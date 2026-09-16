@@ -12,7 +12,7 @@
 <div class="card"><h2>Customer Receipt</h2><div id="receipt"></div><div class="row no-print" style="margin-top:12px"><button class="btn" id="printReceipt">Print / Save as PDF</button></div></div></div>
 <div class="card no-print" id="reviewsCard"><h2>Reviews Awaiting Approval</h2><div id="reviews"></div><div class="msg" id="reviewMsg"></div></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
-const URL='https://flynxttakgqemgccoryq.supabase.co';
+const SUPABASE_URL='https://flynxttakgqemgccoryq.supabase.co';
 const KEY='sb_publishable_P32mETIY1qBGk8Xf6foNog_C1-ZS31Q';
 const TEST_ADMIN_CODE='W4U-TEST-2026';
 let sb=null,order=null,finance=null,payments=[];
@@ -29,7 +29,7 @@ function initSupabase(){
     return false;
   }
   try{
-    sb=window.supabase.createClient(URL,KEY);
+    sb=window.supabase.createClient(SUPABASE_URL,KEY);
     return true;
   }catch(e){
     $('reviewMsg').textContent='Supabase initialization failed: '+(e?.message||String(e));
