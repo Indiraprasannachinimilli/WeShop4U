@@ -1981,24 +1981,46 @@ body.ss-inside .w4u-happy-clients{display:none!important}
 }
 </style>
 
-<style id="weshop4u-mobile-review-diagnostic">
+<style id="weshop4u-edit-image-management">
+.w4u-existing-image{position:relative;display:inline-flex;vertical-align:top;flex-direction:column;width:118px;margin:0 8px 8px 0;border:1px solid rgba(95,75,80,.16);border-radius:12px;padding:6px;background:#fff;box-shadow:0 3px 12px rgba(55,35,40,.06)}
+.w4u-existing-image img,.w4u-existing-image-unavailable{width:104px;height:92px;object-fit:cover;border-radius:8px;background:#f6f1f2;display:flex;align-items:center;justify-content:center;color:#817477;font-size:.75rem}
+.w4u-remove-existing-image{border:0;background:#fff0f2;color:#8e2e42;border-radius:8px;padding:5px 6px;margin-top:6px;font-size:.72rem;font-weight:700;cursor:pointer}
+.w4u-existing-image-name{font-size:.68rem;color:#74666a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px;text-align:center}
+.w4u-admin-order-image{display:inline-flex;flex-direction:column;gap:3px;max-width:90px;text-decoration:none;color:#6f5d62;font-size:.62rem;text-align:center;vertical-align:top;margin:2px}
+.w4u-admin-order-image span{max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+</style>
+
+<style id="weshop4u-mobile-actions-happy-v1">
+.w4u-mobile-social-panel{display:none}
 @media(max-width:575px){
-  body:not(.ss-inside) #happyClientsDiagnostic{
-    display:block!important;
-    width:calc(100% - 24px);
-    max-width:406px;
-    margin:8px auto 12px;
-    padding:9px 11px;
-    box-sizing:border-box;
-    border:1px dashed #b8750b;
-    border-radius:8px;
-    background:#fff8e8;
-    color:#5b3118;
-    font:600 11px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;
-    overflow-wrap:anywhere;
-  }
+ body:not(.ss-inside) #ssLandingHeader{position:relative!important}
+ body:not(.ss-inside) #ssLandingHeader>.ss-v4-hotspots-mobile{display:none!important}
+ body:not(.ss-inside) .w4u-mobile-social-panel{display:block!important;position:absolute;z-index:35;left:4.5%;right:4.5%;top:48%;bottom:5.5%;padding:9px 8px 8px;box-sizing:border-box;border:1px solid rgba(213,138,8,.55);border-radius:16px;background:rgba(255,250,240,.985);box-shadow:0 7px 22px rgba(101,18,14,.12);overflow:hidden}
+ body:not(.ss-inside) .w4u-mobile-action-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ body:not(.ss-inside) .w4u-mobile-action-btn{appearance:none;min-width:0;min-height:48px;padding:6px 3px;border:1px solid #d58a08;border-radius:10px;background:linear-gradient(180deg,#fffdf8,#fff2d7);color:#65120e;font:700 clamp(9px,2.6vw,11px)/1.15 system-ui,-apple-system,"Segoe UI",sans-serif;text-align:center;cursor:pointer}
+ body:not(.ss-inside) .w4u-mobile-action-btn span{display:block;font-size:16px;line-height:1;margin-bottom:4px}
+ body:not(.ss-inside) .w4u-mobile-action-btn b{display:block;white-space:nowrap}
+ body:not(.ss-inside) .w4u-mobile-happy{display:none;margin-top:7px}
+ body:not(.ss-inside) .w4u-mobile-happy.has-reviews{display:block!important}
+ body:not(.ss-inside) .w4u-mobile-happy-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 2px 5px}
+ body:not(.ss-inside) .w4u-mobile-happy-head h2{margin:0;color:#65120e;font:800 clamp(13px,3.6vw,16px)/1.1 system-ui,-apple-system,"Segoe UI",sans-serif}
+ body:not(.ss-inside) .w4u-mobile-happy-head span{color:#8a5a14;font:700 9px/1 system-ui,-apple-system,"Segoe UI",sans-serif}
+ body:not(.ss-inside) .w4u-mobile-happy-scroll{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;scroll-behavior:smooth}
+ body:not(.ss-inside) .w4u-mobile-happy-scroll::-webkit-scrollbar{display:none}
+ body:not(.ss-inside) .w4u-mobile-happy-row{display:flex;gap:7px}
+ body:not(.ss-inside) .w4u-mobile-happy-card{flex:0 0 91%;min-width:0;height:92px;display:grid;grid-template-columns:72px minmax(0,1fr);gap:7px;padding:6px;box-sizing:border-box;border:1px solid #ead7af;border-radius:11px;background:#fff;scroll-snap-align:start;overflow:hidden}
+ body:not(.ss-inside) .w4u-mobile-happy-card.no-image{grid-template-columns:1fr}
+ body:not(.ss-inside) .w4u-mobile-happy-image{width:72px;height:78px;object-fit:cover;border-radius:8px}
+ body:not(.ss-inside) .w4u-mobile-happy-copy{min-width:0;overflow:hidden}
+ body:not(.ss-inside) .w4u-mobile-happy-stars{color:#d58a08;font-size:11px;line-height:1}
+ body:not(.ss-inside) .w4u-mobile-happy-quote{margin:4px 0 3px;color:#3f3033;font:600 9.5px/1.22 system-ui,-apple-system,"Segoe UI",sans-serif;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+ body:not(.ss-inside) .w4u-mobile-happy-meta{display:flex;gap:5px;align-items:center;min-width:0;color:#7a6569;font:700 8px/1.1 system-ui,-apple-system,"Segoe UI",sans-serif}
+ body:not(.ss-inside) .w4u-mobile-happy-name{max-width:58%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ body:not(.ss-inside) .w4u-mobile-happy-event{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ body:not(.ss-inside) #happyClientsSection{display:none!important}
 }
 </style>
+
 </head>
 
 
@@ -2131,6 +2153,17 @@ body.ss-inside .w4u-happy-clients{display:none!important}
     <button type="button" class="ss-v4-hotspot ss-v4-mobile-view" data-order-mode="view" aria-label="View Order"></button>
     <button type="button" class="ss-v4-hotspot ss-v4-mobile-edit" data-order-mode="modify" aria-label="Edit Order"></button>
   </div>
+  <div class="w4u-mobile-social-panel" id="w4uMobileSocialPanel">
+    <div class="w4u-mobile-action-row" aria-label="Order actions">
+      <button type="button" class="w4u-mobile-action-btn" data-order-mode="new"><span>🛒</span><b>New Order</b></button>
+      <button type="button" class="w4u-mobile-action-btn" data-order-mode="view"><span>📄</span><b>View Order</b></button>
+      <button type="button" class="w4u-mobile-action-btn" data-order-mode="modify"><span>✎</span><b>Edit Order</b></button>
+    </div>
+    <section class="w4u-mobile-happy" id="happyClientsMobileSection" aria-labelledby="happyClientsMobileTitle">
+      <div class="w4u-mobile-happy-head"><h2 id="happyClientsMobileTitle">Happy Clients ❤️</h2><span>Swipe →</span></div>
+      <div class="w4u-mobile-happy-scroll"><div class="w4u-mobile-happy-row" id="happyClientsMobileRow"></div></div>
+    </section>
+  </div>
 </div>
 
 <section class="w4u-happy-clients" id="happyClientsSection" aria-labelledby="happyClientsTitle">
@@ -2140,7 +2173,6 @@ body.ss-inside .w4u-happy-clients{display:none!important}
   </div>
   <div class="w4u-happy-scroll"><div class="w4u-happy-row" id="happyClientsRow"></div></div>
 </section>
-<div id="happyClientsDiagnostic" style="display:none"></div>
 
 <div class="ss-inner-header" id="ssInnerHeader">
   <div class="ss-inner-logo">WeShop4U</div>
@@ -2618,12 +2650,18 @@ body.ss-inside .w4u-happy-clients{display:none!important}
             id="previewStrip"
           ></div>
 
+          <div id="existingOrderImagesWrap" class="mt-3" hidden>
+            <div style="font-size:.84rem;font-weight:700;color:#5f4b50;margin-bottom:7px;">Currently attached to this order</div>
+            <div class="preview-strip" id="existingOrderImagesStrip"></div>
+            <div style="font-size:.76rem;color:#817477;margin-top:7px;">Remove an old photo only if you no longer want it on the order. New photos are added separately.</div>
+          </div>
+
 
           <div
             style="font-size:.78rem;color:#9A8E91;"
             class="mt-2"
           >
-            Images are currently only previewed on this page.
+            New images are previewed here before you save the order.
           </div>
 
           </div>
@@ -4314,6 +4352,47 @@ renderEventTiles();
 /* IMAGE PREVIEW                                              */
 /* ========================================================= */
 
+const weshopEditRemovedImagePaths=new Set();
+
+async function renderExistingEditOrderImages(data){
+  const wrap=document.getElementById('existingOrderImagesWrap');
+  const strip=document.getElementById('existingOrderImagesStrip');
+  if(!wrap || !strip) return;
+  const requestId=String(data?.requestId||'').trim().toUpperCase();
+  const images=(Array.isArray(data?.sampleImages)?data.sampleImages:[]).map(img=>({
+    path:typeof img==='string'?img:img?.path,
+    name:typeof img==='string'?'Inspiration image':(img?.name||'Inspiration image')
+  })).filter(img=>img.path && !weshopEditRemovedImagePaths.has(img.path));
+  if(!images.length){ wrap.hidden=true; strip.innerHTML=''; return; }
+  wrap.hidden=false;
+  strip.innerHTML='<span class="loading-soft">Loading attached photos…</span>';
+  try{
+    const phone=sessionStorage.getItem('weshop4u_verification_phone') || data?.contactNumber || data?.whatsapp || '';
+    const results=await getCustomerSubmissionImageUrls(images.map(i=>i.path),requestId,phone,data?._emailAccessToken||'',data?._customerViewToken||'');
+    const urlByPath=new Map((results||[]).map(item=>[item.path,item.url]));
+    strip.innerHTML=images.map((img,index)=>{
+      const url=urlByPath.get(img.path);
+      return `<div class="w4u-existing-image" data-existing-image-path="${escapeHtml(img.path)}">
+        ${url?`<img src="${escapeHtml(url)}" alt="${escapeHtml(img.name)}" loading="lazy">`:'<div class="w4u-existing-image-unavailable">Photo</div>'}
+        <button type="button" class="w4u-remove-existing-image" data-remove-existing-image="${escapeHtml(img.path)}" aria-label="Remove ${escapeHtml(img.name)}">✕ Remove</button>
+        <div class="w4u-existing-image-name">${escapeHtml(img.name || `Photo ${index+1}`)}</div>
+      </div>`;
+    }).join('');
+    strip.querySelectorAll('[data-remove-existing-image]').forEach(button=>{
+      button.addEventListener('click',()=>{
+        const path=button.dataset.removeExistingImage;
+        if(!path) return;
+        weshopEditRemovedImagePaths.add(path);
+        button.closest('[data-existing-image-path]')?.remove();
+        if(!strip.querySelector('[data-existing-image-path]')) wrap.hidden=true;
+      });
+    });
+  }catch(error){
+    console.warn('Existing edit-order images could not be loaded',error);
+    strip.innerHTML='<span class="admin-response-no-images">Attached photos are temporarily unavailable. They will remain on the order unless you explicitly remove them.</span>';
+  }
+}
+
 document
   .getElementById('sampleImages')
   .addEventListener('change',e => {
@@ -5509,7 +5588,10 @@ document.getElementById('submitRequest').addEventListener('click',async()=>{
   const existingRaw=sessionStorage.getItem('weshop4u_prefill_request');
   const existingRequest=existingRaw ? JSON.parse(existingRaw) : null;
   const requestId=editMode && existingRequest?.requestId ? existingRequest.requestId : await makeRequestId();
-  const payload={...getFormData(),requestId,submittedAt:editMode && existingRequest?.submittedAt ? existingRequest.submittedAt : new Date().toISOString(),sampleImages:editMode && existingRequest?.sampleImages ? existingRequest.sampleImages : [],status:editMode ? (existingRequest?.status||'submitted') : 'submitted',customerViewToken:editMode ? (existingRequest?.customerViewToken||'') : makeCustomerViewToken()};
+  const retainedExistingImages=editMode && Array.isArray(existingRequest?.sampleImages)
+    ? existingRequest.sampleImages.filter(img=>!weshopEditRemovedImagePaths.has(typeof img==='string'?img:img?.path))
+    : [];
+  const payload={...getFormData(),requestId,submittedAt:editMode && existingRequest?.submittedAt ? existingRequest.submittedAt : new Date().toISOString(),sampleImages:retainedExistingImages,status:editMode ? (existingRequest?.status||'submitted') : 'submitted',customerViewToken:editMode ? (existingRequest?.customerViewToken||'') : makeCustomerViewToken()};
   lastSubmission=payload;
   try{
     const selectedImageCount=getCustomerImageFiles().length;
@@ -8239,6 +8321,10 @@ function applyRequestPrefill(){
   restoreEditEventAndBudget(data);
   syncOtherRequirementsPanel();
   restoreOtherRequirementsFromNotes(data.notes||'');
+  if(sessionStorage.getItem('weshop4u_prefill_mode')==='edit'){
+    weshopEditRemovedImagePaths.clear();
+    setTimeout(()=>renderExistingEditOrderImages(data),0);
+  }
 
   // Flexibility is a select, not a radio input.
   if(form.couponCode){
@@ -8580,7 +8666,7 @@ async function renderAdminResponses(){
     Promise.all(images.map(async image=>{
       const path=typeof image==='string'?image:image.path, name=typeof image==='string'?'Customer image':(image.name||'Customer image');
       const url=await getAdminSubmissionImageUrl(path);
-      return url?`<a href="${escapeHtml(url)}" target="_blank" rel="noopener" title="${escapeHtml(name)}"><img class="admin-response-thumb" loading="lazy" src="${escapeHtml(url)}" alt="${escapeHtml(name)}"></a>`:'';
+      return url?`<a href="${escapeHtml(url)}" target="_blank" rel="noopener" title="Open ${escapeHtml(name)}" class="w4u-admin-order-image"><img class="admin-response-thumb" loading="lazy" src="${escapeHtml(url)}" alt="${escapeHtml(name)}"><span>${escapeHtml(name)}</span></a>`:'';
     })).then(imageHtml=>{
       if(!document.body.contains(box)) return;
       if(String(box.dataset.imageRequest||'').trim().toUpperCase()!==requestId) return;
@@ -8704,49 +8790,46 @@ async function w4uReviewImageUrl(path){
 function renderHappyClients(reviews){
   const section=document.getElementById('happyClientsSection');
   const row=document.getElementById('happyClientsRow');
-  if(!section||!row) return;
+  const mobileSection=document.getElementById('happyClientsMobileSection');
+  const mobileRow=document.getElementById('happyClientsMobileRow');
   const items=(reviews||[]).filter(r=>r && r.review_text && Number(r.rating)>0);
-  if(!items.length){ section.style.display='none'; row.innerHTML=''; return; }
-  row.innerHTML=items.map(r=>{
-    const rating=Math.max(1,Math.min(5,Number(r.rating)||5));
-    const image=r.image_url||'';
-    const name=escapeHtml(r.customer_display_name||'WeShop4U Customer');
-    const event=escapeHtml(r.event_type||'Celebration');
-    return `<article class="w4u-happy-card${image?'':' no-image'}">
-      ${image?`<img class="w4u-happy-image" loading="lazy" decoding="async" src="${escapeHtml(image)}" alt="Customer celebration">`:''}
-      <div class="w4u-happy-copy">
-        <div class="w4u-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div>
-        <p class="w4u-happy-quote">“${escapeHtml(r.review_text)}”</p>
-        <div class="w4u-happy-meta"><span class="w4u-happy-name">${name}</span><span class="w4u-happy-event">${event}</span></div>
-      </div></article>`;
+  if(!items.length){
+    if(section) section.style.display='none';
+    if(row) row.innerHTML='';
+    if(mobileSection) mobileSection.classList.remove('has-reviews');
+    if(mobileRow) mobileRow.innerHTML='';
+    return;
+  }
+  const desktopHtml=items.map(r=>{
+    const rating=Math.max(1,Math.min(5,Number(r.rating)||5)), image=r.image_url||'';
+    const name=escapeHtml(r.customer_display_name||'WeShop4U Customer'), event=escapeHtml(r.event_type||'Celebration');
+    return `<article class="w4u-happy-card${image?'':' no-image'}">${image?`<img class="w4u-happy-image" loading="lazy" decoding="async" src="${escapeHtml(image)}" alt="Customer celebration">`:''}<div class="w4u-happy-copy"><div class="w4u-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-happy-quote">“${escapeHtml(r.review_text)}”</p><div class="w4u-happy-meta"><span class="w4u-happy-name">${name}</span><span class="w4u-happy-event">${event}</span></div></div></article>`;
   }).join('');
-  section.style.display='block';
+  const mobileHtml=items.map(r=>{
+    const rating=Math.max(1,Math.min(5,Number(r.rating)||5)), image=r.image_url||'';
+    const name=escapeHtml(r.customer_display_name||'WeShop4U Customer'), event=escapeHtml(r.event_type||'Celebration');
+    return `<article class="w4u-mobile-happy-card${image?'':' no-image'}">${image?`<img class="w4u-mobile-happy-image" loading="lazy" decoding="async" src="${escapeHtml(image)}" alt="Customer celebration">`:''}<div class="w4u-mobile-happy-copy"><div class="w4u-mobile-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-mobile-happy-quote">“${escapeHtml(r.review_text)}”</p><div class="w4u-mobile-happy-meta"><span class="w4u-mobile-happy-name">${name}</span><span class="w4u-mobile-happy-event">${event}</span></div></div></article>`;
+  }).join('');
+  if(row) row.innerHTML=desktopHtml;
+  if(section) section.style.display='block';
+  if(mobileRow) mobileRow.innerHTML=mobileHtml;
+  if(mobileSection) mobileSection.classList.add('has-reviews');
 }
 async function loadHappyClients(){
-  const diagnostic=document.getElementById('happyClientsDiagnostic');
-  const setHappyDiagnostic=(message)=>{
-    if(diagnostic) diagnostic.textContent='Happy Clients diagnostic: '+message;
-  };
   try{
-    setHappyDiagnostic('starting Supabase review load…');
     await ensureSupabase();
-    setHappyDiagnostic('Supabase ready; querying approved reviews…');
     const {data,error}=await weshopSupabase.from('customer_reviews')
       .select('rating,review_text,event_type,customer_display_name,image_path,created_at')
       .eq('approved',true).eq('public_consent',true)
       .order('created_at',{ascending:false}).limit(20);
     if(error) throw error;
-    setHappyDiagnostic('query OK; approved reviews returned = '+((data||[]).length));
     const hydrated=await Promise.all((data||[]).map(async r=>({
       ...r,
       image_url:r.image_path ? await w4uReviewImageUrl(r.image_path) : ''
     })));
     renderHappyClients(hydrated);
-    setHappyDiagnostic('render complete; cards = '+hydrated.length);
   }catch(error){
     console.warn('Happy Clients unavailable',error);
-    const detail=(error && (error.message||error.details||error.hint||error.code)) || String(error);
-    setHappyDiagnostic('ERROR — '+detail);
     renderHappyClients([]);
   }
 }
@@ -8759,7 +8842,34 @@ if('scrollRestoration' in history) history.scrollRestoration='manual';
 renderRail();
 setupCustomerRequestIdAccess();
 setupLandingNavigation();
-if(!isAdminModeRequested()) loadHappyClients();
+function startHappyClientsAutoScroll(){
+  const scroller=document.querySelector('.w4u-mobile-happy-scroll');
+  const row=document.getElementById('happyClientsMobileRow');
+  if(!scroller||!row||window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let timer=null;
+  const INTERVAL=2000;
+  const cards=()=>Array.from(row.querySelectorAll('.w4u-mobile-happy-card'));
+  const schedule=()=>{ clearTimeout(timer); if(cards().length>1) timer=setTimeout(advance,INTERVAL); };
+  const advance=()=>{
+    const list=cards(); if(list.length<2) return;
+    const current=scroller.scrollLeft;
+    let next=list.find(card=>card.offsetLeft>current+12);
+    if(!next) next=list[0];
+    scroller.scrollTo({left:next.offsetLeft,behavior:'smooth'});
+    schedule();
+  };
+  const pauseAndResume=()=>{ clearTimeout(timer); timer=setTimeout(schedule,3000); };
+  scroller.addEventListener('touchstart',pauseAndResume,{passive:true});
+  scroller.addEventListener('pointerdown',pauseAndResume,{passive:true});
+  scroller.addEventListener('wheel',pauseAndResume,{passive:true});
+  new MutationObserver(schedule).observe(row,{childList:true});
+  schedule();
+}
+if(!isAdminModeRequested()){
+  loadHappyClients();
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startHappyClientsAutoScroll,{once:true});
+  else startHappyClientsAutoScroll();
+}
 
 const startupParams=new URLSearchParams(window.location.search || '');
 const isLinkedOrderStartup=!!(
