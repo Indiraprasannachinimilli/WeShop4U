@@ -1980,6 +1980,26 @@ body.ss-inside .w4u-happy-clients{display:none!important}
  .w4u-happy-card.no-image{grid-template-columns:1fr}.w4u-happy-image{width:94px;height:116px}.w4u-happy-copy{padding:10px}.w4u-happy-quote{font-size:10px}.w4u-happy-name{font-size:9px}.w4u-happy-event{font-size:8px}
 }
 </style>
+<style id="weshop4u-happy-clients-mobile-fix">
+@media(max-width:575px){
+ body:not(.ss-inside) #happyClientsSection.has-reviews{
+  display:block!important;width:100%!important;max-width:430px!important;
+  margin:8px auto 14px!important;position:relative!important;z-index:5!important;
+  visibility:visible!important;opacity:1!important;overflow:hidden!important
+ }
+ body:not(.ss-inside) #happyClientsSection.has-reviews .w4u-happy-scroll{
+  display:block!important;width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;
+  -webkit-overflow-scrolling:touch;touch-action:pan-x pan-y
+ }
+ body:not(.ss-inside) #happyClientsSection.has-reviews .w4u-happy-row{
+  display:flex!important;width:max-content!important;min-width:100%!important
+ }
+ body:not(.ss-inside) #happyClientsSection.has-reviews .w4u-happy-card{
+  width:calc(100vw - 44px)!important;max-width:360px!important;
+  flex:0 0 calc(100vw - 44px)!important
+ }
+}
+</style>
 </head>
 
 
@@ -8686,7 +8706,7 @@ function renderHappyClients(reviews){
   const row=document.getElementById('happyClientsRow');
   if(!section||!row) return;
   const items=(reviews||[]).filter(r=>r && r.review_text && Number(r.rating)>0);
-  if(!items.length){ section.style.display='none'; row.innerHTML=''; return; }
+  if(!items.length){ section.classList.remove('has-reviews'); section.style.display='none'; row.innerHTML=''; return; }
   row.innerHTML=items.map(r=>{
     const rating=Math.max(1,Math.min(5,Number(r.rating)||5));
     const image=r.image_url||'';
@@ -8700,6 +8720,7 @@ function renderHappyClients(reviews){
         <div class="w4u-happy-meta"><span class="w4u-happy-name">${name}</span><span class="w4u-happy-event">${event}</span></div>
       </div></article>`;
   }).join('');
+  section.classList.add('has-reviews');
   section.style.display='block';
 }
 async function loadHappyClients(){
