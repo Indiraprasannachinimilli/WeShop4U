@@ -1953,6 +1953,33 @@ body:not(.ss-inside) #customerBackToOptions{
   }
 }
 </style>
+
+<style id="weshop4u-dynamic-happy-clients">
+/* Dynamic Happy Clients — populated from approved Supabase reviews only. */
+.w4u-happy-clients{display:none;background:#fffaf0;border-top:1px solid #ead7af;border-bottom:1px solid #ead7af;padding:14px 0 12px;margin:10px auto 14px;max-width:1040px;overflow:hidden}
+.w4u-happy-head{display:flex;justify-content:space-between;align-items:end;gap:12px;padding:0 16px 9px}
+.w4u-happy-title{margin:0;font-family:'Fraunces',Georgia,serif;color:#842d0d;font-size:21px;font-weight:700}
+.w4u-happy-hint{font-size:10px;color:#8b765c;white-space:nowrap}
+.w4u-happy-scroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;scrollbar-width:none}
+.w4u-happy-scroll::-webkit-scrollbar{display:none}
+.w4u-happy-row{display:flex;gap:12px;width:max-content;padding:1px 16px 5px}
+.w4u-happy-card{width:315px;flex:0 0 315px;display:grid;grid-template-columns:110px 1fr;min-height:126px;background:#fff;border:1px solid #e8d3a7;border-radius:11px;overflow:hidden;scroll-snap-align:start;box-shadow:0 3px 10px rgba(116,72,7,.05)}
+.w4u-happy-card.no-image{grid-template-columns:1fr}
+.w4u-happy-image{width:110px;height:126px;object-fit:cover;display:block;background:#f5e1b7}
+.w4u-happy-copy{padding:11px;min-width:0}
+.w4u-happy-stars{font-size:13px;color:#b8750b;letter-spacing:.8px}
+.w4u-happy-quote{margin:7px 0 8px;color:#453b31;font-size:11px;line-height:1.4}
+.w4u-happy-meta{display:flex;justify-content:space-between;gap:6px;align-items:center}
+.w4u-happy-name{font-size:10px;font-weight:800;color:#842d0d}
+.w4u-happy-event{font-size:9px;font-weight:700;color:#7a5420;background:#fff4d7;padding:2px 7px;border-radius:999px}
+body.ss-inside .w4u-happy-clients{display:none!important}
+@media(max-width:575px){
+ body:not(.ss-inside) .w4u-happy-clients{margin:8px 0 10px;padding:12px 0 10px}
+ .w4u-happy-head{padding:0 14px 8px}.w4u-happy-title{font-size:18px}.w4u-happy-hint{font-size:9px}
+ .w4u-happy-row{gap:9px;padding:1px 14px 4px}.w4u-happy-card{width:80vw;max-width:310px;flex-basis:80vw;grid-template-columns:94px 1fr;min-height:116px}
+ .w4u-happy-card.no-image{grid-template-columns:1fr}.w4u-happy-image{width:94px;height:116px}.w4u-happy-copy{padding:10px}.w4u-happy-quote{font-size:10px}.w4u-happy-name{font-size:9px}.w4u-happy-event{font-size:8px}
+}
+</style>
 </head>
 
 
@@ -2086,6 +2113,15 @@ body:not(.ss-inside) #customerBackToOptions{
     <button type="button" class="ss-v4-hotspot ss-v4-mobile-edit" data-order-mode="modify" aria-label="Edit Order"></button>
   </div>
 </div>
+
+<section class="w4u-happy-clients" id="happyClientsSection" aria-labelledby="happyClientsTitle">
+  <div class="w4u-happy-head">
+    <h2 class="w4u-happy-title" id="happyClientsTitle">Happy Clients ❤️</h2>
+    <span class="w4u-happy-hint">Swipe / scroll →</span>
+  </div>
+  <div class="w4u-happy-scroll"><div class="w4u-happy-row" id="happyClientsRow"></div></div>
+</section>
+
 <div class="ss-inner-header" id="ssInnerHeader">
   <div class="ss-inner-logo">WeShop4U</div>
   <div class="ss-inner-tag">You Relax • We Shop For You ❤️</div>
@@ -5288,6 +5324,32 @@ async function uploadCustomerSampleImages(requestId){
   }));
 }
 
+async function uploadPublicReviewImage(requestId){
+  const input=document.getElementById('postSubmitFeedbackImages');
+  const file=[...(input?.files||[])].find(f=>f.type.startsWith('image/'));
+  if(!file) return null;
+  if(file.size>5*1024*1024) throw new Error('Review image is larger than 5 MB.');
+  const optimized=await optimizeImageForUpload(file);
+  const safe=String(file.name||'review').replace(/\.[^.]+$/,'').replace(/[^a-zA-Z0-9_-]+/g,'-').slice(0,45)||'review';
+  const path=`${String(requestId).toUpperCase()}/${Date.now()}-${safe}.jpg`;
+  const {error}=await weshopSupabase.storage.from('weshop4u-review-images').upload(path,optimized,{cacheControl:'31536000',upsert:false,contentType:optimized.type||'image/jpeg'});
+  if(error) throw error;
+  return path;
+}
+async function submitPublicReview(data,feedback,rating,displayName,imagePath,consent){
+  const {data:reviewId,error}=await weshopSupabase.rpc('submit_customer_review_secure',{
+    p_request_id:String(data?.requestId||'').trim().toUpperCase(),
+    p_phone:normalizeCustomerPhone(data?.contactNumber||data?.whatsapp||''),
+    p_rating:Number(rating),
+    p_review_text:feedback,
+    p_display_name:displayName||null,
+    p_image_path:imagePath||null,
+    p_public_consent:consent===true
+  });
+  if(error) throw error;
+  return reviewId;
+}
+
 async function uploadFeedbackImages(requestId){
   try{ await ensureSupabase(); }catch(error){ console.warn('Supabase unavailable',error); return []; }
   if(!weshopSupabase) return [];
@@ -5636,6 +5698,16 @@ function showThankYou(requestId,localOnly=false){
             <label class="form-label" for="postSubmitFeedback">Suggestions / Feedback</label>
             <textarea class="form-control" id="postSubmitFeedback" rows="3" placeholder="Tell us what you liked or what we can improve..."></textarea>
           </div>
+          <div class="mb-3">
+            <label class="form-label" for="postSubmitDisplayName">Name to display publicly <span class="text-muted">(optional)</span></label>
+            <input class="form-control" id="postSubmitDisplayName" maxlength="60" placeholder="e.g. Pavan K. or leave blank for WeShop4U Customer">
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="postSubmitFeedbackImages">Celebration photo <span class="text-muted">(optional)</span></label>
+            <input type="file" class="form-control" id="postSubmitFeedbackImages" accept="image/jpeg,image/png,image/webp">
+            <div class="form-text" style="font-size:.72rem;">If approved, your review and photo may appear in Happy Clients.</div>
+          </div>
+          <label class="shopping-consent-label mb-3"><input type="checkbox" id="postSubmitPublicConsent"> <span>I allow WeShop4U to display this review, display name and uploaded photo publicly after approval.</span></label>
           <button type="button" class="btn-wine-outline w-100" id="savePostSubmitFeedbackBtn">Submit Feedback</button>
           <div class="submit-status" id="postSubmitFeedbackStatus"></div>
         </div>
@@ -5751,7 +5823,16 @@ function showThankYou(requestId,localOnly=false){
       const updated=await updateCustomerRequestById(requestId,updatedPayload);
       if(!updated) throw new Error('Feedback could not be saved.');
       lastSubmission=updatedPayload;
-      feedbackStatus.textContent='Thank you! Your feedback has been saved. ❤️';
+      const consent=Boolean(document.getElementById('postSubmitPublicConsent')?.checked);
+      const displayName=document.getElementById('postSubmitDisplayName')?.value.trim()||'';
+      if(consent && rating && feedback){
+        feedbackStatus.textContent='Saving feedback and review…';
+        const imagePath=await uploadPublicReviewImage(requestId);
+        await submitPublicReview(lastSubmission,feedback,rating,displayName,imagePath,true);
+        feedbackStatus.textContent='Thank you! Your feedback was saved and your review was sent for approval. ❤️';
+      }else{
+        feedbackStatus.textContent='Thank you! Your feedback has been saved. ❤️';
+      }
       feedbackStatus.style.color='#54745F';
       feedbackButton.textContent='Feedback Submitted';
     }catch(error){
@@ -8588,6 +8669,59 @@ async function setupAdminView(){
 
 
 /* ========================================================= */
+/* DYNAMIC HAPPY CLIENTS                                     */
+/* Approved + consented reviews only; photos stay private.   */
+/* ========================================================= */
+async function w4uReviewImageUrl(path){
+  if(!path) return '';
+  const clean=String(path).replace(/^\/+/, '');
+  const {data,error}=await weshopSupabase.storage
+    .from('weshop4u-review-images')
+    .createSignedUrl(clean,60*30);
+  if(error) return '';
+  return data?.signedUrl || '';
+}
+function renderHappyClients(reviews){
+  const section=document.getElementById('happyClientsSection');
+  const row=document.getElementById('happyClientsRow');
+  if(!section||!row) return;
+  const items=(reviews||[]).filter(r=>r && r.review_text && Number(r.rating)>0);
+  if(!items.length){ section.style.display='none'; row.innerHTML=''; return; }
+  row.innerHTML=items.map(r=>{
+    const rating=Math.max(1,Math.min(5,Number(r.rating)||5));
+    const image=r.image_url||'';
+    const name=escapeHtml(r.customer_display_name||'WeShop4U Customer');
+    const event=escapeHtml(r.event_type||'Celebration');
+    return `<article class="w4u-happy-card${image?'':' no-image'}">
+      ${image?`<img class="w4u-happy-image" loading="lazy" decoding="async" src="${escapeHtml(image)}" alt="Customer celebration">`:''}
+      <div class="w4u-happy-copy">
+        <div class="w4u-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div>
+        <p class="w4u-happy-quote">“${escapeHtml(r.review_text)}”</p>
+        <div class="w4u-happy-meta"><span class="w4u-happy-name">${name}</span><span class="w4u-happy-event">${event}</span></div>
+      </div></article>`;
+  }).join('');
+  section.style.display='block';
+}
+async function loadHappyClients(){
+  try{
+    await ensureSupabase();
+    const {data,error}=await weshopSupabase.from('customer_reviews')
+      .select('rating,review_text,event_type,customer_display_name,image_path,created_at')
+      .eq('approved',true).eq('public_consent',true)
+      .order('created_at',{ascending:false}).limit(20);
+    if(error) throw error;
+    const hydrated=await Promise.all((data||[]).map(async r=>({
+      ...r,
+      image_url:r.image_path ? await w4uReviewImageUrl(r.image_path) : ''
+    })));
+    renderHappyClients(hydrated);
+  }catch(error){
+    console.warn('Happy Clients unavailable',error);
+    renderHappyClients([]);
+  }
+}
+
+/* ========================================================= */
 /* INITIALISE                                                  */
 /* ========================================================= */
 
@@ -8595,6 +8729,7 @@ if('scrollRestoration' in history) history.scrollRestoration='manual';
 renderRail();
 setupCustomerRequestIdAccess();
 setupLandingNavigation();
+if(!isAdminModeRequested()) loadHappyClients();
 
 const startupParams=new URLSearchParams(window.location.search || '');
 const isLinkedOrderStartup=!!(
