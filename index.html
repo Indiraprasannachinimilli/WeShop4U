@@ -2101,6 +2101,124 @@ body.ss-inside .w4u-happy-clients{display:none!important}
 }
 </style>
 
+
+<style id="weshop4u-mobile-integrated-happy-v4">
+@media(max-width:575px){
+  /* Keep the visible mobile landing compact. */
+  body:not(.ss-inside) #ssLandingHeader{
+    min-height:0!important;
+    padding-bottom:0!important;
+    margin-bottom:0!important;
+  }
+
+  /* Existing visible order actions: compact horizontal row. */
+  body:not(.ss-inside) .w4u-mobile-action-row,
+  body:not(.ss-inside) .w4u-native-actions{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:6px!important;
+    margin:7px 12px 5px!important;
+  }
+  body:not(.ss-inside) .w4u-mobile-action-btn,
+  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card{
+    min-width:0!important;
+    width:100%!important;
+    min-height:58px!important;
+    height:58px!important;
+    padding:5px 4px!important;
+    border-radius:13px!important;
+  }
+  body:not(.ss-inside) .w4u-mobile-action-btn span{
+    font-size:18px!important;
+    line-height:1!important;
+  }
+  body:not(.ss-inside) .w4u-mobile-action-btn b{
+    font-size:10px!important;
+    line-height:1.05!important;
+  }
+  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card{
+    grid-template-columns:24px minmax(0,1fr) 14px!important;
+    gap:3px!important;
+  }
+  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card .w4u-native-card-icon{
+    width:24px!important;height:24px!important;
+  }
+  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card .w4u-native-card-icon svg{
+    width:17px!important;height:17px!important;
+  }
+  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card .w4u-native-card-copy strong{
+    font-size:9.5px!important;line-height:1.02!important;
+  }
+  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card .w4u-native-card-copy small{
+    display:none!important;
+  }
+  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card .w4u-native-arrow{
+    width:14px!important;height:14px!important;font-size:12px!important;
+  }
+
+  /* Happy Clients must visually belong to the landing page, never a black widget. */
+  body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean{
+    width:100%!important;
+    max-width:none!important;
+    margin:-1px 0 0!important;
+    padding:8px 14px 7px!important;
+    border:0!important;
+    border-top:1px solid rgba(186,132,31,.20)!important;
+    border-radius:0!important;
+    background:linear-gradient(180deg,#fffaf0 0%,#fff7e7 100%)!important;
+    box-shadow:none!important;
+    color:#17234a!important;
+  }
+  body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean.has-reviews{
+    display:block!important;
+  }
+  body:not(.ss-inside) #happyClientsMobileSection .w4u-mobile-happy-head{
+    margin:0 0 5px!important;
+    padding:0 1px!important;
+  }
+  body:not(.ss-inside) #happyClientsMobileSection .w4u-mobile-happy-head h2{
+    margin:0!important;
+    color:#17234a!important;
+    font-size:16px!important;
+    font-weight:800!important;
+  }
+  body:not(.ss-inside) #happyClientsMobileSection .w4u-mobile-happy-head span{
+    color:#9b6814!important;
+    font-size:10px!important;
+    font-weight:700!important;
+  }
+  body:not(.ss-inside) #happyClientsMobileSection .w4u-mobile-happy-scroll{
+    margin:0!important;padding:0!important;
+    background:transparent!important;
+  }
+  body:not(.ss-inside) #happyClientsMobileSection .w4u-mobile-happy-row{
+    padding:0!important;
+    background:transparent!important;
+  }
+  body:not(.ss-inside) #happyClientsMobileSection .w4u-mobile-happy-card{
+    background:rgba(255,255,255,.72)!important;
+    border:1px solid rgba(207,157,54,.30)!important;
+    box-shadow:0 4px 12px rgba(98,66,15,.06)!important;
+    color:#17234a!important;
+  }
+
+  /* Compact benefit strip follows the review area. */
+  body:not(.ss-inside) .w4u-native-trust,
+  body:not(.ss-inside) .w4u-trust-strip,
+  body:not(.ss-inside) .w4u-benefits{
+    margin-top:6px!important;
+    padding-top:5px!important;
+    padding-bottom:5px!important;
+  }
+
+  /* Kill any legacy dark wrapper that may surround the mobile review section. */
+  body:not(.ss-inside) #happyClientsMobileSection,
+  body:not(.ss-inside) #happyClientsMobileSection *{
+    --bs-body-bg:transparent;
+  }
+}
+</style>
+
 </head>
 
 
