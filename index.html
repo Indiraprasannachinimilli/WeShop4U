@@ -2065,59 +2065,39 @@ body.ss-inside .w4u-happy-clients{display:none!important}
 </style>
 
 
-<style id="weshop4u-mobile-horizontal-original-buttons-v3">
+<style id="weshop4u-happy-visible-final-fix">
 @media(max-width:575px){
-  /* Original button container: layout only */
-  body:not(.ss-inside) .w4u-native-actions{
-    display:grid!important;
-    grid-template-columns:repeat(3,minmax(0,1fr))!important;
-    gap:7px!important;
-    margin-top:9px!important;
-  }
-
-  /* Preserve original card visual language; only make each card fit its 1/3-width column. */
-  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card{
-    width:100%!important;
-    min-width:0!important;
-    min-height:72px!important;
-    padding:7px 5px!important;
-    gap:4px!important;
-    grid-template-columns:28px minmax(0,1fr) 16px!important;
-  }
-  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card .w4u-native-card-icon{
-    width:28px!important;
-    height:28px!important;
-  }
-  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card .w4u-native-card-icon svg{
-    width:19px!important;
-    height:19px!important;
-  }
-  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card .w4u-native-card-copy strong{
-    font-size:clamp(9px,2.45vw,11px)!important;
-    line-height:1.05!important;
-  }
-  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card .w4u-native-card-copy small{
+  body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean{
     display:none!important;
+    width:min(100%,430px)!important;
+    margin:0 auto!important;
+    padding:8px 14px 6px!important;
+    box-sizing:border-box!important;
+    position:relative!important;
+    z-index:3!important;
+    border:0!important;
+    border-top:1px solid rgba(217,162,50,.30)!important;
+    border-radius:0!important;
+    background:#fffaf0!important;
+    box-shadow:none!important;
+    overflow:visible!important;
   }
-  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card .w4u-native-arrow{
-    width:16px!important;
-    height:16px!important;
-    font-size:14px!important;
+  body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean.has-reviews{
+    display:block!important;
   }
-
-  /* Recover vertical space without creating an overlay/black box. */
-  body:not(.ss-inside) .w4u-native-footer-line{
-    margin-top:7px!important;
-    padding-top:0!important;
+  body:not(.ss-inside) #happyClientsMobileSection .w4u-mobile-happy-head{
+    margin:0 0 5px!important;
   }
-  body:not(.ss-inside) .w4u-mobile-happy-clean{
-    margin-top:8px!important;
-    padding-top:8px!important;
-    padding-bottom:0!important;
+  body:not(.ss-inside) #happyClientsMobileSection .w4u-mobile-happy-scroll{
+    margin:0!important;
+    padding:0!important;
   }
-  body:not(.ss-inside) .w4u-mobile-happy-clean .w4u-mobile-happy-head{
-    margin-bottom:5px!important;
+  body:not(.ss-inside) #happyClientsMobileSection .w4u-mobile-happy-row{
+    padding:0!important;
   }
+}
+@media(min-width:576px){
+  #happyClientsMobileSection{display:none!important}
 }
 </style>
 
@@ -2240,16 +2220,6 @@ body.ss-inside .w4u-happy-clients{display:none!important}
     </div>
 
     <div class="w4u-native-footer-line">Enjoy the Moment ✨</div>
-
-    <section class="w4u-mobile-happy w4u-mobile-happy-clean" id="happyClientsMobileSection" aria-labelledby="happyClientsMobileTitle">
-      <div class="w4u-mobile-happy-head">
-        <h2 id="happyClientsMobileTitle">Happy Clients ❤️</h2>
-        <span>Swipe →</span>
-      </div>
-      <div class="w4u-mobile-happy-scroll">
-        <div class="w4u-mobile-happy-row" id="happyClientsMobileRow"></div>
-      </div>
-    </section>
   </section>
 
   <div class="ss-v4-hotspots ss-v4-hotspots-desktop" aria-label="WeShop4U quick actions">
@@ -2264,6 +2234,18 @@ body.ss-inside .w4u-happy-clients{display:none!important}
     <button type="button" class="ss-v4-hotspot ss-v4-mobile-edit" data-order-mode="modify" aria-label="Edit Order"></button>
   </div>
 </div>
+
+
+
+    <section class="w4u-mobile-happy w4u-mobile-happy-clean" id="happyClientsMobileSection" aria-labelledby="happyClientsMobileTitle">
+      <div class="w4u-mobile-happy-head">
+        <h2 id="happyClientsMobileTitle">Happy Clients ❤️</h2>
+        <span>Swipe →</span>
+      </div>
+      <div class="w4u-mobile-happy-scroll">
+        <div class="w4u-mobile-happy-row" id="happyClientsMobileRow"></div>
+      </div>
+    </section>
 
 <section class="w4u-happy-clients" id="happyClientsSection" aria-labelledby="happyClientsTitle">
   <div class="w4u-happy-head">
