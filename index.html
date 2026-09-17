@@ -1214,62 +1214,6 @@ body:not(.ss-inside) #landingOffersButton{
 .admin-image-card.dragging{opacity:.55;transform:scale(.995)}
 .admin-image-card.drag-over{box-shadow:0 0 0 2px rgba(137,89,33,.28)}
 .admin-reorder-note{font-size:.86rem;opacity:.8;margin:.35rem 0 .75rem}
-
-/* W4U FIX: exact original mobile card design, arranged horizontally only. */
-@media(max-width:575px){
-  body:not(.ss-inside) .w4u-original-action-row{
-    display:grid!important;
-    grid-template-columns:repeat(3,minmax(0,1fr))!important;
-    gap:6px!important;
-  }
-  body:not(.ss-inside) .w4u-original-horizontal-card{
-    appearance:none!important;
-    width:100%!important;
-    min-width:0!important;
-    min-height:92px!important;
-    height:92px!important;
-    display:grid!important;
-    grid-template-columns:30px minmax(0,1fr) 18px!important;
-    align-items:center!important;
-    gap:4px!important;
-    padding:7px 5px!important;
-    border:1.5px solid #d9a232!important;
-    border-radius:17px!important;
-    background:rgba(255,255,255,.94)!important;
-    box-shadow:0 6px 18px rgba(104,63,10,.075)!important;
-    text-align:left!important;
-    color:#16254e!important;
-    font-family:'Mukta',Arial,sans-serif!important;
-  }
-  body:not(.ss-inside) .w4u-original-horizontal-card .w4u-native-card-icon{
-    width:30px!important;height:30px!important;
-    border-radius:9px!important;
-    background:#fff7e2!important;
-    border:1px solid #ecd39a!important;
-  }
-  body:not(.ss-inside) .w4u-original-horizontal-card .w4u-native-card-icon svg{
-    width:20px!important;height:20px!important;
-    fill:none!important;stroke:#a7640c!important;stroke-width:2.3!important;
-  }
-  body:not(.ss-inside) .w4u-original-horizontal-card .w4u-native-card-copy strong{
-    display:block!important;color:#142a67!important;
-    font-size:clamp(10px,2.7vw,12px)!important;
-    line-height:1.05!important;font-weight:800!important;
-    letter-spacing:-.1px!important;
-  }
-  body:not(.ss-inside) .w4u-original-horizontal-card .w4u-native-card-copy small{
-    display:block!important;margin-top:3px!important;color:#5d687b!important;
-    font-size:clamp(7px,1.85vw,8.5px)!important;
-    line-height:1.12!important;font-weight:500!important;
-  }
-  body:not(.ss-inside) .w4u-original-horizontal-card .w4u-native-arrow{
-    width:18px!important;height:18px!important;
-    border-radius:50%!important;background:#d99213!important;color:#fff!important;
-    font:400 16px/1 Arial,sans-serif!important;padding-bottom:2px!important;
-  }
-  /* The old temporary emoji button rules are no longer used. */
-}
-
 </style>
 
 <link rel="preconnect" href="https://flynxttakgqemgccoryq.supabase.co" crossorigin>
@@ -2077,6 +2021,106 @@ body.ss-inside .w4u-happy-clients{display:none!important}
 }
 </style>
 
+
+<style id="weshop4u-mobile-happy-clean-v2">
+@media(max-width:575px){
+  body:not(.ss-inside) #ssLandingHeader{
+    position:relative!important;
+    min-height:auto!important;
+    padding-bottom:0!important;
+  }
+
+  /* Do not change the original .w4u-native-actions or .w4u-native-card styles. */
+  body:not(.ss-inside) .w4u-mobile-social-panel{
+    display:none!important;
+  }
+
+  body:not(.ss-inside) .w4u-mobile-happy-clean{
+    display:none;
+    position:static!important;
+    width:auto!important;
+    margin:14px 0 0!important;
+    padding:13px 0 4px!important;
+    border:0!important;
+    border-top:1px solid rgba(217,162,50,.34)!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    overflow:visible!important;
+  }
+  body:not(.ss-inside) .w4u-mobile-happy-clean.has-reviews{
+    display:block!important;
+  }
+  body:not(.ss-inside) .w4u-mobile-happy-clean .w4u-mobile-happy-head{
+    margin:0 2px 8px!important;
+  }
+  body:not(.ss-inside) .w4u-mobile-happy-clean .w4u-mobile-happy-scroll{
+    margin:0!important;
+    padding:0!important;
+  }
+  body:not(.ss-inside) .w4u-mobile-happy-clean .w4u-mobile-happy-row{
+    padding:0 2px 2px!important;
+  }
+}
+</style>
+
+
+<style id="weshop4u-mobile-horizontal-original-buttons-v3">
+@media(max-width:575px){
+  /* Original button container: layout only */
+  body:not(.ss-inside) .w4u-native-actions{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:7px!important;
+    margin-top:9px!important;
+  }
+
+  /* Preserve original card visual language; only make each card fit its 1/3-width column. */
+  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card{
+    width:100%!important;
+    min-width:0!important;
+    min-height:72px!important;
+    padding:7px 5px!important;
+    gap:4px!important;
+    grid-template-columns:28px minmax(0,1fr) 16px!important;
+  }
+  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card .w4u-native-card-icon{
+    width:28px!important;
+    height:28px!important;
+  }
+  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card .w4u-native-card-icon svg{
+    width:19px!important;
+    height:19px!important;
+  }
+  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card .w4u-native-card-copy strong{
+    font-size:clamp(9px,2.45vw,11px)!important;
+    line-height:1.05!important;
+  }
+  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card .w4u-native-card-copy small{
+    display:none!important;
+  }
+  body:not(.ss-inside) .w4u-native-actions > .w4u-native-card .w4u-native-arrow{
+    width:16px!important;
+    height:16px!important;
+    font-size:14px!important;
+  }
+
+  /* Recover vertical space without creating an overlay/black box. */
+  body:not(.ss-inside) .w4u-native-footer-line{
+    margin-top:7px!important;
+    padding-top:0!important;
+  }
+  body:not(.ss-inside) .w4u-mobile-happy-clean{
+    margin-top:8px!important;
+    padding-top:8px!important;
+    padding-bottom:0!important;
+  }
+  body:not(.ss-inside) .w4u-mobile-happy-clean .w4u-mobile-happy-head{
+    margin-bottom:5px!important;
+  }
+}
+</style>
+
 </head>
 
 
@@ -2196,6 +2240,16 @@ body.ss-inside .w4u-happy-clients{display:none!important}
     </div>
 
     <div class="w4u-native-footer-line">Enjoy the Moment ✨</div>
+
+    <section class="w4u-mobile-happy w4u-mobile-happy-clean" id="happyClientsMobileSection" aria-labelledby="happyClientsMobileTitle">
+      <div class="w4u-mobile-happy-head">
+        <h2 id="happyClientsMobileTitle">Happy Clients ❤️</h2>
+        <span>Swipe →</span>
+      </div>
+      <div class="w4u-mobile-happy-scroll">
+        <div class="w4u-mobile-happy-row" id="happyClientsMobileRow"></div>
+      </div>
+    </section>
   </section>
 
   <div class="ss-v4-hotspots ss-v4-hotspots-desktop" aria-label="WeShop4U quick actions">
@@ -2208,46 +2262,6 @@ body.ss-inside .w4u-happy-clients{display:none!important}
     <button type="button" class="ss-v4-hotspot ss-v4-mobile-new" data-order-mode="new" aria-label="Place a New Order"></button>
     <button type="button" class="ss-v4-hotspot ss-v4-mobile-view" data-order-mode="view" aria-label="View Order"></button>
     <button type="button" class="ss-v4-hotspot ss-v4-mobile-edit" data-order-mode="modify" aria-label="Edit Order"></button>
-  </div>
-  <div class="w4u-mobile-social-panel" id="w4uMobileSocialPanel">
-    <div class="w4u-mobile-action-row w4u-original-action-row" aria-label="Order actions">
-      <button type="button" class="w4u-native-card w4u-original-horizontal-card" data-order-mode="new">
-        <span class="w4u-native-card-icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48"><path d="M13 8h22a4 4 0 0 1 4 4v24a4 4 0 0 1-4 4H13a4 4 0 0 1-4-4V12a4 4 0 0 1 4-4Z"/><path d="M17 16h14M17 23h14M17 30h8"/><path d="M34 28v9M29.5 32.5h9"/></svg>
-        </span>
-        <span class="w4u-native-card-copy">
-          <strong>Place a New Order</strong>
-          <small>Tell us your event, requirements and budget.</small>
-        </span>
-        <span class="w4u-native-arrow" aria-hidden="true">›</span>
-      </button>
-
-      <button type="button" class="w4u-native-card w4u-original-horizontal-card" data-order-mode="view">
-        <span class="w4u-native-card-icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48"><path d="M24 10c10 0 17 8 20 14-3 6-10 14-20 14S7 30 4 24c3-6 10-14 20-14Z"/><circle cx="24" cy="24" r="6"/></svg>
-        </span>
-        <span class="w4u-native-card-copy">
-          <strong>View Order</strong>
-          <small>Check your order details and current status.</small>
-        </span>
-        <span class="w4u-native-arrow" aria-hidden="true">›</span>
-      </button>
-
-      <button type="button" class="w4u-native-card w4u-original-horizontal-card" data-order-mode="modify">
-        <span class="w4u-native-card-icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48"><path d="M11 36.5 13 27l20-20 8 8-20 20-10 1.5Z"/><path d="m29 11 8 8M11 36.5l7-1.2-5.8-5.8L11 36.5Z"/></svg>
-        </span>
-        <span class="w4u-native-card-copy">
-          <strong>Edit Order</strong>
-          <small>Update your existing order when needed.</small>
-        </span>
-        <span class="w4u-native-arrow" aria-hidden="true">›</span>
-      </button>
-    </div>
-    <section class="w4u-mobile-happy" id="happyClientsMobileSection" aria-labelledby="happyClientsMobileTitle">
-      <div class="w4u-mobile-happy-head"><h2 id="happyClientsMobileTitle">Happy Clients ❤️</h2><span>Swipe →</span></div>
-      <div class="w4u-mobile-happy-scroll"><div class="w4u-mobile-happy-row" id="happyClientsMobileRow"></div></div>
-    </section>
   </div>
 </div>
 
