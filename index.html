@@ -2151,6 +2151,31 @@ body.ss-inside .w4u-happy-clients{display:none!important}
 }
 </style>
 
+
+<style id="w4u-final-desktop-reference-and-multi-review-images">
+.w4u-happy-image-stack,.w4u-mobile-happy-image-stack{position:relative;overflow:hidden;border-radius:inherit}
+.w4u-review-photo-count{position:absolute;right:4px;bottom:4px;padding:2px 5px;border-radius:999px;background:rgba(63,35,17,.72);color:#fff;font:700 8px/1 system-ui,sans-serif}
+@media(max-width:575px){
+  /* Exact desktop-reference visual language: compact pastel cards, colored circular icon, serif title, thin border and arrow. */
+  body:not(.ss-inside) .w4u-desktop-style-actions{gap:8px!important;margin:15px 12px 0!important}
+  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card{
+    height:72px!important;min-height:72px!important;padding:8px 7px!important;
+    grid-template-columns:36px minmax(0,1fr) 12px!important;gap:5px!important;
+    border-radius:11px!important;box-shadow:0 2px 7px rgba(93,56,12,.08)!important;
+  }
+  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-card-new{background:#fff1c9!important;border-color:#e5b651!important}
+  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-card-view{background:#ffdedd!important;border-color:#e9aaa9!important}
+  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-card-edit{background:#e1f0dc!important;border-color:#a7c99d!important}
+  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-icon{width:36px!important;height:36px!important}
+  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-icon svg{width:22px!important;height:22px!important;fill:none!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-copy strong{font-size:11.5px!important;letter-spacing:-.15px!important}
+  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-copy small{font-size:7px!important;margin-top:4px!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-arrow{font-size:25px!important;line-height:1!important}
+  #happyClientsMobileSection .w4u-mobile-happy-image-stack{width:72px;height:78px;border-radius:8px}
+  #happyClientsMobileSection .w4u-mobile-happy-image{width:100%!important;height:100%!important;display:block;object-fit:cover}
+}
+</style>
+
 </head>
 
 
@@ -5535,26 +5560,32 @@ async function uploadCustomerSampleImages(requestId){
   }));
 }
 
-async function uploadPublicReviewImage(requestId){
+async function uploadPublicReviewImages(requestId){
   const input=document.getElementById('postSubmitFeedbackImages');
-  const file=[...(input?.files||[])].find(f=>f.type.startsWith('image/'));
-  if(!file) return null;
-  if(file.size>5*1024*1024) throw new Error('Review image is larger than 5 MB.');
-  const optimized=await optimizeImageForUpload(file);
-  const safe=String(file.name||'review').replace(/\.[^.]+$/,'').replace(/[^a-zA-Z0-9_-]+/g,'-').slice(0,45)||'review';
-  const path=`${String(requestId).toUpperCase()}/${Date.now()}-${safe}.jpg`;
-  const {error}=await weshopSupabase.storage.from('weshop4u-review-images').upload(path,optimized,{cacheControl:'31536000',upsert:false,contentType:optimized.type||'image/jpeg'});
-  if(error) throw error;
-  return path;
+  const files=[...(input?.files||[])].filter(f=>f.type.startsWith('image/'));
+  if(!files.length) return [];
+  if(files.length>5) throw new Error('Please choose a maximum of 5 review photos.');
+  files.forEach(file=>{if(file.size>5*1024*1024) throw new Error(`${file.name} is larger than 5 MB.`);});
+  const optimized=await Promise.all(files.map(optimizeImageForUpload));
+  return Promise.all(optimized.map(async(file,index)=>{
+    const original=files[index];
+    const safe=String(original?.name||`review-${index+1}`).replace(/\.[^.]+$/,'').replace(/[^a-zA-Z0-9_-]+/g,'-').slice(0,45)||`review-${index+1}`;
+    const path=`${String(requestId).toUpperCase()}/${Date.now()}-${index+1}-${safe}.jpg`;
+    const {error}=await weshopSupabase.storage.from('weshop4u-review-images').upload(path,file,{cacheControl:'31536000',upsert:false,contentType:file.type||'image/jpeg'});
+    if(error) throw error;
+    return path;
+  }));
 }
-async function submitPublicReview(data,feedback,rating,displayName,imagePath,consent){
-  const {data:reviewId,error}=await weshopSupabase.rpc('submit_customer_review_secure',{
+async function submitPublicReview(data,feedback,rating,displayName,imagePaths,consent){
+  const paths=Array.isArray(imagePaths)?imagePaths.filter(Boolean).slice(0,5):[];
+  const {data:reviewId,error}=await weshopSupabase.rpc('submit_customer_review_secure_multi',{ 
     p_request_id:String(data?.requestId||'').trim().toUpperCase(),
     p_phone:normalizeCustomerPhone(data?.contactNumber||data?.whatsapp||''),
     p_rating:Number(rating),
     p_review_text:feedback,
     p_display_name:displayName||null,
-    p_image_path:imagePath||null,
+    p_image_path:paths[0]||null,
+    p_image_paths:paths,
     p_public_consent:consent===true
   });
   if(error) throw error;
@@ -5917,11 +5948,11 @@ function showThankYou(requestId,localOnly=false){
             <input class="form-control" id="postSubmitDisplayName" maxlength="60" placeholder="e.g. Pavan K. or leave blank for WeShop4U Customer">
           </div>
           <div class="mb-3">
-            <label class="form-label" for="postSubmitFeedbackImages">Celebration photo <span class="text-muted">(optional)</span></label>
-            <input type="file" class="form-control" id="postSubmitFeedbackImages" accept="image/jpeg,image/png,image/webp">
-            <div class="form-text" style="font-size:.72rem;">If approved, your review and photo may appear in Happy Clients.</div>
+            <label class="form-label" for="postSubmitFeedbackImages">Celebration photos <span class="text-muted">(optional, up to 5)</span></label>
+            <input type="file" class="form-control" id="postSubmitFeedbackImages" accept="image/jpeg,image/png,image/webp" multiple>
+            <div class="form-text" style="font-size:.72rem;">Choose up to 5 photos (5 MB max each). If approved, your review and photos may appear in Happy Clients.</div>
           </div>
-          <label class="shopping-consent-label mb-3"><input type="checkbox" id="postSubmitPublicConsent"> <span>I allow WeShop4U to display this review, display name and uploaded photo publicly after approval.</span></label>
+          <label class="shopping-consent-label mb-3"><input type="checkbox" id="postSubmitPublicConsent"> <span>I allow WeShop4U to display this review, display name and uploaded photos publicly after approval.</span></label>
           <button type="button" class="btn-wine-outline w-100" id="savePostSubmitFeedbackBtn">Submit Feedback</button>
           <div class="submit-status" id="postSubmitFeedbackStatus"></div>
         </div>
@@ -6041,8 +6072,8 @@ function showThankYou(requestId,localOnly=false){
       const displayName=document.getElementById('postSubmitDisplayName')?.value.trim()||'';
       if(consent && rating && feedback){
         feedbackStatus.textContent='Saving feedback and review…';
-        const imagePath=await uploadPublicReviewImage(requestId);
-        await submitPublicReview(lastSubmission,feedback,rating,displayName,imagePath,true);
+        const imagePaths=await uploadPublicReviewImages(requestId);
+        await submitPublicReview(lastSubmission,feedback,rating,displayName,imagePaths,true);
         feedbackStatus.textContent='Thank you! Your feedback was saved and your review was sent for approval. ❤️';
       }else{
         feedbackStatus.textContent='Thank you! Your feedback has been saved. ❤️';
@@ -8913,14 +8944,14 @@ function renderHappyClients(reviews){
     return;
   }
   const desktopHtml=items.map(r=>{
-    const rating=Math.max(1,Math.min(5,Number(r.rating)||5)), image=r.image_url||'';
+    const rating=Math.max(1,Math.min(5,Number(r.rating)||5)), images=(r.image_urls||[]).filter(Boolean), image=images[0]||r.image_url||'';
     const name=escapeHtml(r.customer_display_name||'WeShop4U Customer'), event=escapeHtml(r.event_type||'Celebration');
-    return `<article class="w4u-happy-card${image?'':' no-image'}">${image?`<img class="w4u-happy-image" loading="lazy" decoding="async" src="${escapeHtml(image)}" alt="Customer celebration">`:''}<div class="w4u-happy-copy"><div class="w4u-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-happy-quote">“${escapeHtml(r.review_text)}”</p><div class="w4u-happy-meta"><span class="w4u-happy-name">${name}</span><span class="w4u-happy-event">${event}</span></div></div></article>`;
+    return `<article class="w4u-happy-card${image?'':' no-image'}">${image?`<div class="w4u-happy-image-stack" data-review-images='${escapeHtml(JSON.stringify(images.length?images:[image]))}'><img class="w4u-happy-image" loading="lazy" decoding="async" src="${escapeHtml(image)}" alt="Customer celebration">${images.length>1?`<span class="w4u-review-photo-count">1/${images.length}</span>`:''}</div>`:''}<div class="w4u-happy-copy"><div class="w4u-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-happy-quote">“${escapeHtml(r.review_text)}”</p><div class="w4u-happy-meta"><span class="w4u-happy-name">${name}</span><span class="w4u-happy-event">${event}</span></div></div></article>`;
   }).join('');
   const mobileHtml=items.map(r=>{
-    const rating=Math.max(1,Math.min(5,Number(r.rating)||5)), image=r.image_url||'';
+    const rating=Math.max(1,Math.min(5,Number(r.rating)||5)), images=(r.image_urls||[]).filter(Boolean), image=images[0]||r.image_url||'';
     const name=escapeHtml(r.customer_display_name||'WeShop4U Customer'), event=escapeHtml(r.event_type||'Celebration');
-    return `<article class="w4u-mobile-happy-card${image?'':' no-image'}">${image?`<img class="w4u-mobile-happy-image" loading="lazy" decoding="async" src="${escapeHtml(image)}" alt="Customer celebration">`:''}<div class="w4u-mobile-happy-copy"><div class="w4u-mobile-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-mobile-happy-quote">“${escapeHtml(r.review_text)}”</p><div class="w4u-mobile-happy-meta"><span class="w4u-mobile-happy-name">${name}</span><span class="w4u-mobile-happy-event">${event}</span></div></div></article>`;
+    return `<article class="w4u-mobile-happy-card${image?'':' no-image'}">${image?`<div class="w4u-mobile-happy-image-stack" data-review-images='${escapeHtml(JSON.stringify(images.length?images:[image]))}'><img class="w4u-mobile-happy-image" loading="lazy" decoding="async" src="${escapeHtml(image)}" alt="Customer celebration">${images.length>1?`<span class="w4u-review-photo-count">1/${images.length}</span>`:''}</div>`:''}<div class="w4u-mobile-happy-copy"><div class="w4u-mobile-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-mobile-happy-quote">“${escapeHtml(r.review_text)}”</p><div class="w4u-mobile-happy-meta"><span class="w4u-mobile-happy-name">${name}</span><span class="w4u-mobile-happy-event">${event}</span></div></div></article>`;
   }).join('');
   if(row) row.innerHTML=desktopHtml;
   if(section) section.style.display='block';
@@ -8931,13 +8962,14 @@ async function loadHappyClients(){
   try{
     await ensureSupabase();
     const {data,error}=await weshopSupabase.from('customer_reviews')
-      .select('rating,review_text,event_type,customer_display_name,image_path,created_at')
+      .select('rating,review_text,event_type,customer_display_name,image_path,image_paths,created_at')
       .eq('approved',true).eq('public_consent',true)
       .order('created_at',{ascending:false}).limit(20);
     if(error) throw error;
     const hydrated=await Promise.all((data||[]).map(async r=>({
       ...r,
-      image_url:r.image_path ? await w4uReviewImageUrl(r.image_path) : ''
+      image_urls:await Promise.all((Array.isArray(r.image_paths)&&r.image_paths.length?r.image_paths:(r.image_path?[r.image_path]:[])).slice(0,5).map(w4uReviewImageUrl)),
+      image_url:r.image_path ? await w4uReviewImageUrl(r.image_path) : '' 
     })));
     renderHappyClients(hydrated);
   }catch(error){
@@ -8954,6 +8986,22 @@ if('scrollRestoration' in history) history.scrollRestoration='manual';
 renderRail();
 setupCustomerRequestIdAccess();
 setupLandingNavigation();
+
+function startHappyClientPhotoRotation(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  setInterval(()=>{
+    document.querySelectorAll('[data-review-images]').forEach(stack=>{
+      let images=[]; try{images=JSON.parse(stack.dataset.reviewImages||'[]')}catch(_){return}
+      if(images.length<2) return;
+      const img=stack.querySelector('img'); if(!img) return;
+      const current=Math.max(0,images.indexOf(img.src));
+      const next=(current+1)%images.length;
+      img.src=images[next];
+      const badge=stack.querySelector('.w4u-review-photo-count'); if(badge) badge.textContent=`${next+1}/${images.length}`;
+    });
+  },2000);
+}
+
 function startHappyClientsAutoScroll(){
   const scroller=document.querySelector('.w4u-mobile-happy-scroll');
   const row=document.getElementById('happyClientsMobileRow');
@@ -8979,8 +9027,8 @@ function startHappyClientsAutoScroll(){
 }
 if(!isAdminModeRequested()){
   loadHappyClients();
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startHappyClientsAutoScroll,{once:true});
-  else startHappyClientsAutoScroll();
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>{startHappyClientsAutoScroll();startHappyClientPhotoRotation();},{once:true});
+  else {startHappyClientsAutoScroll();startHappyClientPhotoRotation();}
 }
 
 const startupParams=new URLSearchParams(window.location.search || '');
