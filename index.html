@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light">
+<meta name="color-scheme" content="light only">
 
 <title>WeShop4U — Tell Us Your Event & Budget</title>
 
@@ -2281,10 +2283,34 @@ body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean{position:
 .w4u-final-benefits{display:grid!important;grid-template-columns:repeat(4,1fr)!important;margin:7px 8px 0!important;padding:7px 0 4px!important;background:#fff8e8!important;background-image:none!important;border-top:1px solid #ead7af!important}.w4u-final-benefits>div{background:#fff8e8!important}.w4u-final-benefits b{color:#173943!important}.w4u-final-footer{margin:4px 0 0!important;padding:7px 8px!important;background:#fff8e8!important;background-image:none!important;color:#5b3318!important;min-height:0!important}
 }
 </style>
+
+<style id="w4u-samsung-light-lock">
+:root{color-scheme:only light!important;supported-color-schemes:light!important}
+@media(max-width:575px){
+  html,body,#ssLandingHeader,.w4u-final-mobile,.w4u-final-mobile *{color-scheme:only light!important;forced-color-adjust:none!important}
+  body:not(.ss-inside),body:not(.ss-inside) #ssLandingHeader,body:not(.ss-inside) .w4u-final-mobile{background:#fff8e8!important}
+  .w4u-mobile-brand-copy,.w4u-desktop-style-actions,#happyClientsMobileSection,.w4u-mobile-happy-scroll,.w4u-mobile-happy-row,.w4u-final-benefits,.w4u-final-benefits>div,.w4u-final-footer{background:#fff8e8!important}
+  .w4u-mobile-tagline{color:#0c3c5a!important;-webkit-text-fill-color:#0c3c5a!important}
+  .w4u-mobile-categories{color:#173943!important;-webkit-text-fill-color:#173943!important}
+  .w4u-card-new{background:#fff1cb!important}.w4u-card-view{background:#ffe1df!important}.w4u-card-edit{background:#e2f1df!important}
+  .w4u-card-new strong{color:#8c1d13!important;-webkit-text-fill-color:#8c1d13!important}.w4u-card-view strong{color:#a21820!important;-webkit-text-fill-color:#a21820!important}.w4u-card-edit strong{color:#08723c!important;-webkit-text-fill-color:#08723c!important}
+  .w4u-native-card-copy small{color:#173943!important;-webkit-text-fill-color:#173943!important}
+  .w4u-mobile-happy-head h2{color:#8a2119!important;-webkit-text-fill-color:#8a2119!important}
+  .w4u-mobile-happy-card{background:#fffdf8!important;color:#173943!important}
+  .w4u-mobile-happy-quote,.w4u-mobile-happy-name,.w4u-mobile-happy-event{color:#173943!important;-webkit-text-fill-color:#173943!important}
+  .w4u-mobile-happy-stars{color:#e49a08!important;-webkit-text-fill-color:#e49a08!important}
+  .w4u-final-benefits b{color:#083b55!important;-webkit-text-fill-color:#083b55!important}
+  .w4u-final-footer b{color:#5b3318!important;-webkit-text-fill-color:#5b3318!important}
+}
+</style>
 </head>
 
 
 <body>
+<script id="w4u-force-light-runtime">
+(function(){try{document.documentElement.style.colorScheme='only light';document.documentElement.style.setProperty('color-scheme','only light','important');}catch(e){}})();
+</script>
+
 
 
 <!-- ========================================================= -->
