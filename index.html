@@ -2328,28 +2328,16 @@ body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean{position:
 }
 </style>
 
-<style id="w4u-final-action-size-and-swipe-fix">
+<style id="w4u-targeted-mobile-final-v2">
 @media(max-width:575px){
-  /* Smaller icons, slightly larger text — only the three landing action cards. */
-  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card{
-    grid-template-columns:24px minmax(0,1fr) 10px!important;
-  }
-  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-icon{
-    width:20px!important;height:20px!important;
-  }
-  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-icon svg{
-    width:12px!important;height:12px!important;
-  }
-  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-copy strong{
-    font-size:12px!important;line-height:1.05!important;
-  }
-  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-copy small{
-    font-size:7.5px!important;line-height:1.1!important;
-  }
-  body:not(.ss-inside) #happyClientsMobileSection .w4u-mobile-happy-scroll{
-    overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-y!important;
-    -webkit-overflow-scrolling:touch!important;
-  }
+  /* Only New/View/Edit icon + text sizing. */
+  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card{grid-template-columns:22px minmax(0,1fr) 10px!important;}
+  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-icon{width:18px!important;height:18px!important;}
+  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-icon svg{width:11px!important;height:11px!important;}
+  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-copy strong{font-size:13px!important;line-height:1.08!important;}
+  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-copy small{font-size:8.5px!important;line-height:1.15!important;}
+  /* Keep native horizontal finger scrolling enabled. */
+  body:not(.ss-inside) #happyClientsMobileSection .w4u-mobile-happy-scroll{overflow-x:auto!important;overflow-y:hidden!important;touch-action:auto!important;-webkit-overflow-scrolling:touch!important;}
 }
 </style>
 </head>
@@ -5505,11 +5493,13 @@ function goToHomePage(){
     sessionStorage.removeItem('weshop4u_prefill_mode');
     sessionStorage.removeItem('weshop4u_verification_phone');
     sessionStorage.removeItem('weshop4u_clean_home');
+    sessionStorage.removeItem('weshop4u_open_new_after_reload');
   }catch(e){}
-  // Always perform a clean home load. This guarantees the landing page uses
-  // exactly the same final CSS/DOM state as opening the site URL directly.
-  const cleanHome=window.location.origin + window.location.pathname;
-  window.location.replace(cleanHome);
+
+  // Force a genuinely fresh landing-page navigation. The cache-buster prevents
+  // the browser from restoring an older in-memory/cached landing DOM.
+  const cleanPath=window.location.pathname || '/';
+  window.location.href=cleanPath + '?home=' + Date.now();
 }
 
 async function getCustomerRequestByToken(requestId,token){
@@ -9187,58 +9177,53 @@ function startHappyClientPhotoRotation(){
 function startHappyClientsAutoScroll(){
   const scroller=document.querySelector('#happyClientsMobileSection .w4u-mobile-happy-scroll');
   const row=document.getElementById('happyClientsMobileRow');
-  if(!scroller||!row||window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if(!scroller||!row) return;
 
-  let timer=null, startX=0, startY=0, dragging=false;
+  let timer=null;
+  let resumeTimer=null;
   const INTERVAL=2000;
   const cards=()=>Array.from(row.querySelectorAll('.w4u-mobile-happy-card'));
-  const cardStep=()=>{
+
+  const nearestIndex=()=>{
     const list=cards();
-    if(!list.length) return scroller.clientWidth;
-    return list[0].getBoundingClientRect().width + 7;
+    if(!list.length) return 0;
+    const center=scroller.scrollLeft + scroller.clientWidth/2;
+    let best=0,dist=Infinity;
+    list.forEach((card,i)=>{
+      const d=Math.abs((card.offsetLeft+card.offsetWidth/2)-center);
+      if(d<dist){dist=d;best=i;}
+    });
+    return best;
   };
+
   const schedule=()=>{
     clearTimeout(timer);
     if(cards().length>1) timer=setTimeout(advance,INTERVAL);
   };
+
   const advance=()=>{
-    const list=cards(); if(list.length<2) return;
-    const step=cardStep();
-    const max=scroller.scrollWidth-scroller.clientWidth;
-    const target=scroller.scrollLeft+step;
-    scroller.scrollTo({left:target>=max-4?0:target,behavior:'smooth'});
+    const list=cards();
+    if(list.length<2) return;
+    const current=nearestIndex();
+    const next=(current+1)%list.length;
+    scroller.scrollTo({left:list[next].offsetLeft,behavior:'smooth'});
     schedule();
   };
-  const pause=()=>clearTimeout(timer);
 
-  scroller.style.touchAction='pan-y';
-  scroller.addEventListener('touchstart',e=>{
-    if(!e.touches?.length) return;
-    pause(); dragging=true; startX=e.touches[0].clientX; startY=e.touches[0].clientY;
-  },{passive:true});
-  scroller.addEventListener('touchmove',e=>{
-    if(!dragging||!e.touches?.length) return;
-    const dx=e.touches[0].clientX-startX, dy=e.touches[0].clientY-startY;
-    if(Math.abs(dx)>Math.abs(dy) && Math.abs(dx)>8) e.preventDefault();
-  },{passive:false});
-  scroller.addEventListener('touchend',e=>{
-    if(!dragging) return;
-    dragging=false;
-    const endX=e.changedTouches?.[0]?.clientX ?? startX;
-    const dx=endX-startX;
-    if(Math.abs(dx)>=24){
-      const step=cardStep();
-      const max=scroller.scrollWidth-scroller.clientWidth;
-      let target=dx<0 ? scroller.scrollLeft+step : scroller.scrollLeft-step;
-      if(target<0) target=0;
-      if(target>max) target=max;
-      scroller.scrollTo({left:target,behavior:'smooth'});
-    }
-    setTimeout(schedule,3000);
-  },{passive:true});
-  scroller.addEventListener('pointerdown',pause,{passive:true});
-  scroller.addEventListener('wheel',()=>{pause();setTimeout(schedule,3000)},{passive:true});
-  new MutationObserver(schedule).observe(row,{childList:true});
+  const pauseForManualSwipe=()=>{
+    clearTimeout(timer);
+    clearTimeout(resumeTimer);
+    resumeTimer=setTimeout(schedule,3000);
+  };
+
+  // Native overflow scrolling handles finger swipes reliably on iOS/Android.
+  // We only pause auto-scroll while the customer is interacting.
+  scroller.style.touchAction='auto';
+  scroller.addEventListener('touchstart',pauseForManualSwipe,{passive:true});
+  scroller.addEventListener('pointerdown',pauseForManualSwipe,{passive:true});
+  scroller.addEventListener('wheel',pauseForManualSwipe,{passive:true});
+
+  new MutationObserver(()=>schedule()).observe(row,{childList:true});
   schedule();
 }
 if(!isAdminModeRequested()){
