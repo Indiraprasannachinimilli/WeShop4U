@@ -2304,20 +2304,7 @@ body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean{position:
 }
 </style>
 
-<style id="w4u-image-backed-mobile-final">
-@media(max-width:575px){
- html,body{background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAFElEQVR42mP8/+MFAwwwMSAB3BwAkKkC57wTnEoAAAAASUVORK5CYII=")!important;background-repeat:repeat!important;}
- body:not(.ss-inside) #ssLandingHeader,body:not(.ss-inside) #ssLandingHeader>.w4u-final-mobile,body:not(.ss-inside) .w4u-mobile-brand-copy,body:not(.ss-inside) .w4u-desktop-style-actions,body:not(.ss-inside) #happyClientsMobileSection,body:not(.ss-inside) .w4u-mobile-happy-scroll,body:not(.ss-inside) .w4u-mobile-happy-row,body:not(.ss-inside) .w4u-final-benefits,body:not(.ss-inside) .w4u-final-benefits>div,body:not(.ss-inside) .w4u-final-footer{background-color:transparent!important;background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAFElEQVR42mP8/+MFAwwwMSAB3BwAkKkC57wTnEoAAAAASUVORK5CYII=")!important;background-repeat:repeat!important;}
- body:not(.ss-inside) .w4u-card-new{background-color:transparent!important;background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAFElEQVR42mP8/+E4AwwwMSAB3BwAiMgCvsa2LgMAAAAASUVORK5CYII=")!important;background-repeat:repeat!important;}
- body:not(.ss-inside) .w4u-card-view{background-color:transparent!important;background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAFElEQVR42mP8f/MGAwwwMSAB3BwAh4sCuNU+eucAAAAASUVORK5CYII=")!important;background-repeat:repeat!important;}
- body:not(.ss-inside) .w4u-card-edit{background-color:transparent!important;background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAFElEQVR42mO8/+EOAwwwMSAB3BwAhm0Cs4k50PAAAAAASUVORK5CYII=")!important;background-repeat:repeat!important;}
- body:not(.ss-inside) .w4u-mobile-happy-card{background-color:transparent!important;background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAFElEQVR42mP8//cHAwwwMSAB3BwAlLMC/IfV2tYAAAAASUVORK5CYII=")!important;background-repeat:repeat!important;}
- body:not(.ss-inside) footer.site-foot{display:none!important;}
- body:not(.ss-inside) #ssLandingHeader{margin-bottom:0!important;padding-bottom:0!important;}
- body:not(.ss-inside) .w4u-final-footer{margin-bottom:0!important;padding-bottom:12px!important;}
- body:not(.ss-inside) .container.py-4.py-md-5{display:none!important;}
-}
-</style>
+
 
 <style id="w4u-final-small-action-icons">
 /* Final mobile-only adjustment: reduce ONLY the New/View/Edit icons.
@@ -2325,6 +2312,24 @@ body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean{position:
 @media(max-width:575px){
   body:not(.ss-inside) .w4u-native-card-icon{width:24px!important;height:24px!important;}
   body:not(.ss-inside) .w4u-native-card-icon svg{width:14px!important;height:14px!important;}
+}
+</style>
+
+<style id="w4u-mobile-solid-color-root-fix">
+@media(max-width:575px){
+  html,body{color-scheme:only light!important;background:#fff8e8!important;}
+  body:not(.ss-inside),body:not(.ss-inside) #ssLandingHeader,body:not(.ss-inside) #ssLandingHeader>.w4u-final-mobile,
+  body:not(.ss-inside) .w4u-mobile-brand-copy,body:not(.ss-inside) .w4u-desktop-style-actions,
+  body:not(.ss-inside) #happyClientsMobileSection,body:not(.ss-inside) .w4u-mobile-happy-scroll,
+  body:not(.ss-inside) .w4u-mobile-happy-row,body:not(.ss-inside) .w4u-final-benefits,
+  body:not(.ss-inside) .w4u-final-benefits>div,body:not(.ss-inside) .w4u-final-footer{
+    background-color:#fff8e8!important;background-image:none!important;
+  }
+  body:not(.ss-inside) .w4u-card-new{background-color:#fff1cb!important;background-image:none!important;}
+  body:not(.ss-inside) .w4u-card-view{background-color:#ffe1df!important;background-image:none!important;}
+  body:not(.ss-inside) .w4u-card-edit{background-color:#e2f1df!important;background-image:none!important;}
+  body:not(.ss-inside) .w4u-mobile-happy-card{background-color:#fffdf8!important;background-image:none!important;}
+  body:not(.ss-inside) .w4u-mobile-happy-scroll{overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-x pan-y!important;scroll-snap-type:x mandatory!important;}
 }
 </style>
 </head>
@@ -5485,8 +5490,8 @@ function goToHomePage(){
 
   // View Order replaces the original form HTML, so do not rebuild the landing
   // from that mutated document. Return to a brand-new document instead.
-  const homeUrl = window.location.origin + window.location.pathname + '?home=' + Date.now();
-  window.location.replace(homeUrl);
+  const homeUrl = window.location.origin + window.location.pathname;
+  window.location.href = homeUrl;
 }
 
 async function getCustomerRequestByToken(requestId,token){
@@ -9187,52 +9192,48 @@ function startHappyClientPhotoRotation(){
 }
 
 function startHappyClientsAutoScroll(){
-  const scroller=document.querySelector('.w4u-mobile-happy-scroll');
+  const scroller=document.querySelector('#happyClientsMobileSection .w4u-mobile-happy-scroll');
   const row=document.getElementById('happyClientsMobileRow');
   if(!scroller||!row) return;
 
   const INTERVAL=2000;
   let timer=null;
   let pausedUntil=0;
+  let index=0;
+
   const cards=()=>Array.from(row.querySelectorAll('.w4u-mobile-happy-card'));
-
-  const nearestIndex=()=>{
+  const schedule=()=>{
+    clearTimeout(timer);
+    timer=setTimeout(tick,INTERVAL);
+  };
+  const tick=()=>{
     const list=cards();
-    if(!list.length) return 0;
-    const center=scroller.scrollLeft + scroller.clientWidth/2;
-    let best=0, distance=Infinity;
-    list.forEach((card,i)=>{
-      const d=Math.abs((card.offsetLeft+card.offsetWidth/2)-center);
-      if(d<distance){distance=d;best=i;}
-    });
-    return best;
+    if(list.length>1 && Date.now()>=pausedUntil){
+      index=(index+1)%list.length;
+      const max=Math.max(0,scroller.scrollWidth-scroller.clientWidth);
+      const target=index===0 ? 0 : Math.min(list[index].offsetLeft,max);
+      scroller.scrollTo({left:target,behavior:'smooth'});
+    }
+    schedule();
   };
-
-  const advance=()=>{
+  const pause=()=>{
+    pausedUntil=Date.now()+3000;
     const list=cards();
-    if(list.length<2) return;
-    const next=(nearestIndex()+1)%list.length;
-    scroller.scrollTo({left:list[next].offsetLeft,behavior:'smooth'});
+    if(list.length){
+      let best=0,bestDist=Infinity;
+      list.forEach((card,i)=>{
+        const d=Math.abs(card.offsetLeft-scroller.scrollLeft);
+        if(d<bestDist){bestDist=d;best=i;}
+      });
+      index=best;
+    }
   };
 
-  const startTimer=()=>{
-    if(timer) clearInterval(timer);
-    timer=setInterval(()=>{
-      if(Date.now()<pausedUntil) return;
-      advance();
-    },INTERVAL);
-  };
-
-  const pauseForSwipe=()=>{ pausedUntil=Date.now()+3000; };
-  scroller.addEventListener('touchstart',pauseForSwipe,{passive:true});
-  scroller.addEventListener('touchmove',pauseForSwipe,{passive:true});
-  scroller.addEventListener('pointerdown',pauseForSwipe,{passive:true});
-  scroller.addEventListener('wheel',pauseForSwipe,{passive:true});
-
-  new MutationObserver(()=>{
-    if(cards().length>1 && !timer) startTimer();
-  }).observe(row,{childList:true});
-  startTimer();
+  scroller.addEventListener('touchstart',pause,{passive:true});
+  scroller.addEventListener('touchmove',pause,{passive:true});
+  scroller.addEventListener('pointerdown',pause,{passive:true});
+  scroller.addEventListener('wheel',pause,{passive:true});
+  schedule();
 }
 
 if(!isAdminModeRequested()){
