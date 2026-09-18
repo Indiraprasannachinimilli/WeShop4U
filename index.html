@@ -2319,23 +2319,12 @@ body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean{position:
 }
 </style>
 
-<style id="w4u-targeted-mobile-polish-20260918">
+<style id="w4u-final-small-action-icons">
+/* Final mobile-only adjustment: reduce ONLY the New/View/Edit icons.
+   Card dimensions and all title/description typography remain unchanged. */
 @media(max-width:575px){
-  /* Only reduce the New/View/Edit icon treatment; card layout/design stays unchanged. */
-  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card{
-    grid-template-columns:50px minmax(0,1fr) 38px!important;
-  }
-  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-icon{
-    width:46px!important;height:46px!important;border-radius:13px!important;
-  }
-  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-icon svg{
-    width:28px!important;height:28px!important;
-  }
-  /* Make horizontal review gestures explicit on mobile. */
-  body:not(.ss-inside) .w4u-mobile-happy-scroll{
-    touch-action:pan-y pan-x!important;
-    overscroll-behavior-x:contain;
-  }
+  body:not(.ss-inside) .w4u-native-card-icon{width:24px!important;height:24px!important;}
+  body:not(.ss-inside) .w4u-native-card-icon svg{width:14px!important;height:14px!important;}
 }
 </style>
 </head>
@@ -5490,24 +5479,24 @@ function goToHomePage(){
     sessionStorage.removeItem('weshop4u_prefill_request');
     sessionStorage.removeItem('weshop4u_prefill_mode');
     sessionStorage.removeItem('weshop4u_verification_phone');
-    sessionStorage.setItem('weshop4u_clean_home','1');
+    sessionStorage.removeItem('weshop4u_clean_home');
   }catch(e){}
 
-  // Return to the already-loaded landing page instead of forcing a network reload.
-  // This avoids the blank/slow landing state seen after View Order -> Home.
-  try{
+  // Restore the existing landing page in-place so the approved landing actions
+  // and styling are preserved instead of rebuilding/reloading a different state.
+  const options=document.getElementById('customerOrderOptions');
+  const landing=document.getElementById('ssLandingHeader');
+  if(options && landing){
     showCustomerOrderOptions();
     document.body.classList.remove('ss-inside','ss-admin-mode');
     document.documentElement.classList.remove('ss-admin-boot');
-    history.replaceState(null,'',window.location.pathname);
+    try{ history.replaceState(null,'',window.location.pathname); }catch(e){}
+    landing.style.removeProperty('display');
     window.scrollTo({top:0,left:0,behavior:'auto'});
-    requestAnimationFrame(()=>{
-      document.body.classList.remove('ss-inside');
-      window.dispatchEvent(new Event('resize'));
-    });
-  }catch(error){
-    window.location.replace(window.location.pathname);
+    return;
   }
+  // Fallback only if a result screen replaced the original landing DOM.
+  window.location.assign(window.location.pathname);
 }
 
 async function getCustomerRequestByToken(requestId,token){
@@ -9199,43 +9188,32 @@ function startHappyClientsAutoScroll(){
     schedule();
   };
   const pauseAndResume=()=>{ clearTimeout(timer); timer=setTimeout(schedule,3000); };
-  scroller.addEventListener('touchstart',pauseAndResume,{passive:true});
+  let swipeStartX=null;
+  scroller.addEventListener('touchstart',event=>{
+    pauseAndResume();
+    swipeStartX=event.touches && event.touches[0] ? event.touches[0].clientX : null;
+  },{passive:true});
+  scroller.addEventListener('touchend',event=>{
+    if(swipeStartX===null) return;
+    const endX=event.changedTouches && event.changedTouches[0] ? event.changedTouches[0].clientX : swipeStartX;
+    const dx=endX-swipeStartX; swipeStartX=null;
+    if(Math.abs(dx)<28) return;
+    const list=cards(); if(list.length<2) return;
+    const center=scroller.scrollLeft + scroller.clientWidth/2;
+    let index=list.reduce((best,card,i)=>Math.abs((card.offsetLeft+card.offsetWidth/2)-center)<Math.abs((list[best].offsetLeft+list[best].offsetWidth/2)-center)?i:best,0);
+    index=dx<0 ? Math.min(list.length-1,index+1) : Math.max(0,index-1);
+    scroller.scrollTo({left:list[index].offsetLeft,behavior:'smooth'});
+    pauseAndResume();
+  },{passive:true});
   scroller.addEventListener('pointerdown',pauseAndResume,{passive:true});
   scroller.addEventListener('wheel',pauseAndResume,{passive:true});
   new MutationObserver(schedule).observe(row,{childList:true});
   schedule();
 }
-function enableHappyClientsSwipe(){
-  const scroller=document.querySelector('.w4u-mobile-happy-scroll');
-  const row=document.getElementById('happyClientsMobileRow');
-  if(!scroller||!row||scroller.dataset.swipeReady==='1') return;
-  scroller.dataset.swipeReady='1';
-  let startX=0,startY=0,startLeft=0;
-  scroller.addEventListener('touchstart',e=>{
-    const t=e.touches&&e.touches[0]; if(!t) return;
-    startX=t.clientX; startY=t.clientY; startLeft=scroller.scrollLeft;
-  },{passive:true});
-  scroller.addEventListener('touchend',e=>{
-    const t=e.changedTouches&&e.changedTouches[0]; if(!t) return;
-    const dx=t.clientX-startX,dy=t.clientY-startY;
-    if(Math.abs(dx)<28 || Math.abs(dx)<=Math.abs(dy)) return;
-    const cards=Array.from(row.querySelectorAll('.w4u-mobile-happy-card'));
-    if(cards.length<2) return;
-    const current=scroller.scrollLeft;
-    let target;
-    if(dx<0){
-      target=cards.find(card=>card.offsetLeft>current+12)||cards[cards.length-1];
-    }else{
-      target=[...cards].reverse().find(card=>card.offsetLeft<current-12)||cards[0];
-    }
-    scroller.scrollTo({left:target.offsetLeft,behavior:'smooth'});
-  },{passive:true});
-}
-
 if(!isAdminModeRequested()){
   loadHappyClients();
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>{startHappyClientsAutoScroll();enableHappyClientsSwipe();startHappyClientPhotoRotation();},{once:true});
-  else {startHappyClientsAutoScroll();enableHappyClientsSwipe();startHappyClientPhotoRotation();}
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>{startHappyClientsAutoScroll();startHappyClientPhotoRotation();},{once:true});
+  else {startHappyClientsAutoScroll();startHappyClientPhotoRotation();}
 }
 
 const startupParams=new URLSearchParams(window.location.search || '');
@@ -9294,10 +9272,9 @@ window.addEventListener('hashchange',()=>{
   }
 });
 
-window.addEventListener('pageshow',()=>{
-  if(!isAdminModeRequested() && !isLinkedOrderStartup){
+window.addEventListener('pageshow',event=>{
+  if(event.persisted && !isAdminModeRequested()){
     showCustomerOrderOptions();
-    document.body.classList.remove('ss-inside');
     window.scrollTo(0,0);
   }
 });
