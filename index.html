@@ -2327,19 +2327,6 @@ body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean{position:
   body:not(.ss-inside) .w4u-native-card-icon svg{width:14px!important;height:14px!important;}
 }
 </style>
-
-<style id="w4u-targeted-mobile-final-v2">
-@media(max-width:575px){
-  /* Only New/View/Edit icon + text sizing. */
-  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card{grid-template-columns:22px minmax(0,1fr) 10px!important;}
-  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-icon{width:18px!important;height:18px!important;}
-  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-icon svg{width:11px!important;height:11px!important;}
-  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-copy strong{font-size:13px!important;line-height:1.08!important;}
-  body:not(.ss-inside) .w4u-desktop-style-actions .w4u-native-card-copy small{font-size:8.5px!important;line-height:1.15!important;}
-  /* Keep native horizontal finger scrolling enabled. */
-  body:not(.ss-inside) #happyClientsMobileSection .w4u-mobile-happy-scroll{overflow-x:auto!important;overflow-y:hidden!important;touch-action:auto!important;-webkit-overflow-scrolling:touch!important;}
-}
-</style>
 </head>
 
 
@@ -5496,10 +5483,10 @@ function goToHomePage(){
     sessionStorage.removeItem('weshop4u_open_new_after_reload');
   }catch(e){}
 
-  // Force a genuinely fresh landing-page navigation. The cache-buster prevents
-  // the browser from restoring an older in-memory/cached landing DOM.
-  const cleanPath=window.location.pathname || '/';
-  window.location.href=cleanPath + '?home=' + Date.now();
+  // View Order replaces the original form HTML, so do not rebuild the landing
+  // from that mutated document. Return to a brand-new document instead.
+  const homeUrl = window.location.origin + window.location.pathname + '?home=' + Date.now();
+  window.location.replace(homeUrl);
 }
 
 async function getCustomerRequestByToken(requestId,token){
@@ -8219,6 +8206,31 @@ th{width:34%;color:#5a0730;background:#fffaf0}
 .note{margin-top:18px;color:#786b70;font-size:13px}
 @media print{body{padding:0}.receipt{border:0}}
 </style>
+
+<style id="w4u-home-root-fix-final">
+@media(max-width:575px){
+  /* One canonical mobile landing. These rules also win after returning from View/Edit. */
+  body:not(.ss-inside) #ssLandingHeader>.ss-v4-picture,
+  body:not(.ss-inside) #ssLandingHeader>.ss-v4-hotspots,
+  body:not(.ss-inside) #customerOrderOptions,
+  body:not(.ss-inside) .ss-mobile-landing,
+  body:not(.ss-inside) .w4u-native-mobile-landing:not(.w4u-final-mobile){display:none!important;}
+  body:not(.ss-inside) #ssLandingHeader>.w4u-final-mobile{display:block!important;}
+
+  /* Requested final action-card sizing: smaller icon, slightly larger copy. */
+  body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-icon{width:20px!important;height:20px!important;}
+  body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-icon svg{width:12px!important;height:12px!important;}
+  body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-copy strong{font-size:12px!important;line-height:1.05!important;}
+  body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-copy small{font-size:7.5px!important;line-height:1.12!important;}
+
+  /* Native horizontal swipe; JS only advances cards automatically. */
+  body:not(.ss-inside) .w4u-mobile-happy-scroll{
+    overflow-x:auto!important;overflow-y:hidden!important;
+    -webkit-overflow-scrolling:touch!important;touch-action:pan-x!important;
+    scroll-snap-type:x mandatory!important;scroll-behavior:smooth!important;
+  }
+}
+</style>
 </head>
 <body>
 <div class="receipt">
@@ -9175,57 +9187,54 @@ function startHappyClientPhotoRotation(){
 }
 
 function startHappyClientsAutoScroll(){
-  const scroller=document.querySelector('#happyClientsMobileSection .w4u-mobile-happy-scroll');
+  const scroller=document.querySelector('.w4u-mobile-happy-scroll');
   const row=document.getElementById('happyClientsMobileRow');
   if(!scroller||!row) return;
 
-  let timer=null;
-  let resumeTimer=null;
   const INTERVAL=2000;
+  let timer=null;
+  let pausedUntil=0;
   const cards=()=>Array.from(row.querySelectorAll('.w4u-mobile-happy-card'));
 
   const nearestIndex=()=>{
     const list=cards();
     if(!list.length) return 0;
     const center=scroller.scrollLeft + scroller.clientWidth/2;
-    let best=0,dist=Infinity;
+    let best=0, distance=Infinity;
     list.forEach((card,i)=>{
       const d=Math.abs((card.offsetLeft+card.offsetWidth/2)-center);
-      if(d<dist){dist=d;best=i;}
+      if(d<distance){distance=d;best=i;}
     });
     return best;
-  };
-
-  const schedule=()=>{
-    clearTimeout(timer);
-    if(cards().length>1) timer=setTimeout(advance,INTERVAL);
   };
 
   const advance=()=>{
     const list=cards();
     if(list.length<2) return;
-    const current=nearestIndex();
-    const next=(current+1)%list.length;
+    const next=(nearestIndex()+1)%list.length;
     scroller.scrollTo({left:list[next].offsetLeft,behavior:'smooth'});
-    schedule();
   };
 
-  const pauseForManualSwipe=()=>{
-    clearTimeout(timer);
-    clearTimeout(resumeTimer);
-    resumeTimer=setTimeout(schedule,3000);
+  const startTimer=()=>{
+    if(timer) clearInterval(timer);
+    timer=setInterval(()=>{
+      if(Date.now()<pausedUntil) return;
+      advance();
+    },INTERVAL);
   };
 
-  // Native overflow scrolling handles finger swipes reliably on iOS/Android.
-  // We only pause auto-scroll while the customer is interacting.
-  scroller.style.touchAction='auto';
-  scroller.addEventListener('touchstart',pauseForManualSwipe,{passive:true});
-  scroller.addEventListener('pointerdown',pauseForManualSwipe,{passive:true});
-  scroller.addEventListener('wheel',pauseForManualSwipe,{passive:true});
+  const pauseForSwipe=()=>{ pausedUntil=Date.now()+3000; };
+  scroller.addEventListener('touchstart',pauseForSwipe,{passive:true});
+  scroller.addEventListener('touchmove',pauseForSwipe,{passive:true});
+  scroller.addEventListener('pointerdown',pauseForSwipe,{passive:true});
+  scroller.addEventListener('wheel',pauseForSwipe,{passive:true});
 
-  new MutationObserver(()=>schedule()).observe(row,{childList:true});
-  schedule();
+  new MutationObserver(()=>{
+    if(cards().length>1 && !timer) startTimer();
+  }).observe(row,{childList:true});
+  startTimer();
 }
+
 if(!isAdminModeRequested()){
   loadHappyClients();
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>{startHappyClientsAutoScroll();startHappyClientPhotoRotation();},{once:true});
