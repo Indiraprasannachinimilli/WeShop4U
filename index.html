@@ -2339,6 +2339,24 @@ body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean{position:
  body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-icon svg{width:9px!important;height:9px!important;}
 }
 </style>
+
+<style id="w4u-final-icon-size-balance">
+@media(max-width:575px){
+  body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-icon{
+    width:19px!important;
+    height:19px!important;
+    min-width:19px!important;
+    flex:0 0 19px!important;
+  }
+  body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-icon svg{
+    width:11px!important;
+    height:11px!important;
+    min-width:11px!important;
+    min-height:11px!important;
+  }
+}
+</style>
+
 </head>
 
 
@@ -5493,12 +5511,17 @@ function goToHomePage(){
     sessionStorage.removeItem('weshop4u_verification_phone');
     sessionStorage.removeItem('weshop4u_clean_home');
     sessionStorage.removeItem('weshop4u_open_new_after_reload');
+    // Do not reuse a Happy Clients snapshot after returning from View/Edit.
+    // A cached snapshot can contain only the first photo from an older render.
+    localStorage.removeItem('w4u_happy_clients_v3');
   }catch(e){}
 
   // View Order replaces the original form HTML, so do not rebuild the landing
   // from that mutated document. Return to a brand-new document instead.
-  const homeUrl = window.location.origin + window.location.pathname;
-  window.location.href = homeUrl;
+  // The one-time home parameter also prevents an embedded browser from
+  // restoring a stale page snapshot when leaving the order screen.
+  const homeUrl = window.location.origin + window.location.pathname + '?home=' + Date.now();
+  window.location.replace(homeUrl);
 }
 
 async function getCustomerRequestByToken(requestId,token){
@@ -9257,7 +9280,7 @@ function renderHappyClients(reviews){
   if(mobileRow) mobileRow.innerHTML=mobileHtml;
   if(mobileSection) mobileSection.classList.add('has-reviews');
 }
-const W4U_HAPPY_CACHE_KEY='w4u_happy_clients_v2';
+const W4U_HAPPY_CACHE_KEY='w4u_happy_clients_v3';
 const W4U_HAPPY_CACHE_TTL=5*60*1000;
 
 function readHappyClientsCache(){
