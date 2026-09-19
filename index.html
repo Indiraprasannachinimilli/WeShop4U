@@ -9278,15 +9278,22 @@ function renderHappyClients(reviews){
     if(mobileRow) mobileRow.innerHTML='';
     return;
   }
+  const photoMarkup=(images,cls)=>{
+    if(!images.length) return '';
+    const photos=images.map((url,i)=>`<img class="${cls} w4u-review-rotating-photo" data-photo-index="${i}" loading="${i===0?'eager':'lazy'}" decoding="async" src="${escapeHtml(url)}" alt="Customer celebration"${i===0?'':' style="display:none"'}>`).join('');
+    return photos+(images.length>1?`<span class="w4u-review-photo-count">1/${images.length}</span>`:'');
+  };
   const desktopHtml=items.map(r=>{
-    const rating=Math.max(1,Math.min(5,Number(r.rating)||5)), images=(r.image_urls||[]).filter(Boolean), image=images[0]||r.image_url||'';
+    const rating=Math.max(1,Math.min(5,Number(r.rating)||5));
+    const images=(r.image_urls||[]).filter(Boolean).slice(0,5);
     const name=escapeHtml(r.customer_display_name||'WeShop4U Customer'), event=escapeHtml(r.event_type||'Celebration');
-    return `<article class="w4u-happy-card${image?'':' no-image'}">${image?`<div class="w4u-happy-image-stack" data-review-images='${escapeHtml(JSON.stringify(images.length?images:[image]))}'><img class="w4u-happy-image" loading="lazy" decoding="async" src="${escapeHtml(image)}" alt="Customer celebration">${images.length>1?`<span class="w4u-review-photo-count">1/${images.length}</span>`:''}</div>`:''}<div class="w4u-happy-copy"><div class="w4u-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-happy-quote">“${escapeHtml(r.review_text)}”</p><div class="w4u-happy-meta"><span class="w4u-happy-name">${name}</span><span class="w4u-happy-event">${event}</span></div></div></article>`;
+    return `<article class="w4u-happy-card${images.length?'':' no-image'}">${images.length?`<div class="w4u-happy-image-stack" data-photo-current="0">${photoMarkup(images,'w4u-happy-image')}</div>`:''}<div class="w4u-happy-copy"><div class="w4u-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-happy-quote">“${escapeHtml(r.review_text)}”</p><div class="w4u-happy-meta"><span class="w4u-happy-name">${name}</span><span class="w4u-happy-event">${event}</span></div></div></article>`;
   }).join('');
   const mobileHtml=items.map(r=>{
-    const rating=Math.max(1,Math.min(5,Number(r.rating)||5)), images=(r.image_urls||[]).filter(Boolean), image=images[0]||r.image_url||'';
+    const rating=Math.max(1,Math.min(5,Number(r.rating)||5));
+    const images=(r.image_urls||[]).filter(Boolean).slice(0,5);
     const name=escapeHtml(r.customer_display_name||'WeShop4U Customer'), event=escapeHtml(r.event_type||'Celebration');
-    return `<article class="w4u-mobile-happy-card${image?'':' no-image'}">${image?`<div class="w4u-mobile-happy-image-stack" data-review-images='${escapeHtml(JSON.stringify(images.length?images:[image]))}'><img class="w4u-mobile-happy-image" loading="lazy" decoding="async" src="${escapeHtml(image)}" alt="Customer celebration">${images.length>1?`<span class="w4u-review-photo-count">1/${images.length}</span>`:''}</div>`:''}<div class="w4u-mobile-happy-copy"><div class="w4u-mobile-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-mobile-happy-quote">“${escapeHtml(r.review_text)}”</p><div class="w4u-mobile-happy-meta"><span class="w4u-mobile-happy-name">${name}</span><span class="w4u-mobile-happy-event">${event}</span></div></div></article>`;
+    return `<article class="w4u-mobile-happy-card${images.length?'':' no-image'}">${images.length?`<div class="w4u-mobile-happy-image-stack" data-photo-current="0">${photoMarkup(images,'w4u-mobile-happy-image')}</div>`:''}<div class="w4u-mobile-happy-copy"><div class="w4u-mobile-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-mobile-happy-quote">“${escapeHtml(r.review_text)}”</p><div class="w4u-mobile-happy-meta"><span class="w4u-mobile-happy-name">${name}</span><span class="w4u-mobile-happy-event">${event}</span></div></div></article>`;
   }).join('');
   if(row) row.innerHTML=desktopHtml;
   if(section) section.style.display='block';
@@ -9324,80 +9331,56 @@ renderRail();
 setupCustomerRequestIdAccess();
 setupLandingNavigation();
 
+function w4uShowReviewPhoto(stack,index){
+  if(!stack) return 0;
+  const photos=Array.from(stack.querySelectorAll('.w4u-review-rotating-photo'));
+  if(!photos.length) return 0;
+  const safe=((index%photos.length)+photos.length)%photos.length;
+  photos.forEach((img,i)=>{img.style.display=i===safe?'block':'none';});
+  stack.dataset.photoCurrent=String(safe);
+  const badge=stack.querySelector('.w4u-review-photo-count');
+  if(badge) badge.textContent=`${safe+1}/${photos.length}`;
+  return photos.length;
+}
 function startHappyClientPhotoRotation(){
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  // Desktop cards sit side-by-side with no auto-scroll between them, so each
-  // one can just keep cycling its own photos independently forever. The
-  // mobile row is different (see startHappyClientsAutoScroll): it moves
-  // between customers automatically, so its photo rotation has to be
-  // coordinated with that movement rather than running on its own timer -
-  // scope this loop to desktop cards only to avoid the two fighting over
-  // the same element on a stack that also matches both selectors.
   setInterval(()=>{
-    document.querySelectorAll('.w4u-happy-image-stack[data-review-images]').forEach(stack=>{
-      let images=[]; try{images=JSON.parse(stack.dataset.reviewImages||'[]')}catch(_){return}
-      if(images.length<2) return;
-      const img=stack.querySelector('img'); if(!img) return;
-      const current=Math.max(0,images.indexOf(img.src));
-      const next=(current+1)%images.length;
-      img.src=images[next];
-      const badge=stack.querySelector('.w4u-review-photo-count'); if(badge) badge.textContent=`${next+1}/${images.length}`;
+    document.querySelectorAll('.w4u-happy-image-stack').forEach(stack=>{
+      const photos=stack.querySelectorAll('.w4u-review-rotating-photo');
+      if(photos.length<2) return;
+      const current=Number(stack.dataset.photoCurrent||0);
+      w4uShowReviewPhoto(stack,current+1);
     });
   },2000);
 }
-
 function startHappyClientsAutoScroll(){
   const scroller=document.querySelector('#happyClientsMobileSection .w4u-mobile-happy-scroll');
   const row=document.getElementById('happyClientsMobileRow');
   if(!scroller||!row) return;
-
   const INTERVAL=2000;
-  let timer=null;
-  let pausedUntil=0;
-  let index=0;
-  let photoIndex=0;
-
+  let timer=null,pausedUntil=0,index=0;
   const cards=()=>Array.from(row.querySelectorAll('.w4u-mobile-happy-card'));
-  const imagesFor=(card)=>{
-    const stack=card?.querySelector('.w4u-mobile-happy-image-stack[data-review-images]');
-    if(!stack) return {stack:null,images:[]};
-    let images=[]; try{images=JSON.parse(stack.dataset.reviewImages||'[]')}catch(_){images=[];}
-    return {stack,images};
-  };
-  const showPhoto=(card,photoIdx)=>{
-    const {stack,images}=imagesFor(card);
-    if(!stack||!images.length) return;
-    const safeIdx=((photoIdx%images.length)+images.length)%images.length;
-    const img=stack.querySelector('img'); if(img) img.src=images[safeIdx];
-    const badge=stack.querySelector('.w4u-review-photo-count'); if(badge) badge.textContent=`${safeIdx+1}/${images.length}`;
-  };
-  const schedule=()=>{
-    clearTimeout(timer);
-    timer=setTimeout(tick,INTERVAL);
-  };
+  const stackFor=card=>card?.querySelector('.w4u-mobile-happy-image-stack')||null;
+  const schedule=()=>{clearTimeout(timer);timer=setTimeout(tick,INTERVAL);};
   const goToCard=(newIndex,list)=>{
     index=newIndex;
-    photoIndex=0;
     const max=Math.max(0,scroller.scrollWidth-scroller.clientWidth);
-    const target=index===0 ? 0 : Math.min(list[index].offsetLeft,max);
+    const target=index===0?0:Math.min(list[index].offsetLeft,max);
     scroller.scrollTo({left:target,behavior:'smooth'});
-    showPhoto(list[index],0);
+    w4uShowReviewPhoto(stackFor(list[index]),0);
   };
   const tick=()=>{
     const list=cards();
-    if(!list.length || Date.now()<pausedUntil){ schedule(); return; }
-    const currentCard=list[index]||list[0];
-    const {images}=imagesFor(currentCard);
-    if(images.length>1 && photoIndex+1<images.length){
-      // This customer has more photos to show yet - advance the photo,
-      // not the card, so all of their images play out at the same 2s
-      // cadence before we ever move on.
-      photoIndex+=1;
-      showPhoto(currentCard,photoIndex);
+    if(!list.length||Date.now()<pausedUntil){schedule();return;}
+    const card=list[index]||list[0], stack=stackFor(card);
+    const photos=stack?stack.querySelectorAll('.w4u-review-rotating-photo'):[];
+    const current=stack?Number(stack.dataset.photoCurrent||0):0;
+    if(photos.length>1 && current+1<photos.length){
+      w4uShowReviewPhoto(stack,current+1);
     }else if(list.length>1){
-      // Every photo for this customer has had its turn (or there was only
-      // one/none) - now move to the next customer's card.
       goToCard((index+1)%list.length,list);
+    }else if(photos.length>1){
+      w4uShowReviewPhoto(stack,0);
     }
     schedule();
   };
@@ -9406,18 +9389,10 @@ function startHappyClientsAutoScroll(){
     const list=cards();
     if(list.length){
       let best=0,bestDist=Infinity;
-      list.forEach((card,i)=>{
-        const d=Math.abs(card.offsetLeft-scroller.scrollLeft);
-        if(d<bestDist){bestDist=d;best=i;}
-      });
-      if(best!==index){
-        index=best;
-        photoIndex=0;
-        showPhoto(list[index],0);
-      }
+      list.forEach((card,i)=>{const d=Math.abs(card.offsetLeft-scroller.scrollLeft);if(d<bestDist){bestDist=d;best=i;}});
+      if(best!==index){index=best;w4uShowReviewPhoto(stackFor(list[index]),0);}
     }
   };
-
   scroller.addEventListener('touchstart',pause,{passive:true});
   scroller.addEventListener('touchmove',pause,{passive:true});
   scroller.addEventListener('pointerdown',pause,{passive:true});
