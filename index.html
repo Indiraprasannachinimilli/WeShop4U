@@ -8261,8 +8261,8 @@ th{width:34%;color:#5a0730;background:#fffaf0}
   body:not(.ss-inside) #ssLandingHeader>.w4u-final-mobile{display:block!important;}
 
   /* Requested final action-card sizing: smaller icon, slightly larger copy. */
-  body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-icon{width:20px!important;height:20px!important;}
-  body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-icon svg{width:12px!important;height:12px!important;}
+  body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-icon{width:17px!important;height:17px!important;}
+  body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-icon svg{width:10px!important;height:10px!important;}
   body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-copy strong{font-size:12px!important;line-height:1.05!important;}
   body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-copy small{font-size:7.5px!important;line-height:1.12!important;}
 
@@ -9201,7 +9201,23 @@ function renderHappyClients(reviews){
   if(mobileRow) mobileRow.innerHTML=mobileHtml;
   if(mobileSection) mobileSection.classList.add('has-reviews');
 }
+const W4U_HAPPY_CACHE_KEY='w4u_happy_clients_v1';
+const W4U_HAPPY_CACHE_TTL=5*60*1000;
+
+function readHappyClientsCache(){
+  try{
+    const cached=JSON.parse(localStorage.getItem(W4U_HAPPY_CACHE_KEY)||'null');
+    if(!cached||!Array.isArray(cached.items)||!cached.savedAt) return null;
+    if(Date.now()-cached.savedAt>W4U_HAPPY_CACHE_TTL) return null;
+    return cached.items;
+  }catch(_){ return null; }
+}
+function writeHappyClientsCache(items){
+  try{localStorage.setItem(W4U_HAPPY_CACHE_KEY,JSON.stringify({savedAt:Date.now(),items}));}catch(_){}
+}
 async function loadHappyClients(){
+  const cached=readHappyClientsCache();
+  if(cached&&cached.length) renderHappyClients(cached);
   try{
     await ensureSupabase();
     const {data,error}=await weshopSupabase.from('customer_reviews')
@@ -9209,15 +9225,16 @@ async function loadHappyClients(){
       .eq('approved',true).eq('public_consent',true)
       .order('created_at',{ascending:false}).limit(20);
     if(error) throw error;
-    const hydrated=await Promise.all((data||[]).map(async r=>({
-      ...r,
-      image_urls:await Promise.all((Array.isArray(r.image_paths)&&r.image_paths.length?r.image_paths:(r.image_path?[r.image_path]:[])).slice(0,5).map(w4uReviewImageUrl)),
-      image_url:r.image_path ? await w4uReviewImageUrl(r.image_path) : '' 
-    })));
+    const hydrated=await Promise.all((data||[]).map(async r=>{
+      const paths=(Array.isArray(r.image_paths)&&r.image_paths.length?r.image_paths:(r.image_path?[r.image_path]:[])).slice(0,5);
+      const image_urls=await Promise.all(paths.map(w4uReviewImageUrl));
+      return {...r,image_urls,image_url:image_urls[0]||''};
+    }));
     renderHappyClients(hydrated);
+    writeHappyClientsCache(hydrated);
   }catch(error){
     console.warn('Happy Clients unavailable',error);
-    renderHappyClients([]);
+    if(!cached) renderHappyClients([]);
   }
 }
 
