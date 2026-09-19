@@ -2335,8 +2335,8 @@ body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean{position:
 
 <style id="w4u-smaller-action-icons-final">
 @media(max-width:575px){
- body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-icon{width:14px!important;height:14px!important;}
- body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-icon svg{width:8px!important;height:8px!important;}
+ body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-icon{width:16px!important;height:16px!important;}
+ body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-icon svg{width:9px!important;height:9px!important;}
 }
 </style>
 </head>
@@ -5733,8 +5733,8 @@ async function uploadCustomerSampleImages(requestId){
 
 const WESHOP4U_ALLOWED_FEEDBACK_IMAGE_TYPES=['image/jpeg','image/png','image/webp'];
 
-async function uploadPublicReviewImages(requestId){
-  const input=document.getElementById('postSubmitFeedbackImages');
+async function uploadPublicReviewImages(requestId,inputId='postSubmitFeedbackImages'){
+  const input=document.getElementById(inputId);
   const allFiles=[...(input?.files||[])];
   if(!allFiles.length) return [];
   if(allFiles.length>5) throw new Error('Only 5 images are allowed. Please choose 5 or fewer photos.');
@@ -8469,6 +8469,22 @@ async function renderCustomerLinkedRequest(data){
           <label class="form-label" for="viewOrderFeedback">Suggestions / Feedback</label>
           <textarea class="form-control" id="viewOrderFeedback" rows="3" placeholder="Tell us what you liked or what we can improve...">${escapeHtml(data.feedback||'')}</textarea>
         </div>
+        <div class="mb-3">
+          <label class="form-label" for="viewOrderDisplayName">Name to show with your review <span class="text-muted">(optional)</span></label>
+          <input type="text" class="form-control" id="viewOrderDisplayName" maxlength="80" placeholder="Your name">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="viewOrderFeedbackImages">Celebration photos <span class="text-muted">(optional, up to 5)</span></label>
+          <input type="file" class="form-control" id="viewOrderFeedbackImages" accept="image/jpeg,image/png,image/webp" multiple>
+          <div class="form-text" style="font-size:.72rem;">JPG, PNG or WEBP. Maximum 5 MB per photo.</div>
+          <div class="form-text" id="viewOrderFeedbackImagesError" style="font-size:.72rem;color:#9B2D3F;"></div>
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="viewOrderPublicConsent">
+          <label class="form-check-label" for="viewOrderPublicConsent" style="font-size:.82rem;">
+            I allow WeShop4U to display my review and selected photos in Happy Clients after approval.
+          </label>
+        </div>
         <button type="button" class="btn-wine-outline w-100" id="saveViewOrderFeedbackBtn">Submit Feedback</button>
         <div class="submit-status" id="viewOrderFeedbackStatus"></div>
       </div>`:''}
@@ -8555,14 +8571,47 @@ async function renderCustomerLinkedRequest(data){
       data.rating=rating;
       customerLinkedRequest.feedback=feedback;
       customerLinkedRequest.rating=rating;
-      if(status){status.textContent='Thank you! Your feedback has been saved. ❤️';status.style.color='#54745F';}
+
+      const consent=Boolean(document.getElementById('viewOrderPublicConsent')?.checked);
+      const displayName=document.getElementById('viewOrderDisplayName')?.value.trim()||'';
+      if(consent && rating && feedback){
+        if(status) status.textContent='Saving feedback and review…';
+        const imagePaths=await uploadPublicReviewImages(data.requestId,'viewOrderFeedbackImages');
+        await submitPublicReview(data,feedback,rating,displayName,imagePaths,true);
+        if(status){status.textContent='Thank you! Your feedback was saved and your review was sent for approval. ❤️';status.style.color='#54745F';}
+      }else{
+        if(status){status.textContent='Thank you! Your feedback has been saved. ❤️';status.style.color='#54745F';}
+      }
       if(btn) btn.textContent='Feedback Submitted';
     }catch(error){
       console.error(error);
-      if(status){status.textContent='Could not save feedback right now. Please try again.';status.style.color='#9B2D3F';}
+      const knownIssue=error instanceof Error && (
+        error.message==='Only 5 images are allowed. Please choose 5 or fewer photos.' ||
+        error.message==='Only JPG, PNG or WEBP images are supported. Please remove any other file types.' ||
+        /is larger than 5 MB\.$/.test(error.message||'')
+      );
+      if(status){status.textContent=knownIssue?error.message:'Could not save feedback right now. Please try again.';status.style.color='#9B2D3F';}
       if(btn) btn.disabled=false;
     }
   });
+  document.getElementById('viewOrderFeedbackImages')?.addEventListener('change',function(){
+    const errorEl=document.getElementById('viewOrderFeedbackImagesError');
+    const files=[...(this.files||[])];
+    if(!errorEl) return;
+    if(!files.length){errorEl.textContent='';return;}
+    if(files.length>5){
+      errorEl.textContent='Only 5 images are allowed. Please choose 5 or fewer photos.';
+      return;
+    }
+    const invalid=files.find(f=>!WESHOP4U_ALLOWED_FEEDBACK_IMAGE_TYPES.includes(f.type));
+    if(invalid){
+      errorEl.textContent='Only JPG, PNG or WEBP images are supported.';
+      return;
+    }
+    const tooLarge=files.find(f=>f.size>5*1024*1024);
+    errorEl.textContent=tooLarge?`${tooLarge.name} is larger than 5 MB.`:'';
+  });
+
   document.getElementById('customerDownloadLinked')?.addEventListener('click',()=>downloadSubmission(data));
   document.getElementById('customerBackToOptions')?.addEventListener('click',goToHomePage);
 }
@@ -9208,7 +9257,7 @@ function renderHappyClients(reviews){
   if(mobileRow) mobileRow.innerHTML=mobileHtml;
   if(mobileSection) mobileSection.classList.add('has-reviews');
 }
-const W4U_HAPPY_CACHE_KEY='w4u_happy_clients_v1';
+const W4U_HAPPY_CACHE_KEY='w4u_happy_clients_v2';
 const W4U_HAPPY_CACHE_TTL=5*60*1000;
 
 function readHappyClientsCache(){
