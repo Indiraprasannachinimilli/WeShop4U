@@ -5724,11 +5724,15 @@ async function uploadCustomerSampleImages(requestId){
   }));
 }
 
+const WESHOP4U_ALLOWED_FEEDBACK_IMAGE_TYPES=['image/jpeg','image/png','image/webp'];
+
 async function uploadPublicReviewImages(requestId){
   const input=document.getElementById('postSubmitFeedbackImages');
-  const files=[...(input?.files||[])].filter(f=>f.type.startsWith('image/'));
-  if(!files.length) return [];
-  if(files.length>5) throw new Error('Please choose a maximum of 5 review photos.');
+  const allFiles=[...(input?.files||[])];
+  if(!allFiles.length) return [];
+  if(allFiles.length>5) throw new Error('Only 5 images are allowed. Please choose 5 or fewer photos.');
+  const files=allFiles.filter(f=>WESHOP4U_ALLOWED_FEEDBACK_IMAGE_TYPES.includes(f.type));
+  if(files.length<allFiles.length) throw new Error('Only JPG, PNG or WEBP images are supported. Please remove any other file types.');
   files.forEach(file=>{if(file.size>5*1024*1024) throw new Error(`${file.name} is larger than 5 MB.`);});
   const optimized=await Promise.all(files.map(optimizeImageForUpload));
   return Promise.all(optimized.map(async(file,index)=>{
@@ -6115,6 +6119,7 @@ function showThankYou(requestId,localOnly=false){
             <label class="form-label" for="postSubmitFeedbackImages">Celebration photos <span class="text-muted">(optional, up to 5)</span></label>
             <input type="file" class="form-control" id="postSubmitFeedbackImages" accept="image/jpeg,image/png,image/webp" multiple>
             <div class="form-text" style="font-size:.72rem;">Choose up to 5 photos (5 MB max each). If approved, your review and photos may appear in Happy Clients.</div>
+            <div class="form-text" id="postSubmitFeedbackImagesError" style="font-size:.72rem;color:#9B2D3F;"></div>
           </div>
           <label class="shopping-consent-label mb-3"><input type="checkbox" id="postSubmitPublicConsent"> <span>I allow WeShop4U to display this review, display name and uploaded photos publicly after approval.</span></label>
           <button type="button" class="btn-wine-outline w-100" id="savePostSubmitFeedbackBtn">Submit Feedback</button>
@@ -6246,10 +6251,43 @@ function showThankYou(requestId,localOnly=false){
       feedbackButton.textContent='Feedback Submitted';
     }catch(error){
       console.error(error);
-      feedbackStatus.textContent='Could not save feedback right now. Please try again.';
+      // uploadPublicReviewImages() throws customer-facing, actionable
+      // messages for photo count/format/size problems; show those verbatim
+      // instead of masking them behind the generic fallback below.
+      const knownIssue=error instanceof Error && (
+        error.message==='Only 5 images are allowed. Please choose 5 or fewer photos.' ||
+        error.message==='Only JPG, PNG or WEBP images are supported. Please remove any other file types.' ||
+        /is larger than 5 MB\.$/.test(error.message||'')
+      );
+      feedbackStatus.textContent=knownIssue ? error.message : 'Could not save feedback right now. Please try again.';
       feedbackStatus.style.color='#9B2D3F';
       feedbackButton.disabled=false;
     }
+  });
+
+  document.getElementById('postSubmitFeedbackImages')?.addEventListener('change',function(){
+    const errorEl=document.getElementById('postSubmitFeedbackImagesError');
+    const files=[...(this.files||[])];
+    if(!errorEl) return;
+    if(!files.length){ errorEl.textContent=''; return; }
+    if(files.length>5){
+      errorEl.textContent='Only 5 images are allowed. Please choose 5 or fewer photos.';
+      this.value='';
+      return;
+    }
+    const invalidType=files.find(f=>!WESHOP4U_ALLOWED_FEEDBACK_IMAGE_TYPES.includes(f.type));
+    if(invalidType){
+      errorEl.textContent=`"${invalidType.name}" is not a supported format. Please use JPG, PNG or WEBP images only.`;
+      this.value='';
+      return;
+    }
+    const tooLarge=files.find(f=>f.size>5*1024*1024);
+    if(tooLarge){
+      errorEl.textContent=`"${tooLarge.name}" is larger than 5 MB. Please choose a smaller photo.`;
+      this.value='';
+      return;
+    }
+    errorEl.textContent='';
   });
 
 
@@ -9194,8 +9232,15 @@ setupLandingNavigation();
 
 function startHappyClientPhotoRotation(){
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // Desktop cards sit side-by-side with no auto-scroll between them, so each
+  // one can just keep cycling its own photos independently forever. The
+  // mobile row is different (see startHappyClientsAutoScroll): it moves
+  // between customers automatically, so its photo rotation has to be
+  // coordinated with that movement rather than running on its own timer -
+  // scope this loop to desktop cards only to avoid the two fighting over
+  // the same element on a stack that also matches both selectors.
   setInterval(()=>{
-    document.querySelectorAll('[data-review-images]').forEach(stack=>{
+    document.querySelectorAll('.w4u-happy-image-stack[data-review-images]').forEach(stack=>{
       let images=[]; try{images=JSON.parse(stack.dataset.reviewImages||'[]')}catch(_){return}
       if(images.length<2) return;
       const img=stack.querySelector('img'); if(!img) return;
@@ -9216,19 +9261,49 @@ function startHappyClientsAutoScroll(){
   let timer=null;
   let pausedUntil=0;
   let index=0;
+  let photoIndex=0;
 
   const cards=()=>Array.from(row.querySelectorAll('.w4u-mobile-happy-card'));
+  const imagesFor=(card)=>{
+    const stack=card?.querySelector('.w4u-mobile-happy-image-stack[data-review-images]');
+    if(!stack) return {stack:null,images:[]};
+    let images=[]; try{images=JSON.parse(stack.dataset.reviewImages||'[]')}catch(_){images=[];}
+    return {stack,images};
+  };
+  const showPhoto=(card,photoIdx)=>{
+    const {stack,images}=imagesFor(card);
+    if(!stack||!images.length) return;
+    const safeIdx=((photoIdx%images.length)+images.length)%images.length;
+    const img=stack.querySelector('img'); if(img) img.src=images[safeIdx];
+    const badge=stack.querySelector('.w4u-review-photo-count'); if(badge) badge.textContent=`${safeIdx+1}/${images.length}`;
+  };
   const schedule=()=>{
     clearTimeout(timer);
     timer=setTimeout(tick,INTERVAL);
   };
+  const goToCard=(newIndex,list)=>{
+    index=newIndex;
+    photoIndex=0;
+    const max=Math.max(0,scroller.scrollWidth-scroller.clientWidth);
+    const target=index===0 ? 0 : Math.min(list[index].offsetLeft,max);
+    scroller.scrollTo({left:target,behavior:'smooth'});
+    showPhoto(list[index],0);
+  };
   const tick=()=>{
     const list=cards();
-    if(list.length>1 && Date.now()>=pausedUntil){
-      index=(index+1)%list.length;
-      const max=Math.max(0,scroller.scrollWidth-scroller.clientWidth);
-      const target=index===0 ? 0 : Math.min(list[index].offsetLeft,max);
-      scroller.scrollTo({left:target,behavior:'smooth'});
+    if(!list.length || Date.now()<pausedUntil){ schedule(); return; }
+    const currentCard=list[index]||list[0];
+    const {images}=imagesFor(currentCard);
+    if(images.length>1 && photoIndex+1<images.length){
+      // This customer has more photos to show yet - advance the photo,
+      // not the card, so all of their images play out at the same 2s
+      // cadence before we ever move on.
+      photoIndex+=1;
+      showPhoto(currentCard,photoIndex);
+    }else if(list.length>1){
+      // Every photo for this customer has had its turn (or there was only
+      // one/none) - now move to the next customer's card.
+      goToCard((index+1)%list.length,list);
     }
     schedule();
   };
@@ -9241,7 +9316,11 @@ function startHappyClientsAutoScroll(){
         const d=Math.abs(card.offsetLeft-scroller.scrollLeft);
         if(d<bestDist){bestDist=d;best=i;}
       });
-      index=best;
+      if(best!==index){
+        index=best;
+        photoIndex=0;
+        showPhoto(list[index],0);
+      }
     }
   };
 
