@@ -2357,6 +2357,22 @@ body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean{position:
 }
 </style>
 
+
+<style id="w4u-final-action-spacing-fix">
+@media(max-width:575px){
+  body:not(.ss-inside) .w4u-final-mobile .w4u-desktop-style-actions .w4u-native-card{
+    grid-template-columns:19px minmax(0,1fr) 10px!important;
+    column-gap:2px!important;
+  }
+  body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-icon{
+    width:19px!important;height:19px!important;min-width:19px!important;flex:0 0 19px!important;
+  }
+  body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-icon svg{
+    width:11px!important;height:11px!important;min-width:11px!important;min-height:11px!important;
+  }
+}
+</style>
+
 </head>
 
 
@@ -5511,9 +5527,6 @@ function goToHomePage(){
     sessionStorage.removeItem('weshop4u_verification_phone');
     sessionStorage.removeItem('weshop4u_clean_home');
     sessionStorage.removeItem('weshop4u_open_new_after_reload');
-    // Do not reuse a Happy Clients snapshot after returning from View/Edit.
-    // A cached snapshot can contain only the first photo from an older render.
-    localStorage.removeItem('w4u_happy_clients_v3');
   }catch(e){}
 
   // View Order replaces the original form HTML, so do not rebuild the landing
@@ -9280,23 +9293,7 @@ function renderHappyClients(reviews){
   if(mobileRow) mobileRow.innerHTML=mobileHtml;
   if(mobileSection) mobileSection.classList.add('has-reviews');
 }
-const W4U_HAPPY_CACHE_KEY='w4u_happy_clients_v3';
-const W4U_HAPPY_CACHE_TTL=5*60*1000;
-
-function readHappyClientsCache(){
-  try{
-    const cached=JSON.parse(localStorage.getItem(W4U_HAPPY_CACHE_KEY)||'null');
-    if(!cached||!Array.isArray(cached.items)||!cached.savedAt) return null;
-    if(Date.now()-cached.savedAt>W4U_HAPPY_CACHE_TTL) return null;
-    return cached.items;
-  }catch(_){ return null; }
-}
-function writeHappyClientsCache(items){
-  try{localStorage.setItem(W4U_HAPPY_CACHE_KEY,JSON.stringify({savedAt:Date.now(),items}));}catch(_){}
-}
 async function loadHappyClients(){
-  const cached=readHappyClientsCache();
-  if(cached&&cached.length) renderHappyClients(cached);
   try{
     await ensureSupabase();
     const {data,error}=await weshopSupabase.from('customer_reviews')
@@ -9306,14 +9303,15 @@ async function loadHappyClients(){
     if(error) throw error;
     const hydrated=await Promise.all((data||[]).map(async r=>{
       const paths=(Array.isArray(r.image_paths)&&r.image_paths.length?r.image_paths:(r.image_path?[r.image_path]:[])).slice(0,5);
-      const image_urls=await Promise.all(paths.map(w4uReviewImageUrl));
+      const image_urls=(await Promise.all(paths.map(w4uReviewImageUrl))).filter(Boolean);
       return {...r,image_urls,image_url:image_urls[0]||''};
     }));
     renderHappyClients(hydrated);
-    writeHappyClientsCache(hydrated);
+    return hydrated;
   }catch(error){
     console.warn('Happy Clients unavailable',error);
-    if(!cached) renderHappyClients([]);
+    renderHappyClients([]);
+    return [];
   }
 }
 
@@ -9428,9 +9426,12 @@ function startHappyClientsAutoScroll(){
 }
 
 if(!isAdminModeRequested()){
-  loadHappyClients();
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>{startHappyClientsAutoScroll();startHappyClientPhotoRotation();},{once:true});
-  else {startHappyClientsAutoScroll();startHappyClientPhotoRotation();}
+  const startHappyClients=()=>loadHappyClients().then(()=>{
+    startHappyClientsAutoScroll();
+    startHappyClientPhotoRotation();
+  });
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startHappyClients,{once:true});
+  else startHappyClients();
 }
 
 const startupParams=new URLSearchParams(window.location.search || '');
