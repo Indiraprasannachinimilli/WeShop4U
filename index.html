@@ -8756,6 +8756,22 @@ function showCustomerOrderOptions(){
   if(input) input.value='';
   if(phone) phone.value='';
   if(status) status.textContent='';
+  // Which landing implementation renders (native New/View/Edit buttons vs
+  // the legacy image + invisible tap-zone overlay) is controlled purely by
+  // body.ss-inside. That class was only ever synced by a separate
+  // MutationObserver wired up once at DOMContentLoaded, watching this same
+  // #customerOrderOptions element from the outside. That left a gap where
+  // this function could unhide the landing options while ss-inside stayed
+  // stuck from the previous screen (e.g. after Back to Home) - showing the
+  // old overlay underneath, whose full-page invisible tap layer also
+  // swallowed touch/swipe input meant for the Happy Clients row. Setting
+  // the class here directly makes "show the landing" and "mark body as
+  // landing state" one atomic step, so every caller (fresh load, Back to
+  // Home reload, bfcache pageshow restore) always converges on the same
+  // state instead of racing a separate observer.
+  if(!document.body.classList.contains('ss-admin-mode')){
+    document.body.classList.remove('ss-inside');
+  }
 }
 
 async function openCustomerRequestById(requestId,whatsapp){
