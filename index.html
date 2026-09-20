@@ -9296,14 +9296,13 @@ async function setupAdminView(){
 /* DYNAMIC HAPPY CLIENTS                                     */
 /* Approved + consented reviews only; photos stay private.   */
 /* ========================================================= */
-async function w4uReviewImageUrl(path){
+function w4uReviewImageUrl(path){
   if(!path) return '';
   const clean=String(path).replace(/^\/+/, '');
-  const {data,error}=await weshopSupabase.storage
-    .from('weshop4u-review-images')
-    .createSignedUrl(clean,60*30);
-  if(error) return '';
-  return data?.signedUrl || '';
+  const {data}=weshopSupabase.storage
+    .from('weshop4u-public-review-images')
+    .getPublicUrl(clean);
+  return data?.publicUrl || '';
 }
 function renderHappyClients(reviews){
   const section=document.getElementById('happyClientsSection');
@@ -9350,7 +9349,7 @@ async function loadHappyClients(){
     if(error) throw error;
     const hydrated=await Promise.all((data||[]).map(async r=>{
       const paths=(Array.isArray(r.image_paths)&&r.image_paths.length?r.image_paths:(r.image_path?[r.image_path]:[])).slice(0,5);
-      const image_urls=(await Promise.all(paths.map(w4uReviewImageUrl))).filter(Boolean);
+      const image_urls=paths.map(w4uReviewImageUrl).filter(Boolean);
       return {...r,image_urls,image_url:image_urls[0]||''};
     }));
     renderHappyClients(hydrated);
