@@ -165,29 +165,55 @@ async function loadApprovedReviews(){
 }
 async function syncReviewPublicImages(id,action){
   if(!initSupabase()) throw new Error('Supabase is unavailable.');
-  const {data:sessionData,error:sessionError}=await sb.auth.getSession();
-  if(sessionError) throw sessionError;
-  const accessToken=sessionData?.session?.access_token;
-  if(!accessToken) throw new Error('Admin session expired. Please sign out and sign in again.');
 
-  const response=await fetch(SUPABASE_URL+'/functions/v1/sync-public-review-images',{
-    method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'apikey':KEY,
-      'Authorization':'Bearer '+accessToken
-    },
-    body:JSON.stringify({review_id:Number(id),action})
-  });
+  const {data:review,error:reviewError}=await sb
+    .from('customer_reviews')
+    .select('approved,public_consent,image_path,image_paths')
+    .eq('id',Number(id))
+    .maybeSingle();
 
-  let payload=null;
-  try{ payload=await response.json(); }catch(_){}
-  if(!response.ok){
-    throw new Error(payload?.error || ('Image sync failed (HTTP '+response.status+').'));
+  if(reviewError) throw reviewError;
+  if(!review) throw new Error('Review not found.');
+
+  const paths=[...(Array.isArray(review.image_paths)?review.image_paths:[]),review.image_path]
+    .filter(Boolean);
+  const unique=[...new Set(paths)].slice(0,5);
+  const publicBucket=sb.storage.from('weshop4u-public-review-images');
+
+  if(action==='unpublish'){
+    if(!unique.length) return {ok:true,paths:[]};
+    const {error}=await publicBucket.remove(unique);
+    if(error) throw error;
+    return {ok:true,paths:[]};
   }
-  if(payload?.ok===false) throw new Error(payload.error||'Public review image sync failed.');
-  return payload;
+
+  if(action!=='publish') throw new Error('Invalid image sync action.');
+  if(!review.approved || !review.public_consent) return {ok:true,paths:[]};
+
+  const privateBucket=sb.storage.from('weshop4u-review-images');
+  const copied=[];
+
+  for(const path of unique){
+    const {data:file,error:downloadError}=await privateBucket.download(path);
+    if(downloadError || !file) throw new Error('Unable to read review photo: '+(downloadError?.message||path));
+
+    const lower=String(path).toLowerCase();
+    const contentType=file.type ||
+      (lower.endsWith('.png')?'image/png':
+       lower.endsWith('.webp')?'image/webp':'image/jpeg');
+
+    const {error:uploadError}=await publicBucket.upload(path,file,{
+      upsert:true,
+      cacheControl:'31536000',
+      contentType
+    });
+    if(uploadError) throw new Error('Unable to publish review photo: '+uploadError.message);
+    copied.push(path);
+  }
+
+  return {ok:true,paths:copied};
 }
+
 async function refreshReviews(){await Promise.all([loadReviews(),loadApprovedReviews()]);}
 async function approveReview(id){
   if(!initSupabase())return;
