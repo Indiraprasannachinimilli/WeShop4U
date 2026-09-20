@@ -6499,6 +6499,13 @@ function configuredLandingPageUrl(requestId=''){
   if(!/^https?:\/\//i.test(base) || /YOUR-WEBSITE/i.test(base)) return '';
   const url=new URL(base);
   if(requestId) url.searchParams.set('request',requestId);
+  // Some in-app browsers (e.g. the Google app's built-in browser) cache
+  // more aggressively than standalone Chrome and can be slow to notice a
+  // fresh deploy even with proper Cache-Control headers on the server.
+  // Stamping every newly generated link with the current time makes the
+  // URL itself unique per share, so those caches have no old entry to
+  // match against and are forced to fetch the live page.
+  url.searchParams.set('v',Date.now().toString(36));
   return url.toString();
 }
 
