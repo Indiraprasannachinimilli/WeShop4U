@@ -10,6 +10,16 @@
 <meta http-equiv="Expires" content="0">
 <style>:root{color-scheme:only light}</style>
 
+<!-- Happy Clients images depend on the Supabase library + a signed-URL round
+     trip. Warming the connection and starting the library download here,
+     in parallel with the rest of the page parsing, removes that dependency
+     chain from being "discovered" only after the whole document has
+     already loaded - this is most of why the photos used to visibly pop
+     in ~1s after everything else. -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://flynxttakgqemgccoryq.supabase.co" crossorigin>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+
 <title>WeShop4U — Tell Us Your Event & Budget</title>
 
 <link
@@ -2159,7 +2169,10 @@ body.ss-inside .w4u-happy-clients{display:none!important}
 
 
 <style id="w4u-final-desktop-reference-and-multi-review-images">
-.w4u-happy-image-stack,.w4u-mobile-happy-image-stack{position:relative;overflow:hidden;border-radius:inherit}
+.w4u-happy-image-stack,.w4u-mobile-happy-image-stack{position:relative;overflow:hidden;border-radius:inherit;background:linear-gradient(100deg,#f3e6c9 30%,#faf1de 50%,#f3e6c9 70%);background-size:200% 100%;animation:w4uHappyShimmer 1.3s ease-in-out infinite}
+.w4u-happy-image-stack:has(img),.w4u-mobile-happy-image-stack:has(img){animation:none;background:none}
+@keyframes w4uHappyShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media (prefers-reduced-motion: reduce){.w4u-happy-image-stack,.w4u-mobile-happy-image-stack{animation:none}}
 .w4u-review-photo-count{position:absolute;right:4px;bottom:4px;padding:2px 5px;border-radius:999px;background:rgba(63,35,17,.72);color:#fff;font:700 8px/1 system-ui,sans-serif}
 @media(max-width:575px){
   /* Exact desktop-reference visual language: compact pastel cards, colored circular icon, serif title, thin border and arrow. */
@@ -2364,8 +2377,8 @@ body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean{position:
 <style id="w4u-final-action-spacing-fix">
 @media(max-width:575px){
   body:not(.ss-inside) .w4u-final-mobile .w4u-desktop-style-actions .w4u-native-card{
-    grid-template-columns:42px minmax(0,1fr) 10px!important;
-    column-gap:4px!important;
+    grid-template-columns:38px minmax(0,1fr) 12px!important;
+    column-gap:3px!important;
   }
   body:not(.ss-inside) .w4u-final-mobile .w4u-native-card-icon{
     width:19px!important;height:19px!important;min-width:19px!important;flex:0 0 19px!important;
@@ -9337,6 +9350,20 @@ async function loadHappyClients(){
 /* ========================================================= */
 
 if('scrollRestoration' in history) history.scrollRestoration='manual';
+
+// Kick this off first, before the other setup calls below: it's the one
+// piece of the landing page that depends on a network round trip (the
+// review data plus a signed URL per photo), so it benefits the most from
+// starting as early as possible rather than waiting behind everything else.
+if(!isAdminModeRequested()){
+  const startHappyClients=()=>loadHappyClients().then(()=>{
+    startHappyClientsAutoScroll();
+    startHappyClientPhotoRotation();
+  });
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startHappyClients,{once:true});
+  else startHappyClients();
+}
+
 renderRail();
 setupCustomerRequestIdAccess();
 setupLandingNavigation();
@@ -9408,15 +9435,6 @@ function startHappyClientsAutoScroll(){
   scroller.addEventListener('pointerdown',pause,{passive:true});
   scroller.addEventListener('wheel',pause,{passive:true});
   schedule();
-}
-
-if(!isAdminModeRequested()){
-  const startHappyClients=()=>loadHappyClients().then(()=>{
-    startHappyClientsAutoScroll();
-    startHappyClientPhotoRotation();
-  });
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startHappyClients,{once:true});
-  else startHappyClients();
 }
 
 const startupParams=new URLSearchParams(window.location.search || '');
