@@ -174,7 +174,7 @@ async function syncReviewPublicImages(id,action){
     method:'POST',
     headers:{
       'Content-Type':'application/json',
-      'apikey':SUPABASE_ANON_KEY,
+      'apikey':KEY,
       'Authorization':'Bearer '+accessToken
     },
     body:JSON.stringify({review_id:Number(id),action})
