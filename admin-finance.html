@@ -192,26 +192,28 @@ async function refreshReviews(){await Promise.all([loadReviews(),loadApprovedRev
 async function approveReview(id){
   if(!initSupabase())return;
   try{
-    const {error}=await sb.from('customer_reviews').update({approved:true,approved_at:new Date().toISOString()}).eq('id',id);
+    const {error}=await sb.rpc('approve_customer_review_admin',{p_review_id:Number(id)});
     if(error)throw error;
-    await syncReviewPublicImages(id,'publish');
+    try{await syncReviewPublicImages(id,'publish');}catch(e){console.warn('Public image sync pending:',e);}
     await refreshReviews();
   }catch(e){
     alert('Unable to approve review: '+(e?.message||String(e)));
   }
 }
+
 async function disableReview(id){
   if(!initSupabase())return;
   if(!confirm('Disable this review? It will disappear from Happy Clients but will not be deleted.'))return;
   try{
-    await syncReviewPublicImages(id,'unpublish');
-    const {error}=await sb.from('customer_reviews').update({approved:false,approved_at:null}).eq('id',id);
+    const {error}=await sb.rpc('disable_customer_review_admin',{p_review_id:Number(id)});
     if(error)throw error;
+    try{await syncReviewPublicImages(id,'unpublish');}catch(e){console.warn('Public image cleanup pending:',e);}
     await refreshReviews();
   }catch(e){
     alert('Unable to disable review: '+(e?.message||String(e)));
   }
 }
+
 async function deleteReview(id){
   if(!initSupabase())return;
   if(!confirm('Permanently delete this review and its uploaded photos? This cannot be undone.'))return;
