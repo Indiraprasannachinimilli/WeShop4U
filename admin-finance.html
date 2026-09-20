@@ -151,6 +151,10 @@ async function loadApprovedReviews(){
   $('approvedReviewMsg').textContent='Loading approved reviews…';
   try{
     const rows=await reviewRows(true);
+    const publicRows=rows.filter(r=>r.public_consent && (r._paths||[]).length);
+    if(publicRows.length){
+      await Promise.allSettled(publicRows.map(r=>syncReviewPublicImages(r.id,'publish')));
+    }
     $('approvedReviewCount').textContent=String(rows.length);
     const box=$('approvedReviews');
     box.innerHTML=rows.length?rows.map(r=>reviewMarkup(r,true)).join(''):'No approved reviews.';
@@ -159,16 +163,32 @@ async function loadApprovedReviews(){
     $('approvedReviewMsg').textContent='';
   }catch(e){$('approvedReviewMsg').textContent='Approved reviews unavailable: '+(e?.message||String(e));}
 }
+async function syncReviewPublicImages(id,action){
+  if(!initSupabase()) throw new Error('Supabase is unavailable.');
+  const {data,error}=await sb.functions.invoke('sync-public-review-images',{
+    body:{review_id:Number(id),action}
+  });
+  if(error) throw error;
+  if(data?.ok===false) throw new Error(data.error||'Public review image sync failed.');
+  return data;
+}
 async function refreshReviews(){await Promise.all([loadReviews(),loadApprovedReviews()]);}
 async function approveReview(id){
   if(!initSupabase())return;
-  const {error}=await sb.from('customer_reviews').update({approved:true,approved_at:new Date().toISOString()}).eq('id',id);
-  if(error)alert(error.message);else await refreshReviews();
+  try{
+    const {error}=await sb.from('customer_reviews').update({approved:true,approved_at:new Date().toISOString()}).eq('id',id);
+    if(error)throw error;
+    await syncReviewPublicImages(id,'publish');
+    await refreshReviews();
+  }catch(e){
+    alert('Unable to approve review: '+(e?.message||String(e)));
+  }
 }
 async function disableReview(id){
   if(!initSupabase())return;
   if(!confirm('Disable this review? It will disappear from Happy Clients but will not be deleted.'))return;
   try{
+    await syncReviewPublicImages(id,'unpublish');
     const {error}=await sb.from('customer_reviews').update({approved:false,approved_at:null}).eq('id',id);
     if(error)throw error;
     await refreshReviews();
@@ -183,9 +203,15 @@ async function deleteReview(id){
   if(readError){alert(readError.message);return;}
   const paths=[...(Array.isArray(review?.image_paths)?review.image_paths:[]),review?.image_path].filter(Boolean);
   const unique=[...new Set(paths)];
+  try{
+    await syncReviewPublicImages(id,'unpublish');
+  }catch(e){
+    alert('Could not remove public review photos: '+(e?.message||String(e)));
+    return;
+  }
   if(unique.length){
     const {error:storageError}=await sb.storage.from('weshop4u-review-images').remove(unique);
-    if(storageError){alert('Could not delete review photos: '+storageError.message);return;}
+    if(storageError){alert('Could not delete private review photos: '+storageError.message);return;}
   }
   const {error}=await sb.from('customer_reviews').delete().eq('id',id);
   if(error)alert(error.message);else await refreshReviews();
