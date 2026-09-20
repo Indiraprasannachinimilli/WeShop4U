@@ -105,9 +105,13 @@ async function reviewRows(approved){
     const paths=(Array.isArray(r.image_paths)?r.image_paths:[]).filter(Boolean).slice(0,5);
     if(!paths.length&&r.image_path)paths.push(r.image_path);
     const signedUrls=[];
-    for(const path of paths){
-      const signed=await sb.storage.from('weshop4u-review-images').createSignedUrl(path,60*30);
-      if(signed.data?.signedUrl)signedUrls.push(signed.data.signedUrl);
+    if(paths.length){
+      try{
+        const signed=await sb.storage.from('weshop4u-review-images').createSignedUrls(paths,60*30);
+        (signed.data||[]).forEach(item=>{if(item?.signedUrl)signedUrls.push(item.signedUrl)});
+      }catch(e){
+        console.warn('Review images could not be loaded',e);
+      }
     }
     return {...r,_paths:paths,_imgs:signedUrls};
   }));
@@ -164,8 +168,13 @@ async function approveReview(id){
 async function disableReview(id){
   if(!initSupabase())return;
   if(!confirm('Disable this review? It will disappear from Happy Clients but will not be deleted.'))return;
-  const {error}=await sb.from('customer_reviews').update({approved:false,approved_at:null}).eq('id',id);
-  if(error)alert(error.message);else await refreshReviews();
+  try{
+    const {error}=await sb.from('customer_reviews').update({approved:false,approved_at:null}).eq('id',id);
+    if(error)throw error;
+    await refreshReviews();
+  }catch(e){
+    alert('Unable to disable review: '+(e?.message||String(e)));
+  }
 }
 async function deleteReview(id){
   if(!initSupabase())return;
