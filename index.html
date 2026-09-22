@@ -9339,13 +9339,48 @@ async function setupAdminView(){
 /* DYNAMIC HAPPY CLIENTS                                     */
 /* Approved + consented reviews only; photos stay private.   */
 /* ========================================================= */
+const W4U_HAPPY_CACHE_KEY='w4u_happy_clients_v3';
+const W4U_HAPPY_CACHE_MAX_AGE=7*24*60*60*1000;
+let w4uHappyIntervalsStarted=false;
+
 function w4uReviewImageUrl(path){
   if(!path) return '';
   const clean=String(path).replace(/^\/+/, '');
-  const {data}=weshopSupabase.storage
-    .from('weshop4u-public-review-images')
-    .getPublicUrl(clean);
-  return data?.publicUrl || '';
+  // Public bucket: construct the URL directly. This removes the need to wait
+  // for the Supabase JS library merely to calculate a public image URL.
+  return `${WESHOP4U_SUPABASE_URL}/storage/v1/object/public/weshop4u-public-review-images/${clean.split('/').map(encodeURIComponent).join('/')}`;
+}
+function w4uReadHappyCache(){
+  try{
+    const parsed=JSON.parse(localStorage.getItem(W4U_HAPPY_CACHE_KEY)||'null');
+    if(!parsed || !Array.isArray(parsed.reviews) || !parsed.reviews.length) return [];
+    // Stale content is still safe to paint immediately; Supabase revalidates
+    // it in the background. Keep an age guard only for very old abandoned data.
+    if(parsed.savedAt && Date.now()-parsed.savedAt>W4U_HAPPY_CACHE_MAX_AGE) return [];
+    return parsed.reviews;
+  }catch(_){ return []; }
+}
+function w4uWriteHappyCache(reviews){
+  try{
+    localStorage.setItem(W4U_HAPPY_CACHE_KEY,JSON.stringify({
+      savedAt:Date.now(),
+      reviews:(reviews||[]).slice(0,20)
+    }));
+  }catch(_){}
+}
+function w4uPreloadFirstHappyImages(reviews){
+  const urls=[];
+  (reviews||[]).slice(0,3).forEach(r=>{
+    const u=(r.image_urls||[])[0];
+    if(u && !urls.includes(u)) urls.push(u);
+  });
+  urls.forEach(url=>{
+    if(document.head.querySelector(`link[data-w4u-happy-preload="${CSS.escape(url)}"]`)) return;
+    const link=document.createElement('link');
+    link.rel='preload'; link.as='image'; link.href=url;
+    link.dataset.w4uHappyPreload=url;
+    document.head.appendChild(link);
+  });
 }
 function renderHappyClients(reviews){
   const section=document.getElementById('happyClientsSection');
@@ -9362,7 +9397,7 @@ function renderHappyClients(reviews){
   }
   const photoMarkup=(images,cls)=>{
     if(!images.length) return '';
-    const photos=images.map((url,i)=>`<img class="${cls} w4u-review-rotating-photo" data-photo-index="${i}" loading="${i===0?'eager':'lazy'}" decoding="async" src="${escapeHtml(url)}" alt="Customer celebration"${i===0?'':' style="display:none"'}>`).join('');
+    const photos=images.map((url,i)=>`<img class="${cls} w4u-review-rotating-photo" data-photo-index="${i}" loading="${i===0?'eager':'lazy'}" fetchpriority="${i===0?'high':'low'}" decoding="async" src="${escapeHtml(url)}" alt="Customer celebration"${i===0?'':' style="display:none"'}>`).join('');
     return photos+(images.length>1?`<span class="w4u-review-photo-count">1/${images.length}</span>`:'');
   };
   const desktopHtml=items.map(r=>{
@@ -9377,30 +9412,56 @@ function renderHappyClients(reviews){
     const name=escapeHtml(r.customer_display_name||'WeShop4U Customer'), event=escapeHtml(r.event_type||'Celebration');
     return `<article class="w4u-mobile-happy-card${images.length?'':' no-image'}">${images.length?`<div class="w4u-mobile-happy-image-stack" data-photo-current="0">${photoMarkup(images,'w4u-mobile-happy-image')}</div>`:''}<div class="w4u-mobile-happy-copy"><div class="w4u-mobile-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-mobile-happy-quote">“${escapeHtml(r.review_text)}”</p><div class="w4u-mobile-happy-meta"><span class="w4u-mobile-happy-name">${name}</span><span class="w4u-mobile-happy-event">${event}</span></div></div></article>`;
   }).join('');
-  if(row) row.innerHTML=desktopHtml;
+  if(row && row.innerHTML!==desktopHtml) row.innerHTML=desktopHtml;
   if(section) section.style.display='block';
-  if(mobileRow) mobileRow.innerHTML=mobileHtml;
+  if(mobileRow && mobileRow.innerHTML!==mobileHtml) mobileRow.innerHTML=mobileHtml;
   if(mobileSection) mobileSection.classList.add('has-reviews');
 }
+async function w4uFetchHappyClientsDirect(){
+  // Fetch reviews directly with the browser Fetch API. This starts without
+  // waiting for the deferred Supabase library to download/initialise.
+  const select='rating,review_text,event_type,customer_display_name,image_path,image_paths,created_at';
+  const url=`${WESHOP4U_SUPABASE_URL}/rest/v1/customer_reviews?select=${encodeURIComponent(select)}&approved=eq.true&public_consent=eq.true&order=created_at.desc&limit=20`;
+  const response=await fetch(url,{
+    headers:{
+      apikey:WESHOP4U_SUPABASE_PUBLISHABLE_KEY,
+      Authorization:`Bearer ${WESHOP4U_SUPABASE_PUBLISHABLE_KEY}`
+    },
+    cache:'no-store'
+  });
+  if(!response.ok) throw new Error(`Happy Clients request failed (${response.status})`);
+  const data=await response.json();
+  return (data||[]).map(r=>{
+    const paths=(Array.isArray(r.image_paths)&&r.image_paths.length?r.image_paths:(r.image_path?[r.image_path]:[])).slice(0,5);
+    const image_urls=paths.map(w4uReviewImageUrl).filter(Boolean);
+    return {...r,image_urls,image_url:image_urls[0]||''};
+  });
+}
 async function loadHappyClients(){
+  const cached=w4uReadHappyCache();
+  if(cached.length){
+    // First paint for returning visitors: no network dependency.
+    w4uPreloadFirstHappyImages(cached);
+    renderHappyClients(cached);
+  }
   try{
-    await ensureSupabase();
-    const {data,error}=await weshopSupabase.from('customer_reviews')
-      .select('rating,review_text,event_type,customer_display_name,image_path,image_paths,created_at')
-      .eq('approved',true).eq('public_consent',true)
-      .order('created_at',{ascending:false}).limit(20);
-    if(error) throw error;
-    const hydrated=await Promise.all((data||[]).map(async r=>{
-      const paths=(Array.isArray(r.image_paths)&&r.image_paths.length?r.image_paths:(r.image_path?[r.image_path]:[])).slice(0,5);
-      const image_urls=paths.map(w4uReviewImageUrl).filter(Boolean);
-      return {...r,image_urls,image_url:image_urls[0]||''};
-    }));
-    renderHappyClients(hydrated);
+    // Revalidate in the background. First-time visitors also benefit because
+    // this path no longer waits for ensureSupabase()/supabase-js.
+    const hydrated=await w4uFetchHappyClientsDirect();
+    if(hydrated.length){
+      w4uPreloadFirstHappyImages(hydrated);
+      w4uWriteHappyCache(hydrated);
+      renderHappyClients(hydrated);
+    }else if(!cached.length){
+      renderHappyClients([]);
+    }
     return hydrated;
   }catch(error){
-    console.warn('Happy Clients unavailable',error);
-    renderHappyClients([]);
-    return [];
+    console.warn('Happy Clients background refresh unavailable',error);
+    // Never blank already-rendered cached reviews because of a temporary
+    // network problem.
+    if(!cached.length) renderHappyClients([]);
+    return cached;
   }
 }
 
@@ -9416,8 +9477,11 @@ if('scrollRestoration' in history) history.scrollRestoration='manual';
 // starting as early as possible rather than waiting behind everything else.
 if(!isAdminModeRequested()){
   const startHappyClients=()=>loadHappyClients().then(()=>{
-    startHappyClientsAutoScroll();
-    startHappyClientPhotoRotation();
+    if(!w4uHappyIntervalsStarted){
+      w4uHappyIntervalsStarted=true;
+      startHappyClientsAutoScroll();
+      startHappyClientPhotoRotation();
+    }
   });
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startHappyClients,{once:true});
   else startHappyClients();
