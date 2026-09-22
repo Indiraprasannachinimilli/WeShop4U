@@ -2406,6 +2406,49 @@ body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean{position:
 }
 </style>
 
+
+<style id="w4u-happy-clients-lightbox-v2">
+.w4u-happy-image-stack,.w4u-mobile-happy-image-stack{cursor:zoom-in}
+.w4u-happy-image-stack:focus-visible,.w4u-mobile-happy-image-stack:focus-visible{
+  outline:3px solid rgba(184,117,11,.55);outline-offset:2px
+}
+#w4uHappyLightbox[hidden]{display:none!important}
+#w4uHappyLightbox{
+  position:fixed;inset:0;z-index:12000;display:grid;place-items:center;
+  padding:18px;background:rgba(20,16,13,.88);backdrop-filter:blur(3px)
+}
+.w4u-lightbox-dialog{
+  position:relative;width:min(96vw,1100px);height:min(92vh,900px);
+  display:flex;align-items:center;justify-content:center
+}
+.w4u-lightbox-image{
+  display:block;max-width:100%;max-height:92vh;width:auto;height:auto;
+  object-fit:contain;border-radius:10px;background:#fff;
+  box-shadow:0 20px 70px rgba(0,0,0,.42)
+}
+.w4u-lightbox-close,.w4u-lightbox-prev,.w4u-lightbox-next{
+  position:absolute;border:0;cursor:pointer;color:#fff;background:rgba(45,30,20,.78);
+  display:grid;place-items:center;box-shadow:0 2px 12px rgba(0,0,0,.28)
+}
+.w4u-lightbox-close{right:8px;top:8px;width:42px;height:42px;border-radius:50%;font:400 30px/1 Arial,sans-serif}
+.w4u-lightbox-prev,.w4u-lightbox-next{top:50%;transform:translateY(-50%);width:44px;height:54px;border-radius:10px;font:400 34px/1 Arial,sans-serif}
+.w4u-lightbox-prev{left:8px}.w4u-lightbox-next{right:8px}
+.w4u-lightbox-counter{
+  position:absolute;left:50%;bottom:10px;transform:translateX(-50%);
+  padding:5px 10px;border-radius:999px;background:rgba(45,30,20,.78);
+  color:#fff;font:700 11px/1 system-ui,sans-serif
+}
+.w4u-lightbox-prev[hidden],.w4u-lightbox-next[hidden],.w4u-lightbox-counter[hidden]{display:none!important}
+@media(max-width:575px){
+  #w4uHappyLightbox{padding:8px}
+  .w4u-lightbox-dialog{width:100%;height:96svh}
+  .w4u-lightbox-image{max-width:100%;max-height:94svh;border-radius:7px}
+  .w4u-lightbox-close{right:7px;top:7px;width:40px;height:40px}
+  .w4u-lightbox-prev,.w4u-lightbox-next{width:40px;height:50px}
+  .w4u-lightbox-prev{left:5px}.w4u-lightbox-next{right:5px}
+}
+</style>
+
 </head>
 
 
@@ -9731,6 +9774,88 @@ document.addEventListener('DOMContentLoaded',function(){
 })();
 </script>
 
+
+
+<div id="w4uHappyLightbox" hidden role="dialog" aria-modal="true" aria-label="Happy Clients photo viewer">
+  <div class="w4u-lightbox-dialog">
+    <img id="w4uHappyLightboxImage" class="w4u-lightbox-image" alt="Customer celebration enlarged">
+    <button type="button" id="w4uHappyLightboxClose" class="w4u-lightbox-close" aria-label="Close photo viewer">×</button>
+    <button type="button" id="w4uHappyLightboxPrev" class="w4u-lightbox-prev" aria-label="Previous photo">‹</button>
+    <button type="button" id="w4uHappyLightboxNext" class="w4u-lightbox-next" aria-label="Next photo">›</button>
+    <div id="w4uHappyLightboxCounter" class="w4u-lightbox-counter" aria-live="polite"></div>
+  </div>
+</div>
+<script id="w4u-happy-clients-lightbox-script-v2">
+(function(){
+  let images=[], index=0, lastTrigger=null;
+  const el=()=>({
+    box:document.getElementById('w4uHappyLightbox'),
+    image:document.getElementById('w4uHappyLightboxImage'),
+    close:document.getElementById('w4uHappyLightboxClose'),
+    prev:document.getElementById('w4uHappyLightboxPrev'),
+    next:document.getElementById('w4uHappyLightboxNext'),
+    counter:document.getElementById('w4uHappyLightboxCounter')
+  });
+  function show(i){
+    const e=el(); if(!images.length) return;
+    index=(i+images.length)%images.length;
+    e.image.src=images[index];
+    const multi=images.length>1;
+    e.prev.hidden=!multi;e.next.hidden=!multi;e.counter.hidden=!multi;
+    e.counter.textContent=(index+1)+' / '+images.length;
+  }
+  function open(stack,img){
+    const e=el();
+    images=Array.from(stack.querySelectorAll('.w4u-review-rotating-photo'))
+      .map(x=>x.currentSrc||x.src).filter(Boolean);
+    if(!images.length) return;
+    lastTrigger=stack;
+    const src=img?.currentSrc||img?.src||'';
+    show(Math.max(0,images.indexOf(src)));
+    e.box.hidden=false;
+    document.body.style.overflow='hidden';
+    e.close.focus({preventScroll:true});
+  }
+  function close(){
+    const e=el(); if(e.box.hidden) return;
+    e.box.hidden=true;e.image.removeAttribute('src');
+    document.body.style.overflow='';
+    lastTrigger?.focus?.({preventScroll:true});
+  }
+  document.addEventListener('click',ev=>{
+    const img=ev.target.closest?.('.w4u-review-rotating-photo');
+    if(img){
+      const stack=img.closest('.w4u-happy-image-stack,.w4u-mobile-happy-image-stack');
+      if(stack){ev.preventDefault();open(stack,img);return;}
+    }
+    if(ev.target.id==='w4uHappyLightbox'||ev.target.closest?.('#w4uHappyLightboxClose')) return close();
+    if(ev.target.closest?.('#w4uHappyLightboxPrev')) return show(index-1);
+    if(ev.target.closest?.('#w4uHappyLightboxNext')) return show(index+1);
+  });
+  document.addEventListener('keydown',ev=>{
+    const e=el();
+    if(!e.box.hidden){
+      if(ev.key==='Escape') close();
+      else if(ev.key==='ArrowLeft') show(index-1);
+      else if(ev.key==='ArrowRight') show(index+1);
+      return;
+    }
+    if((ev.key==='Enter'||ev.key===' ') && ev.target.matches?.('.w4u-happy-image-stack,.w4u-mobile-happy-image-stack')){
+      ev.preventDefault();
+      open(ev.target,ev.target.querySelector('.w4u-review-rotating-photo'));
+    }
+  });
+  function makeAccessible(){
+    document.querySelectorAll('.w4u-happy-image-stack,.w4u-mobile-happy-image-stack').forEach(stack=>{
+      if(!stack.hasAttribute('tabindex')){
+        stack.tabIndex=0;stack.setAttribute('role','button');stack.setAttribute('aria-label','Open customer photo');
+      }
+    });
+  }
+  new MutationObserver(makeAccessible).observe(document.body,{childList:true,subtree:true});
+  makeAccessible();
+})();
+</script>
 
 </body>
 </html>
