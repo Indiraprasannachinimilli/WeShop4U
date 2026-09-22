@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WeShop4U Business Analytics</title>
+<link rel="preconnect" href="https://flynxttakgqemgccoryq.supabase.co" crossorigin>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+:root{--wine:#7b2639;--gold:#b8750b;--cream:#fffaf0;--ink:#292d31;--muted:#6b7280;--line:#eadfca;--good:#207a4b;--bad:#b42318}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f7f4ee;color:var(--ink)}
+header{background:linear-gradient(135deg,#6d2033,#8d3549);color:#fff;padding:20px}.wrap{max-width:1240px;margin:auto;padding:18px}
+h1{margin:0;font-size:1.55rem}.sub{opacity:.86;margin-top:4px;font-size:.9rem}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 5px 18px rgba(40,30,20,.05);margin-bottom:16px}
+.grid{display:grid;gap:12px}.stats{grid-template-columns:repeat(6,1fr)}.stat span{display:block;color:var(--muted);font-size:.78rem}.stat strong{font-size:1.25rem}
+.toolbar{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.field{display:flex;flex-direction:column;gap:5px;min-width:150px}
+label{font-size:.8rem;font-weight:700}input,select,button{font:inherit;border-radius:9px;border:1px solid #d7cbb8;padding:9px 10px;background:#fff}
+button{cursor:pointer;font-weight:750}.primary{background:var(--wine);color:#fff;border-color:var(--wine)}.secondary{color:var(--wine);border-color:var(--wine)}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:16px}.chart-card{min-height:360px}.chart-wrap{height:290px}
+h2{font-size:1.05rem;margin:0 0 12px}.login{max-width:650px;margin:32px auto}.login-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:10px}
+.expense-form{display:grid;grid-template-columns:150px 220px 140px 1fr 150px auto;gap:9px;align-items:end}
+table{width:100%;border-collapse:collapse;font-size:.86rem}th,td{padding:9px;border-bottom:1px solid #eee4d5;text-align:left}th{background:#fff9ec}
+.msg{font-size:.86rem;margin-top:8px}.good{color:var(--good)}.bad{color:var(--bad)}.muted{color:var(--muted)}
+.badge{display:inline-block;padding:3px 7px;border-radius:999px;background:#fff4d7;font-size:.72rem}
+[hidden]{display:none!important}
+@media(max-width:1000px){.stats{grid-template-columns:repeat(3,1fr)}.expense-form{grid-template-columns:1fr 1fr 1fr}.charts{grid-template-columns:1fr}}
+@media(max-width:650px){.stats{grid-template-columns:1fr 1fr}.login-grid,.expense-form{grid-template-columns:1fr}.wrap{padding:10px}.chart-card{min-height:330px}}
+</style>
+</head>
+<body>
+<header><div class="wrap" style="padding:0"><h1>WeShop4U — Business Analytics</h1><div class="sub">Monthly sales, expenses, profit/loss, orders and customers</div></div></header>
+
+<main class="wrap">
+<section id="loginCard" class="card login">
+  <h2>Admin Login</h2>
+  <div class="login-grid">
+    <input id="email" type="email" placeholder="Admin email" autocomplete="username">
+    <input id="password" type="password" placeholder="Password" autocomplete="current-password">
+    <button id="loginBtn" class="primary">Login</button>
+  </div>
+  <div id="loginMsg" class="msg muted"></div>
+</section>
+
+<div id="app" hidden>
+  <section class="card">
+    <div class="toolbar">
+      <div class="field"><label>Year</label><select id="yearSelect"></select></div>
+      <button id="refreshBtn" class="secondary">Refresh</button>
+      <button id="logoutBtn" class="secondary">Logout</button>
+      <span class="muted" id="updatedAt"></span>
+    </div>
+  </section>
+
+  <section class="grid stats">
+    <div class="card stat"><span>Total Sales</span><strong id="totalSales">₹0</strong></div>
+    <div class="card stat"><span>Total Expenses</span><strong id="totalExpenses">₹0</strong></div>
+    <div class="card stat"><span>Net Profit / Loss</span><strong id="netProfit">₹0</strong></div>
+    <div class="card stat"><span>Total Orders</span><strong id="totalOrders">0</strong></div>
+    <div class="card stat"><span>Completed Orders</span><strong id="completedOrders">0</strong></div>
+    <div class="card stat"><span>Customers</span><strong id="totalCustomers">0</strong></div>
+  </section>
+
+  <section class="charts">
+    <div class="card chart-card"><h2>Monthly Sales</h2><div class="chart-wrap"><canvas id="salesChart"></canvas></div></div>
+    <div class="card chart-card"><h2>Sales vs Expenses vs Profit/Loss</h2><div class="chart-wrap"><canvas id="profitChart"></canvas></div></div>
+    <div class="card chart-card"><h2>Monthly Orders</h2><div class="chart-wrap"><canvas id="ordersChart"></canvas></div></div>
+    <div class="card chart-card"><h2>Monthly Customers</h2><div class="chart-wrap"><canvas id="customersChart"></canvas></div></div>
+  </section>
+
+  <section class="card">
+    <h2>Add Expense / Investment</h2>
+    <div class="expense-form">
+      <div class="field"><label>Date</label><input id="expenseDate" type="date"></div>
+      <div class="field"><label>Category</label>
+        <select id="expenseCategory">
+          <option>Purchased Items</option><option>Customization / Production</option><option>Packaging</option>
+          <option>Marketing</option><option>Petrol / Travel</option><option>Delivery / Courier</option>
+          <option>Website / Technology</option><option>Equipment / Investment</option><option>Other Expenses</option>
+        </select>
+      </div>
+      <div class="field"><label>Amount (₹)</label><input id="expenseAmount" type="number" min="0" step="0.01" placeholder="0"></div>
+      <div class="field"><label>Description</label><input id="expenseDescription" maxlength="250" placeholder="What was this expense for?"></div>
+      <div class="field"><label>Order ID (optional)</label><input id="expenseOrderId" maxlength="40" placeholder="WS-..."></div>
+      <button id="saveExpenseBtn" class="primary">Save Expense</button>
+    </div>
+    <div id="expenseMsg" class="msg"></div>
+  </section>
+
+  <section class="card">
+    <h2>Expenses for selected year</h2>
+    <div style="overflow:auto">
+      <table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Order ID</th><th>Amount</th><th></th></tr></thead>
+      <tbody id="expenseRows"></tbody></table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Expense Breakdown</h2>
+    <div class="chart-wrap"><canvas id="expenseChart"></canvas></div>
+  </section>
+</div>
+</main>
+
+<script>
+const SUPABASE_URL='https://flynxttakgqemgccoryq.supabase.co';
+const SUPABASE_KEY='sb_publishable_P32mETIY1qBGk8Xf6foNog_C1-ZS31Q';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});
+let charts={};
+
+function destroyChart(name){if(charts[name]){charts[name].destroy();delete charts[name]}}
+function makeChart(name,canvas,datasets,rupees=false){
+  destroyChart(name);
+  charts[name]=new Chart(document.getElementById(canvas),{
+    type:'bar',data:{labels:months,datasets},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      scales:{y:{beginAtZero:true,ticks:{callback:v=>rupees?money(v):v}}},
+      plugins:{tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${rupees?money(c.raw):c.raw}`}}}}
+  });
+}
+function yearOf(v){const d=new Date(v);return isNaN(d)?null:d.getFullYear()}
+function monthOf(v){const d=new Date(v);return isNaN(d)?null:d.getMonth()}
+function normalizeStatus(s){return String(s||'submitted').trim().toLowerCase()}
+function customerKey(r){return String(r.contact_number||r.whatsapp_number||r.whatsapp||r.name||'').trim().toLowerCase()}
+function saleDate(r){return r.completed_at||r.updated_at||r.submitted_at}
+function saleAmount(r){return Number(r.actual_sale_amount||0)}
+function isCompleted(r){return ['completed','delivered'].includes(normalizeStatus(r.status))}
+
+async function ensureLoggedIn(){
+  const {data}=await sb.auth.getSession();
+  if(data?.session?.user){showApp();return true}
+  return false;
+}
+function showApp(){document.getElementById('loginCard').hidden=true;document.getElementById('app').hidden=false;loadAll()}
+document.getElementById('loginBtn').onclick=async()=>{
+  const msg=document.getElementById('loginMsg');msg.textContent='Signing in…';
+  const {error}=await sb.auth.signInWithPassword({email:email.value.trim(),password:password.value});
+  if(error){msg.textContent='Login failed: '+error.message;return}
+  msg.textContent='';showApp();
+};
+document.getElementById('logoutBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};
+document.getElementById('refreshBtn').onclick=loadAll;
+document.getElementById('yearSelect').onchange=loadAll;
+
+async function fetchData(){
+  const [ordersRes,expensesRes]=await Promise.all([
+    sb.from('customer_requests').select('request_id,submitted_at,updated_at,completed_at,name,contact_number,whatsapp_number,whatsapp,status,actual_sale_amount'),
+    sb.from('business_expenses').select('id,expense_date,category,description,amount,order_id,created_at').order('expense_date',{ascending:false})
+  ]);
+  if(ordersRes.error) throw ordersRes.error;
+  if(expensesRes.error) throw expensesRes.error;
+  return {orders:ordersRes.data||[],expenses:expensesRes.data||[]};
+}
+function populateYears(orders,expenses){
+  const select=document.getElementById('yearSelect'), current=Number(select.value)||new Date().getFullYear();
+  const years=new Set([new Date().getFullYear()]);
+  orders.forEach(r=>{const y=yearOf(r.submitted_at);if(y)years.add(y);const sy=yearOf(saleDate(r));if(sy)years.add(sy)});
+  expenses.forEach(e=>{const y=yearOf(e.expense_date);if(y)years.add(y)});
+  const sorted=[...years].sort((a,b)=>b-a);
+  select.innerHTML=sorted.map(y=>`<option value="${y}">${y}</option>`).join('');
+  select.value=years.has(current)?current:sorted[0];
+}
+async function loadAll(){
+  try{
+    const data=await fetchData();
+    if(!yearSelect.options.length) populateYears(data.orders,data.expenses);
+    render(data.orders,data.expenses,Number(yearSelect.value));
+    updatedAt.textContent='Updated '+new Date().toLocaleString();
+  }catch(e){alert('Unable to load analytics: '+e.message)}
+}
+function render(orders,expenses,year){
+  const sales=Array(12).fill(0), costs=Array(12).fill(0), profit=Array(12).fill(0);
+  const requests=Array(12).fill(0), completed=Array(12).fill(0), customers=Array(12).fill(0);
+  const monthlyCustomerSets=Array.from({length:12},()=>new Set());
+
+  orders.forEach(r=>{
+    if(yearOf(r.submitted_at)===year){
+      const m=monthOf(r.submitted_at); requests[m]++;
+      const k=customerKey(r);if(k)monthlyCustomerSets[m].add(k);
+    }
+    if(isCompleted(r)&&yearOf(saleDate(r))===year){
+      const m=monthOf(saleDate(r));completed[m]++;sales[m]+=saleAmount(r);
+    }
+  });
+  expenses.filter(e=>yearOf(e.expense_date)===year).forEach(e=>{costs[monthOf(e.expense_date)]+=Number(e.amount||0)});
+  for(let i=0;i<12;i++){customers[i]=monthlyCustomerSets[i].size;profit[i]=sales[i]-costs[i]}
+
+  totalSales.textContent=money(sales.reduce((a,b)=>a+b,0));
+  totalExpenses.textContent=money(costs.reduce((a,b)=>a+b,0));
+  const np=profit.reduce((a,b)=>a+b,0);netProfit.textContent=money(np);netProfit.className=np>=0?'good':'bad';
+  totalOrders.textContent=requests.reduce((a,b)=>a+b,0);
+  completedOrders.textContent=completed.reduce((a,b)=>a+b,0);
+  totalCustomers.textContent=new Set(orders.filter(r=>yearOf(r.submitted_at)===year).map(customerKey).filter(Boolean)).size;
+
+  makeChart('sales','salesChart',[{label:'Sales',data:sales}],true);
+  makeChart('profit','profitChart',[
+    {label:'Sales',data:sales},{label:'Expenses',data:costs},{label:'Profit / Loss',data:profit}
+  ],true);
+  makeChart('orders','ordersChart',[{label:'Requests',data:requests},{label:'Completed',data:completed}],false);
+  makeChart('customers','customersChart',[{label:'Customers',data:customers}],false);
+
+  const yearExpenses=expenses.filter(e=>yearOf(e.expense_date)===year);
+  expenseRows.innerHTML=yearExpenses.length?yearExpenses.map(e=>`<tr>
+    <td>${e.expense_date||''}</td><td><span class="badge">${escapeHtml(e.category||'')}</span></td>
+    <td>${escapeHtml(e.description||'')}</td><td>${escapeHtml(e.order_id||'—')}</td>
+    <td>${money(e.amount)}</td><td><button class="secondary" onclick="deleteExpense('${e.id}')">Delete</button></td>
+  </tr>`).join(''):'<tr><td colspan="6" class="muted">No expenses entered for this year.</td></tr>';
+
+  const byCat={};yearExpenses.forEach(e=>byCat[e.category]=(byCat[e.category]||0)+Number(e.amount||0));
+  destroyChart('expense');
+  charts.expense=new Chart(document.getElementById('expenseChart'),{
+    type:'bar',data:{labels:Object.keys(byCat),datasets:[{label:'Expenses',data:Object.values(byCat)}]},
+    options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{callback:v=>money(v)}}},
+      plugins:{tooltip:{callbacks:{label:c=>'Expenses: '+money(c.raw)}}}}
+  });
+}
+function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+document.getElementById('saveExpenseBtn').onclick=async()=>{
+  const msg=expenseMsg, amount=Number(expenseAmount.value);
+  if(!expenseDate.value||!amount||amount<=0){msg.textContent='Enter a date and an amount greater than zero.';msg.className='msg bad';return}
+  msg.textContent='Saving…';msg.className='msg muted';
+  const {error}=await sb.from('business_expenses').insert({
+    expense_date:expenseDate.value,category:expenseCategory.value,amount,
+    description:expenseDescription.value.trim()||null,order_id:expenseOrderId.value.trim().toUpperCase()||null
+  });
+  if(error){msg.textContent='Unable to save: '+error.message;msg.className='msg bad';return}
+  msg.textContent='Expense saved.';msg.className='msg good';
+  expenseAmount.value='';expenseDescription.value='';expenseOrderId.value='';
+  await loadAll();
+};
+window.deleteExpense=async id=>{
+  if(!confirm('Delete this expense?'))return;
+  const {error}=await sb.from('business_expenses').delete().eq('id',id);
+  if(error){alert(error.message);return}await loadAll();
+};
+expenseDate.value=new Date().toISOString().slice(0,10);
+ensureLoggedIn();
+</script>
+</body></html>
