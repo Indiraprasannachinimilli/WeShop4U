@@ -5906,12 +5906,26 @@ async function upsertPublicReview(data,feedback,rating,displayName,imagePaths,co
   if(error) throw error;
   return reviewId;
 }
+function getExistingReviewImageUrl(path){
+  if(!path) return '';
+  if(/^https?:\/\//i.test(path)) return path;
+  const {data}=weshopSupabase.storage.from('weshop4u-public-review-images').getPublicUrl(path);
+  return data?.publicUrl||'';
+}
 function renderExistingReviewImages(containerId,paths){
   const box=document.getElementById(containerId); if(!box) return;
   box.dataset.paths=JSON.stringify((paths||[]).filter(Boolean).slice(0,5));
   const paint=()=>{
     const current=JSON.parse(box.dataset.paths||'[]');
-    box.innerHTML=current.length?current.map((path,i)=>`<span class="w4u-existing-image" style="width:auto;min-width:110px"><span class="w4u-existing-image-name" title="${escapeHtml(path)}">Photo ${i+1}</span><button type="button" class="w4u-remove-existing-image" data-index="${i}">Remove</button></span>`).join(''):'<span class="text-muted" style="font-size:.72rem;">No existing photos.</span>';
+    box.innerHTML=current.length?current.map((path,i)=>{
+      const url=getExistingReviewImageUrl(path);
+      return `<span class="w4u-existing-image">
+        <img src="${escapeHtml(url)}" alt="Feedback photo ${i+1}" loading="lazy"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <span class="w4u-existing-image-unavailable" style="display:none;">Preview unavailable</span>
+        <button type="button" class="w4u-remove-existing-image" data-index="${i}">✕ Remove</button>
+      </span>`;
+    }).join(''):'<span class="text-muted" style="font-size:.72rem;">No existing photos.</span>';
     box.querySelectorAll('.w4u-remove-existing-image').forEach(btn=>btn.addEventListener('click',()=>{
       const arr=JSON.parse(box.dataset.paths||'[]'); arr.splice(Number(btn.dataset.index),1); box.dataset.paths=JSON.stringify(arr); paint();
     }));
