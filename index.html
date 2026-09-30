@@ -1984,7 +1984,9 @@ body:not(.ss-inside) #customerBackToOptions{
 .w4u-happy-image{width:110px;height:126px;object-fit:cover;display:block;background:#f5e1b7}
 .w4u-happy-copy{padding:11px;min-width:0}
 .w4u-happy-stars{font-size:13px;color:#b8750b;letter-spacing:.8px}
-.w4u-happy-quote{margin:7px 0 8px;color:#453b31;font-size:11px;line-height:1.4}
+.w4u-happy-quote{margin:7px 0 4px;color:#453b31;font-size:11px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.w4u-happy-quote.is-expanded{display:block;-webkit-line-clamp:unset;overflow:visible}
+.w4u-review-more{border:0;background:transparent;padding:0;margin:0 0 6px;color:#842d0d;font:700 10px/1.2 inherit;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .w4u-happy-meta{display:flex;justify-content:space-between;gap:6px;align-items:center}
 .w4u-happy-name{font-size:10px;font-weight:800;color:#842d0d}
 .w4u-happy-event{font-size:9px;font-weight:700;color:#7a5420;background:#fff4d7;padding:2px 7px;border-radius:999px}
@@ -2029,7 +2031,10 @@ body.ss-inside .w4u-happy-clients{display:none!important}
  body:not(.ss-inside) .w4u-mobile-happy-image{width:72px;height:78px;object-fit:cover;border-radius:8px}
  body:not(.ss-inside) .w4u-mobile-happy-copy{min-width:0;overflow:hidden}
  body:not(.ss-inside) .w4u-mobile-happy-stars{color:#d58a08;font-size:11px;line-height:1}
- body:not(.ss-inside) .w4u-mobile-happy-quote{margin:4px 0 3px;color:#3f3033;font:600 9.5px/1.22 system-ui,-apple-system,"Segoe UI",sans-serif;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+ body:not(.ss-inside) .w4u-mobile-happy-quote{margin:4px 0 2px;color:#3f3033;font:600 9.5px/1.22 system-ui,-apple-system,"Segoe UI",sans-serif;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+ body:not(.ss-inside) .w4u-mobile-happy-quote.is-expanded{display:block;-webkit-line-clamp:unset;overflow:visible}
+ body:not(.ss-inside) .w4u-mobile-happy-card:has(.w4u-mobile-happy-quote.is-expanded){height:auto;min-height:92px}
+ body:not(.ss-inside) .w4u-mobile-review-more{border:0;background:transparent;padding:0;margin:0 0 2px;color:#842d0d;font:800 8px/1.1 system-ui,-apple-system,"Segoe UI",sans-serif;cursor:pointer;text-decoration:underline}
  body:not(.ss-inside) .w4u-mobile-happy-meta{display:flex;gap:5px;align-items:center;min-width:0;color:#7a6569;font:700 8px/1.1 system-ui,-apple-system,"Segoe UI",sans-serif}
  body:not(.ss-inside) .w4u-mobile-happy-name{max-width:58%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
  body:not(.ss-inside) .w4u-mobile-happy-event{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -5879,6 +5884,44 @@ async function submitPublicReview(data,feedback,rating,displayName,imagePaths,co
   return reviewId;
 }
 
+async function getExistingPublicReview(data){
+  await ensureSupabase();
+  const {data:rows,error}=await weshopSupabase.rpc('get_customer_review_secure',{
+    p_request_id:String(data?.requestId||'').trim().toUpperCase(),
+    p_phone:normalizeCustomerPhone(data?.contactNumber||data?.whatsapp||''),
+    p_view_token:String(data?._customerViewToken||'').trim()||null
+  });
+  if(error) throw error;
+  return Array.isArray(rows)?(rows[0]||null):rows;
+}
+async function upsertPublicReview(data,feedback,rating,displayName,imagePaths,consent){
+  const paths=Array.isArray(imagePaths)?imagePaths.filter(Boolean).slice(0,5):[];
+  const {data:reviewId,error}=await weshopSupabase.rpc('upsert_customer_review_secure_multi',{
+    p_request_id:String(data?.requestId||'').trim().toUpperCase(),
+    p_phone:normalizeCustomerPhone(data?.contactNumber||data?.whatsapp||''),
+    p_view_token:String(data?._customerViewToken||'').trim()||null,
+    p_rating:Number(rating),p_review_text:feedback,p_display_name:displayName||null,
+    p_image_paths:paths,p_public_consent:consent===true
+  });
+  if(error) throw error;
+  return reviewId;
+}
+function renderExistingReviewImages(containerId,paths){
+  const box=document.getElementById(containerId); if(!box) return;
+  box.dataset.paths=JSON.stringify((paths||[]).filter(Boolean).slice(0,5));
+  const paint=()=>{
+    const current=JSON.parse(box.dataset.paths||'[]');
+    box.innerHTML=current.length?current.map((path,i)=>`<span class="w4u-existing-image" style="width:auto;min-width:110px"><span class="w4u-existing-image-name" title="${escapeHtml(path)}">Photo ${i+1}</span><button type="button" class="w4u-remove-existing-image" data-index="${i}">Remove</button></span>`).join(''):'<span class="text-muted" style="font-size:.72rem;">No existing photos.</span>';
+    box.querySelectorAll('.w4u-remove-existing-image').forEach(btn=>btn.addEventListener('click',()=>{
+      const arr=JSON.parse(box.dataset.paths||'[]'); arr.splice(Number(btn.dataset.index),1); box.dataset.paths=JSON.stringify(arr); paint();
+    }));
+  }; paint();
+}
+function getRetainedReviewImagePaths(containerId){
+  const box=document.getElementById(containerId); if(!box) return [];
+  try{return JSON.parse(box.dataset.paths||'[]');}catch(_){return [];}
+}
+
 async function uploadFeedbackImages(requestId){
   try{ await ensureSupabase(); }catch(error){ console.warn('Supabase unavailable',error); return []; }
   if(!weshopSupabase) return [];
@@ -6228,7 +6271,8 @@ function showThankYou(requestId,localOnly=false){
           </div>
           <div class="mb-3">
             <label class="form-label" for="postSubmitFeedback">Suggestions / Feedback</label>
-            <textarea class="form-control" id="postSubmitFeedback" rows="3" placeholder="Tell us what you liked or what we can improve..."></textarea>
+            <textarea class="form-control" id="postSubmitFeedback" rows="3" maxlength="1000" placeholder="Tell us what you liked or what we can improve..."></textarea>
+            <div class="form-text" id="postSubmitFeedbackCount" style="font-size:.7rem;text-align:right;">0 / 1000</div>
           </div>
           <div class="mb-3">
             <label class="form-label" for="postSubmitDisplayName">Name to display publicly <span class="text-muted">(optional)</span></label>
@@ -6339,6 +6383,7 @@ function showThankYou(requestId,localOnly=false){
     }
   });
 
+  w4uBindFeedbackCounter('postSubmitFeedback','postSubmitFeedbackCount');
   document.getElementById('savePostSubmitFeedbackBtn')?.addEventListener('click',async()=>{
     const feedbackButton=document.getElementById('savePostSubmitFeedbackBtn');
     const feedbackStatus=document.getElementById('postSubmitFeedbackStatus');
@@ -8586,14 +8631,16 @@ async function renderCustomerLinkedRequest(data){
         </div>
         <div class="mb-3">
           <label class="form-label" for="viewOrderFeedback">Suggestions / Feedback</label>
-          <textarea class="form-control" id="viewOrderFeedback" rows="3" placeholder="Tell us what you liked or what we can improve...">${escapeHtml(data.feedback||'')}</textarea>
+          <textarea class="form-control" id="viewOrderFeedback" rows="3" maxlength="1000" placeholder="Tell us what you liked or what we can improve...">${escapeHtml(data.feedback||'')}</textarea>
+          <div class="form-text" id="viewOrderFeedbackCount" style="font-size:.7rem;text-align:right;">${String(data.feedback||'').length} / 1000</div>
         </div>
         <div class="mb-3">
           <label class="form-label" for="viewOrderDisplayName">Name to show with your review <span class="text-muted">(optional)</span></label>
           <input type="text" class="form-control" id="viewOrderDisplayName" maxlength="80" placeholder="Your name">
         </div>
         <div class="mb-3">
-          <label class="form-label" for="viewOrderFeedbackImages">Celebration photos <span class="text-muted">(optional, up to 5)</span></label>
+          <label class="form-label" for="viewOrderFeedbackImages">Celebration photos <span class="text-muted">(optional, up to 5 total)</span></label>
+          <div id="viewOrderExistingReviewImages" class="mb-2"></div>
           <input type="file" class="form-control" id="viewOrderFeedbackImages" accept="image/jpeg,image/png,image/webp" multiple>
           <div class="form-text" style="font-size:.72rem;">JPG, PNG or WEBP. Maximum 5 MB per photo.</div>
           <div class="form-text" id="viewOrderFeedbackImagesError" style="font-size:.72rem;color:#9B2D3F;"></div>
@@ -8604,7 +8651,7 @@ async function renderCustomerLinkedRequest(data){
             I allow WeShop4U to display my review and selected photos in Happy Clients after approval.
           </label>
         </div>
-        <button type="button" class="btn-wine-outline w-100" id="saveViewOrderFeedbackBtn">Submit Feedback</button>
+        <button type="button" class="btn-wine-outline w-100" id="saveViewOrderFeedbackBtn">${data.feedback||data.rating?'Save Feedback Changes':'Submit Feedback'}</button>
         <div class="submit-status" id="viewOrderFeedbackStatus"></div>
       </div>`:''}
     </div>`;
@@ -8672,6 +8719,13 @@ async function renderCustomerLinkedRequest(data){
     // The signed URLs are already protected by the verified order token.
     loadCustomerOrderImages();
   }
+  w4uBindFeedbackCounter('viewOrderFeedback','viewOrderFeedbackCount');
+  getExistingPublicReview(data).then(review=>{
+    if(!review) { renderExistingReviewImages('viewOrderExistingReviewImages',[]); return; }
+    const name=document.getElementById('viewOrderDisplayName'); if(name) name.value=review.customer_display_name||'';
+    const consent=document.getElementById('viewOrderPublicConsent'); if(consent) consent.checked=review.public_consent===true;
+    renderExistingReviewImages('viewOrderExistingReviewImages',review.image_paths||[]);
+  }).catch(error=>{ console.warn('Existing public review could not be loaded',error); renderExistingReviewImages('viewOrderExistingReviewImages',[]); });
   document.getElementById('saveViewOrderFeedbackBtn')?.addEventListener('click',async()=>{
     const btn=document.getElementById('saveViewOrderFeedbackBtn');
     const status=document.getElementById('viewOrderFeedbackStatus');
@@ -8695,8 +8749,10 @@ async function renderCustomerLinkedRequest(data){
       const displayName=document.getElementById('viewOrderDisplayName')?.value.trim()||'';
       if(consent && rating && feedback){
         if(status) status.textContent='Saving feedback and review…';
-        const imagePaths=await uploadPublicReviewImages(data.requestId,'viewOrderFeedbackImages');
-        await submitPublicReview(data,feedback,rating,displayName,imagePaths,true);
+        const retained=getRetainedReviewImagePaths('viewOrderExistingReviewImages');
+        const added=await uploadPublicReviewImages(data.requestId,'viewOrderFeedbackImages');
+        const imagePaths=[...retained,...added].slice(0,5);
+        await upsertPublicReview(data,feedback,rating,displayName,imagePaths,true);
         if(status){status.textContent='Thank you! Your feedback was saved and your review was sent for approval. ❤️';status.style.color='#54745F';}
       }else{
         if(status){status.textContent='Thank you! Your feedback has been saved. ❤️';status.style.color='#54745F';}
@@ -9382,6 +9438,25 @@ function w4uPreloadFirstHappyImages(reviews){
     document.head.appendChild(link);
   });
 }
+function w4uBindReviewExpanders(){
+  document.querySelectorAll('.w4u-review-more,.w4u-mobile-review-more').forEach(btn=>{
+    if(btn.dataset.bound==='1') return;
+    btn.dataset.bound='1';
+    btn.addEventListener('click',()=>{
+      const quote=btn.parentElement?.querySelector('.w4u-happy-quote,.w4u-mobile-happy-quote');
+      if(!quote) return;
+      const expanded=quote.classList.toggle('is-expanded');
+      btn.textContent=expanded?'Show less':'Read more';
+      btn.setAttribute('aria-expanded',String(expanded));
+    });
+  });
+}
+function w4uBindFeedbackCounter(textareaId,counterId){
+  const field=document.getElementById(textareaId), counter=document.getElementById(counterId);
+  if(!field||!counter) return;
+  const paint=()=>counter.textContent=`${field.value.length} / 1000`;
+  field.addEventListener('input',paint); paint();
+}
 function renderHappyClients(reviews){
   const section=document.getElementById('happyClientsSection');
   const row=document.getElementById('happyClientsRow');
@@ -9404,18 +9479,19 @@ function renderHappyClients(reviews){
     const rating=Math.max(1,Math.min(5,Number(r.rating)||5));
     const images=(r.image_urls||[]).filter(Boolean).slice(0,5);
     const name=escapeHtml(r.customer_display_name||'WeShop4U Customer'), event=escapeHtml(r.event_type||'Celebration');
-    return `<article class="w4u-happy-card${images.length?'':' no-image'}">${images.length?`<div class="w4u-happy-image-stack" data-photo-current="0">${photoMarkup(images,'w4u-happy-image')}</div>`:''}<div class="w4u-happy-copy"><div class="w4u-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-happy-quote">“${escapeHtml(r.review_text)}”</p><div class="w4u-happy-meta"><span class="w4u-happy-name">${name}</span><span class="w4u-happy-event">${event}</span></div></div></article>`;
+    return `<article class="w4u-happy-card${images.length?'':' no-image'}">${images.length?`<div class="w4u-happy-image-stack" data-photo-current="0">${photoMarkup(images,'w4u-happy-image')}</div>`:''}<div class="w4u-happy-copy"><div class="w4u-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-happy-quote">“${escapeHtml(r.review_text)}”</p>${String(r.review_text||'').length>150?`<button type="button" class="w4u-review-more" aria-expanded="false">Read more</button>`:''}<div class="w4u-happy-meta"><span class="w4u-happy-name">${name}</span><span class="w4u-happy-event">${event}</span></div></div></article>`;
   }).join('');
   const mobileHtml=items.map(r=>{
     const rating=Math.max(1,Math.min(5,Number(r.rating)||5));
     const images=(r.image_urls||[]).filter(Boolean).slice(0,5);
     const name=escapeHtml(r.customer_display_name||'WeShop4U Customer'), event=escapeHtml(r.event_type||'Celebration');
-    return `<article class="w4u-mobile-happy-card${images.length?'':' no-image'}">${images.length?`<div class="w4u-mobile-happy-image-stack" data-photo-current="0">${photoMarkup(images,'w4u-mobile-happy-image')}</div>`:''}<div class="w4u-mobile-happy-copy"><div class="w4u-mobile-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-mobile-happy-quote">“${escapeHtml(r.review_text)}”</p><div class="w4u-mobile-happy-meta"><span class="w4u-mobile-happy-name">${name}</span><span class="w4u-mobile-happy-event">${event}</span></div></div></article>`;
+    return `<article class="w4u-mobile-happy-card${images.length?'':' no-image'}">${images.length?`<div class="w4u-mobile-happy-image-stack" data-photo-current="0">${photoMarkup(images,'w4u-mobile-happy-image')}</div>`:''}<div class="w4u-mobile-happy-copy"><div class="w4u-mobile-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-mobile-happy-quote">“${escapeHtml(r.review_text)}”</p>${String(r.review_text||'').length>110?`<button type="button" class="w4u-mobile-review-more" aria-expanded="false">Read more</button>`:''}<div class="w4u-mobile-happy-meta"><span class="w4u-mobile-happy-name">${name}</span><span class="w4u-mobile-happy-event">${event}</span></div></div></article>`;
   }).join('');
   if(row && row.innerHTML!==desktopHtml) row.innerHTML=desktopHtml;
   if(section) section.style.display='block';
   if(mobileRow && mobileRow.innerHTML!==mobileHtml) mobileRow.innerHTML=mobileHtml;
   if(mobileSection) mobileSection.classList.add('has-reviews');
+  w4uBindReviewExpanders();
 }
 async function w4uFetchHappyClientsDirect(){
   // Fetch reviews directly with the browser Fetch API. This starts without
@@ -9464,6 +9540,40 @@ async function loadHappyClients(){
     return cached;
   }
 }
+
+/* ========================================================= */
+/* PRIVACY-SAFE ANALYTICS (GA4)                              */
+/* Set your GA4 Measurement ID (G-XXXXXXXXXX) below.         */
+/* No names, phone numbers, addresses, order IDs or review   */
+/* text are sent by these helpers.                           */
+/* ========================================================= */
+const WESHOP4U_GA_MEASUREMENT_ID='G-TN6SHG2858';
+function w4uInitAnalytics(){
+  const id=String(WESHOP4U_GA_MEASUREMENT_ID||'').trim();
+  if(!/^G-[A-Z0-9]+$/i.test(id)) return;
+  window.dataLayer=window.dataLayer||[];
+  window.gtag=window.gtag||function(){dataLayer.push(arguments)};
+  gtag('js',new Date()); gtag('config',id,{send_page_view:true});
+  const script=document.createElement('script'); script.async=true; script.src=`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`; document.head.appendChild(script);
+}
+function w4uTrack(eventName,params={}){
+  if(typeof window.gtag!=='function') return;
+  const safe={}; ['action','section','event_type','source'].forEach(k=>{if(params[k]!=null)safe[k]=String(params[k]).slice(0,80)});
+  gtag('event',eventName,safe);
+}
+function w4uBindAnalytics(){
+  document.addEventListener('click',e=>{
+    const el=e.target.closest('button,a'); if(!el) return;
+    const id=el.id||'';
+    if(/new/i.test(id)) w4uTrack('new_order_click',{section:'landing'});
+    else if(/view/i.test(id)) w4uTrack('view_order_click',{section:'landing'});
+    else if(/edit/i.test(id)) w4uTrack('edit_order_click',{section:'landing'});
+    else if(/offer/i.test(id)) w4uTrack('special_offers_click',{section:'landing'});
+    else if((el.href||'').includes('wa.me')||(el.href||'').includes('whatsapp')) w4uTrack('whatsapp_click',{source:'website'});
+  },{passive:true});
+}
+w4uInitAnalytics();
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',w4uBindAnalytics,{once:true}); else w4uBindAnalytics();
 
 /* ========================================================= */
 /* INITIALISE                                                  */
