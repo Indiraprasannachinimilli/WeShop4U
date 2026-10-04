@@ -2454,11 +2454,6 @@ body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean{position:
 }
 </style>
 
-
-<style id="w4u-review-age-fix">
-.w4u-review-age{font-size:9px;color:#7b858d;white-space:nowrap;margin-left:auto;font-weight:600}
-@media(max-width:575px){body:not(.ss-inside) .w4u-review-age{font-size:7.5px;color:#55717f!important;-webkit-text-fill-color:#55717f!important}}
-</style>
 </head>
 
 
@@ -5911,30 +5906,39 @@ async function upsertPublicReview(data,feedback,rating,displayName,imagePaths,co
   if(error) throw error;
   return reviewId;
 }
-function getExistingReviewImageUrl(path){
+async function getExistingReviewImageUrl(path){
   if(!path) return '';
   if(/^https?:\/\//i.test(path)) return path;
-  const {data}=weshopSupabase.storage.from('weshop4u-review-images').getPublicUrl(path);
-  return data?.publicUrl||'';
+  await ensureSupabase();
+  const {data,error}=await weshopSupabase.storage.from('weshop4u-review-images').createSignedUrl(path,60*60);
+  if(error) throw error;
+  return data?.signedUrl||'';
 }
-function renderExistingReviewImages(containerId,paths){
+async function renderExistingReviewImages(containerId,paths){
   const box=document.getElementById(containerId); if(!box) return;
   box.dataset.paths=JSON.stringify((paths||[]).filter(Boolean).slice(0,5));
-  const paint=()=>{
+  const paint=async()=>{
     const current=JSON.parse(box.dataset.paths||'[]');
-    box.innerHTML=current.length?current.map((path,i)=>{
-      const url=getExistingReviewImageUrl(path);
+    if(!current.length){
+      box.innerHTML='<span class="text-muted" style="font-size:.72rem;">No existing photos.</span>';
+      return;
+    }
+    box.innerHTML='<span class="text-muted" style="font-size:.72rem;">Loading photos…</span>';
+    const urls=await Promise.all(current.map(async path=>{
+      try{return await getExistingReviewImageUrl(path);}catch(error){console.warn('Review photo preview unavailable',error);return '';}
+    }));
+    box.innerHTML=current.map((path,i)=>{
+      const url=urls[i]||'';
       return `<span class="w4u-existing-image">
-        <img src="${escapeHtml(url)}" alt="Feedback photo ${i+1}" loading="lazy"
-             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-        <span class="w4u-existing-image-unavailable" style="display:none;">Preview unavailable</span>
+        ${url?`<img src="${escapeHtml(url)}" alt="Feedback photo ${i+1}" loading="lazy">`:'<span class="w4u-existing-image-unavailable">Preview unavailable</span>'}
         <button type="button" class="w4u-remove-existing-image" data-index="${i}">✕ Remove</button>
       </span>`;
-    }).join(''):'<span class="text-muted" style="font-size:.72rem;">No existing photos.</span>';
+    }).join('');
     box.querySelectorAll('.w4u-remove-existing-image').forEach(btn=>btn.addEventListener('click',()=>{
       const arr=JSON.parse(box.dataset.paths||'[]'); arr.splice(Number(btn.dataset.index),1); box.dataset.paths=JSON.stringify(arr); paint();
     }));
-  }; paint();
+  };
+  await paint();
 }
 function getRetainedReviewImagePaths(containerId){
   const box=document.getElementById(containerId); if(!box) return [];
@@ -9476,25 +9480,21 @@ function w4uBindFeedbackCounter(textareaId,counterId){
   const paint=()=>counter.textContent=`${field.value.length} / 1000`;
   field.addEventListener('input',paint); paint();
 }
-function w4uReviewAge(createdAt){
-  if(!createdAt) return '';
-  const posted=new Date(createdAt);
-  if(Number.isNaN(posted.getTime())) return '';
-  const diff=Math.max(0,Date.now()-posted.getTime());
-  const minutes=Math.floor(diff/60000);
-  if(minutes<1) return 'Just now';
-  if(minutes<60) return `${minutes} min${minutes===1?'':'s'} ago`;
-  const hours=Math.floor(minutes/60);
-  if(hours<24) return `${hours} hour${hours===1?'':'s'} ago`;
-  const days=Math.floor(hours/24);
+function w4uReviewAge(value){
+  if(!value) return '';
+  const created=new Date(value);
+  if(Number.isNaN(created.getTime())) return '';
+  const diff=Math.max(0,Date.now()-created.getTime());
+  const minute=60*1000, hour=60*minute, day=24*hour;
+  if(diff<minute) return 'Just now';
+  if(diff<hour){ const n=Math.floor(diff/minute); return `${n} minute${n===1?'':'s'} ago`; }
+  if(diff<day){ const n=Math.floor(diff/hour); return `${n} hour${n===1?'':'s'} ago`; }
+  const days=Math.floor(diff/day);
   if(days===1) return 'Yesterday';
   if(days<7) return `${days} days ago`;
-  const weeks=Math.floor(days/7);
-  if(days<30) return `${weeks} week${weeks===1?'':'s'} ago`;
-  const months=Math.floor(days/30);
-  if(days<365) return `${months} month${months===1?'':'s'} ago`;
-  const years=Math.floor(days/365);
-  return `${years} year${years===1?'':'s'} ago`;
+  if(days<30){ const n=Math.floor(days/7); return `${n} week${n===1?'':'s'} ago`; }
+  if(days<365){ const n=Math.floor(days/30); return `${n} month${n===1?'':'s'} ago`; }
+  const n=Math.floor(days/365); return `${n} year${n===1?'':'s'} ago`;
 }
 function renderHappyClients(reviews){
   const section=document.getElementById('happyClientsSection');
@@ -9517,14 +9517,14 @@ function renderHappyClients(reviews){
   const desktopHtml=items.map(r=>{
     const rating=Math.max(1,Math.min(5,Number(r.rating)||5));
     const images=(r.image_urls||[]).filter(Boolean).slice(0,5);
-    const name=escapeHtml(r.customer_display_name||'WeShop4U Customer'), event=escapeHtml(r.event_type||'Celebration'), age=escapeHtml(w4uReviewAge(r.created_at));
-    return `<article class="w4u-happy-card${images.length?'':' no-image'}">${images.length?`<div class="w4u-happy-image-stack" data-photo-current="0">${photoMarkup(images,'w4u-happy-image')}</div>`:''}<div class="w4u-happy-copy"><div class="w4u-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-happy-quote">“${escapeHtml(r.review_text)}”</p>${String(r.review_text||'').length>150?`<button type="button" class="w4u-review-more" aria-expanded="false">View More</button>`:''}<div class="w4u-happy-meta"><span class="w4u-happy-name">${name}</span><span class="w4u-happy-event">${event}</span>${age?`<span class="w4u-review-age">${age}</span>`:''}</div></div></article>`;
+    const name=escapeHtml(r.customer_display_name||'WeShop4U Customer'), event=escapeHtml(r.event_type||'Celebration');
+    return `<article class="w4u-happy-card${images.length?'':' no-image'}">${images.length?`<div class="w4u-happy-image-stack" data-photo-current="0">${photoMarkup(images,'w4u-happy-image')}</div>`:''}<div class="w4u-happy-copy"><div class="w4u-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-happy-quote">“${escapeHtml(r.review_text)}”</p>${String(r.review_text||'').length>150?`<button type="button" class="w4u-review-more" aria-expanded="false">View More</button>`:''}<div class="w4u-happy-meta"><span class="w4u-happy-name">${name}</span><span class="w4u-happy-event">${event}${w4uReviewAge(r.created_at)?` · ${escapeHtml(w4uReviewAge(r.created_at))}`:''}</span></div></div></article>`;
   }).join('');
   const mobileHtml=items.map(r=>{
     const rating=Math.max(1,Math.min(5,Number(r.rating)||5));
     const images=(r.image_urls||[]).filter(Boolean).slice(0,5);
-    const name=escapeHtml(r.customer_display_name||'WeShop4U Customer'), event=escapeHtml(r.event_type||'Celebration'), age=escapeHtml(w4uReviewAge(r.created_at));
-    return `<article class="w4u-mobile-happy-card${images.length?'':' no-image'}">${images.length?`<div class="w4u-mobile-happy-image-stack" data-photo-current="0">${photoMarkup(images,'w4u-mobile-happy-image')}</div>`:''}<div class="w4u-mobile-happy-copy"><div class="w4u-mobile-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-mobile-happy-quote">“${escapeHtml(r.review_text)}”</p>${String(r.review_text||'').length>110?`<button type="button" class="w4u-mobile-review-more" aria-expanded="false">View More</button>`:''}<div class="w4u-mobile-happy-meta"><span class="w4u-mobile-happy-name">${name}</span><span class="w4u-mobile-happy-event">${event}</span>${age?`<span class="w4u-review-age">${age}</span>`:''}</div></div></article>`;
+    const name=escapeHtml(r.customer_display_name||'WeShop4U Customer'), event=escapeHtml(r.event_type||'Celebration');
+    return `<article class="w4u-mobile-happy-card${images.length?'':' no-image'}">${images.length?`<div class="w4u-mobile-happy-image-stack" data-photo-current="0">${photoMarkup(images,'w4u-mobile-happy-image')}</div>`:''}<div class="w4u-mobile-happy-copy"><div class="w4u-mobile-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-mobile-happy-quote">“${escapeHtml(r.review_text)}”</p>${String(r.review_text||'').length>110?`<button type="button" class="w4u-mobile-review-more" aria-expanded="false">View More</button>`:''}<div class="w4u-mobile-happy-meta"><span class="w4u-mobile-happy-name">${name}</span><span class="w4u-mobile-happy-event">${event}${w4uReviewAge(r.created_at)?` · ${escapeHtml(w4uReviewAge(r.created_at))}`:''}</span></div></div></article>`;
   }).join('');
   if(row && row.innerHTML!==desktopHtml) row.innerHTML=desktopHtml;
   if(section) section.style.display='block';
