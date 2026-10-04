@@ -2454,6 +2454,11 @@ body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean{position:
 }
 </style>
 
+
+<style id="w4u-review-age-fix">
+.w4u-review-age{font-size:9px;color:#7b858d;white-space:nowrap;margin-left:auto;font-weight:600}
+@media(max-width:575px){body:not(.ss-inside) .w4u-review-age{font-size:7.5px;color:#55717f!important;-webkit-text-fill-color:#55717f!important}}
+</style>
 </head>
 
 
@@ -5909,7 +5914,7 @@ async function upsertPublicReview(data,feedback,rating,displayName,imagePaths,co
 function getExistingReviewImageUrl(path){
   if(!path) return '';
   if(/^https?:\/\//i.test(path)) return path;
-  const {data}=weshopSupabase.storage.from('weshop4u-public-review-images').getPublicUrl(path);
+  const {data}=weshopSupabase.storage.from('weshop4u-review-images').getPublicUrl(path);
   return data?.publicUrl||'';
 }
 function renderExistingReviewImages(containerId,paths){
@@ -6421,7 +6426,7 @@ function showThankYou(requestId,localOnly=false){
         feedbackStatus.textContent='Saving feedback and review…';
         const imagePaths=await uploadPublicReviewImages(requestId);
         await submitPublicReview(lastSubmission,feedback,rating,displayName,imagePaths,true);
-        feedbackStatus.textContent='Thank you! Your feedback was saved and your review was sent for approval. ❤️';
+        feedbackStatus.textContent='Thank you! Your feedback and review have been submitted successfully. ❤️';
       }else{
         feedbackStatus.textContent='Thank you! Your feedback has been saved. ❤️';
       }
@@ -8767,7 +8772,7 @@ async function renderCustomerLinkedRequest(data){
         const added=await uploadPublicReviewImages(data.requestId,'viewOrderFeedbackImages');
         const imagePaths=[...retained,...added].slice(0,5);
         await upsertPublicReview(data,feedback,rating,displayName,imagePaths,true);
-        if(status){status.textContent='Thank you! Your feedback was saved and your review was sent for approval. ❤️';status.style.color='#54745F';}
+        if(status){status.textContent='Thank you! Your feedback and review have been submitted successfully. ❤️';status.style.color='#54745F';}
       }else{
         if(status){status.textContent='Thank you! Your feedback has been saved. ❤️';status.style.color='#54745F';}
       }
@@ -9460,7 +9465,7 @@ function w4uBindReviewExpanders(){
       const quote=btn.parentElement?.querySelector('.w4u-happy-quote,.w4u-mobile-happy-quote');
       if(!quote) return;
       const expanded=quote.classList.toggle('is-expanded');
-      btn.textContent=expanded?'Show less':'Read more';
+      btn.textContent=expanded?'View Less':'View More';
       btn.setAttribute('aria-expanded',String(expanded));
     });
   });
@@ -9470,6 +9475,26 @@ function w4uBindFeedbackCounter(textareaId,counterId){
   if(!field||!counter) return;
   const paint=()=>counter.textContent=`${field.value.length} / 1000`;
   field.addEventListener('input',paint); paint();
+}
+function w4uReviewAge(createdAt){
+  if(!createdAt) return '';
+  const posted=new Date(createdAt);
+  if(Number.isNaN(posted.getTime())) return '';
+  const diff=Math.max(0,Date.now()-posted.getTime());
+  const minutes=Math.floor(diff/60000);
+  if(minutes<1) return 'Just now';
+  if(minutes<60) return `${minutes} min${minutes===1?'':'s'} ago`;
+  const hours=Math.floor(minutes/60);
+  if(hours<24) return `${hours} hour${hours===1?'':'s'} ago`;
+  const days=Math.floor(hours/24);
+  if(days===1) return 'Yesterday';
+  if(days<7) return `${days} days ago`;
+  const weeks=Math.floor(days/7);
+  if(days<30) return `${weeks} week${weeks===1?'':'s'} ago`;
+  const months=Math.floor(days/30);
+  if(days<365) return `${months} month${months===1?'':'s'} ago`;
+  const years=Math.floor(days/365);
+  return `${years} year${years===1?'':'s'} ago`;
 }
 function renderHappyClients(reviews){
   const section=document.getElementById('happyClientsSection');
@@ -9492,14 +9517,14 @@ function renderHappyClients(reviews){
   const desktopHtml=items.map(r=>{
     const rating=Math.max(1,Math.min(5,Number(r.rating)||5));
     const images=(r.image_urls||[]).filter(Boolean).slice(0,5);
-    const name=escapeHtml(r.customer_display_name||'WeShop4U Customer'), event=escapeHtml(r.event_type||'Celebration');
-    return `<article class="w4u-happy-card${images.length?'':' no-image'}">${images.length?`<div class="w4u-happy-image-stack" data-photo-current="0">${photoMarkup(images,'w4u-happy-image')}</div>`:''}<div class="w4u-happy-copy"><div class="w4u-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-happy-quote">“${escapeHtml(r.review_text)}”</p>${String(r.review_text||'').length>150?`<button type="button" class="w4u-review-more" aria-expanded="false">Read more</button>`:''}<div class="w4u-happy-meta"><span class="w4u-happy-name">${name}</span><span class="w4u-happy-event">${event}</span></div></div></article>`;
+    const name=escapeHtml(r.customer_display_name||'WeShop4U Customer'), event=escapeHtml(r.event_type||'Celebration'), age=escapeHtml(w4uReviewAge(r.created_at));
+    return `<article class="w4u-happy-card${images.length?'':' no-image'}">${images.length?`<div class="w4u-happy-image-stack" data-photo-current="0">${photoMarkup(images,'w4u-happy-image')}</div>`:''}<div class="w4u-happy-copy"><div class="w4u-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-happy-quote">“${escapeHtml(r.review_text)}”</p>${String(r.review_text||'').length>150?`<button type="button" class="w4u-review-more" aria-expanded="false">View More</button>`:''}<div class="w4u-happy-meta"><span class="w4u-happy-name">${name}</span><span class="w4u-happy-event">${event}</span>${age?`<span class="w4u-review-age">${age}</span>`:''}</div></div></article>`;
   }).join('');
   const mobileHtml=items.map(r=>{
     const rating=Math.max(1,Math.min(5,Number(r.rating)||5));
     const images=(r.image_urls||[]).filter(Boolean).slice(0,5);
-    const name=escapeHtml(r.customer_display_name||'WeShop4U Customer'), event=escapeHtml(r.event_type||'Celebration');
-    return `<article class="w4u-mobile-happy-card${images.length?'':' no-image'}">${images.length?`<div class="w4u-mobile-happy-image-stack" data-photo-current="0">${photoMarkup(images,'w4u-mobile-happy-image')}</div>`:''}<div class="w4u-mobile-happy-copy"><div class="w4u-mobile-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-mobile-happy-quote">“${escapeHtml(r.review_text)}”</p>${String(r.review_text||'').length>110?`<button type="button" class="w4u-mobile-review-more" aria-expanded="false">Read more</button>`:''}<div class="w4u-mobile-happy-meta"><span class="w4u-mobile-happy-name">${name}</span><span class="w4u-mobile-happy-event">${event}</span></div></div></article>`;
+    const name=escapeHtml(r.customer_display_name||'WeShop4U Customer'), event=escapeHtml(r.event_type||'Celebration'), age=escapeHtml(w4uReviewAge(r.created_at));
+    return `<article class="w4u-mobile-happy-card${images.length?'':' no-image'}">${images.length?`<div class="w4u-mobile-happy-image-stack" data-photo-current="0">${photoMarkup(images,'w4u-mobile-happy-image')}</div>`:''}<div class="w4u-mobile-happy-copy"><div class="w4u-mobile-happy-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div><p class="w4u-mobile-happy-quote">“${escapeHtml(r.review_text)}”</p>${String(r.review_text||'').length>110?`<button type="button" class="w4u-mobile-review-more" aria-expanded="false">View More</button>`:''}<div class="w4u-mobile-happy-meta"><span class="w4u-mobile-happy-name">${name}</span><span class="w4u-mobile-happy-event">${event}</span>${age?`<span class="w4u-review-age">${age}</span>`:''}</div></div></article>`;
   }).join('');
   if(row && row.innerHTML!==desktopHtml) row.innerHTML=desktopHtml;
   if(section) section.style.display='block';
