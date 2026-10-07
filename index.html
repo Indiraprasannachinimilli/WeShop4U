@@ -8,7 +8,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<style>:root{color-scheme:only light}</style>
+<style>:root{color-scheme:only light}
+.other-requirement-preview{flex-wrap:wrap}
+.other-requirement-preview-card{display:inline-flex;align-items:center;gap:4px;max-width:100%;padding:3px 5px;border:1px solid #ead9b9;border-radius:4px;background:#fff}
+.other-requirement-preview-card>span{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+</style>
 
 <!-- Happy Clients images depend on the Supabase library + a signed-URL round
      trip. Warming the connection and starting the library download here,
@@ -4475,6 +4479,11 @@ function cleanupOtherRequirementPreview(row){
   const preview=row?.querySelector('.other-requirement-preview');
   const oldUrl=preview?.dataset?.objectUrl;
   if(oldUrl){ URL.revokeObjectURL(oldUrl); delete preview.dataset.objectUrl; }
+  try{
+    const urls=JSON.parse(preview?.dataset?.objectUrls||'[]');
+    urls.forEach(url=>URL.revokeObjectURL(url));
+  }catch{}
+  if(preview) delete preview.dataset.objectUrls;
 }
 
 function createOtherRequirementRow(data={}){
@@ -4494,10 +4503,10 @@ function createOtherRequirementRow(data={}){
       <input class="form-control other-requirement-details" id="otherRequirementDetails${id}" type="text" maxlength="320" placeholder="Quantity, colour, size, style, etc." value="${escapeHtml(data.details||'')}">
     </div>
     <div class="other-requirement-upload-wrap">
-      <label class="form-label">Reference Image <span style="font-weight:400;color:#777;">(optional)</span></label>
+      <label class="form-label">Reference Images <span style="font-weight:400;color:#777;">(optional, up to 3)</span></label>
       <label class="other-requirement-upload">
-        <input type="file" class="other-requirement-image" accept="image/*">
-        <span>📷 Upload Image</span>
+        <input type="file" class="other-requirement-image" accept="image/*" multiple>
+        <span>📷 Upload Images (max 3)</span>
       </label>
       <div class="other-requirement-preview">${data.referenceImageName ? `<span>Previously: ${escapeHtml(data.referenceImageName)}</span>` : ''}</div>
     </div>
@@ -4510,17 +4519,31 @@ function createOtherRequirementRow(data={}){
   fileInput?.addEventListener('change',()=>{
     cleanupOtherRequirementPreview(row);
     preview.innerHTML='';
-    const file=fileInput.files?.[0];
-    if(!file) return;
-    const objectUrl=URL.createObjectURL(file);
-    preview.dataset.objectUrl=objectUrl;
-    const img=document.createElement('img');
-    img.src=objectUrl;
-    img.alt='Reference preview';
-    const name=document.createElement('span');
-    name.textContent=file.name;
-    preview.append(img,name);
-    optimizeImageForUpload(file).catch(error=>console.warn('Image pre-optimization unavailable',error));
+    let files=[...(fileInput.files||[])].filter(file=>file.type?.startsWith('image/'));
+    if(files.length>3){
+      alert('You can attach up to 3 reference images for each special requirement.');
+      const dt=new DataTransfer();
+      files.slice(0,3).forEach(file=>dt.items.add(file));
+      fileInput.files=dt.files;
+      files=files.slice(0,3);
+    }
+    if(!files.length) return;
+    const urls=[];
+    files.forEach((file,index)=>{
+      const objectUrl=URL.createObjectURL(file);
+      urls.push(objectUrl);
+      const card=document.createElement('span');
+      card.className='other-requirement-preview-card';
+      const img=document.createElement('img');
+      img.src=objectUrl;
+      img.alt=`Reference preview ${index+1}`;
+      const name=document.createElement('span');
+      name.textContent=file.name;
+      card.append(img,name);
+      preview.appendChild(card);
+      optimizeImageForUpload(file).catch(error=>console.warn('Image pre-optimization unavailable',error));
+    });
+    preview.dataset.objectUrls=JSON.stringify(urls);
   });
 
   row.querySelector('.other-requirement-remove')?.addEventListener('click',()=>{
@@ -4562,9 +4585,10 @@ function getOtherRequirementsData(){
     .map(row=>{
       const item=row.querySelector('.other-requirement-item')?.value?.trim() || '';
       const details=row.querySelector('.other-requirement-details')?.value?.trim() || '';
-      const file=row.querySelector('.other-requirement-image')?.files?.[0] || null;
-      const previous=row.querySelector('.other-requirement-preview span')?.textContent?.replace(/^Previously:\s*/,'') || '';
-      return {item,details,referenceImageName:file?.name || previous || '',hasNewImage:!!file};
+      const files=[...(row.querySelector('.other-requirement-image')?.files||[])].slice(0,3);
+      const previous=row.querySelector('.other-requirement-preview')?.textContent?.replace(/^Previously:\s*/,'').trim() || '';
+      const referenceImageNames=files.length ? files.map(file=>file.name) : (previous ? previous.split(/\s*\|\s*/).filter(Boolean) : []);
+      return {item,details,referenceImageNames,referenceImageName:referenceImageNames.join(' | '),hasNewImage:files.length>0};
     })
     .filter(entry=>entry.item || entry.details || entry.referenceImageName);
 }
@@ -4615,14 +4639,17 @@ function parseOtherRequirementsFromNotes(notes){
     const itemMatch=line.match(/^\s*\d+\.\s*Item:\s*(.*)$/i);
     if(itemMatch){
       if(current?.item) result.push(current);
-      current={item:itemMatch[1].trim(),details:'',referenceImageName:''};
+      current={item:itemMatch[1].trim(),details:'',referenceImageName:'',referenceImageNames:[]};
       return;
     }
     if(!current) return;
     const detailsMatch=line.match(/^\s*Details:\s*(.*)$/i);
     if(detailsMatch){ current.details=detailsMatch[1].trim(); return; }
-    const imageMatch=line.match(/^\s*Reference image:\s*(.*)$/i);
-    if(imageMatch){ current.referenceImageName=imageMatch[1].trim(); }
+    const imageMatch=line.match(/^\s*Reference images?:\s*(.*)$/i);
+    if(imageMatch){
+      current.referenceImageName=imageMatch[1].trim();
+      current.referenceImageNames=current.referenceImageName.split(/\s*\|\s*/).filter(Boolean);
+    }
   });
   if(current?.item) result.push(current);
   return result;
@@ -4635,7 +4662,7 @@ function composeNotesWithOtherRequirements(baseNotes,requirements){
   requirements.forEach((entry,index)=>{
     lines.push(`${index+1}. Item: ${String(entry.item||'').replace(/\s+/g,' ').trim()}`);
     if(entry.details) lines.push(`   Details: ${String(entry.details).replace(/\s+/g,' ').trim()}`);
-    if(entry.referenceImageName) lines.push(`   Reference image: ${String(entry.referenceImageName).replace(/\s+/g,' ').trim()}`);
+    if(entry.referenceImageName) lines.push(`   Reference images: ${String(entry.referenceImageName).replace(/\s+/g,' ').trim()}`);
   });
   return [cleanBase,lines.join('\n')].filter(Boolean).join('\n\n');
 }
@@ -5077,6 +5104,7 @@ function validateStep(i){
 
   if(
     i === 0 &&
+    !isOtherRequirementSelected() &&
     !document.querySelector(
       'input[name="items"]:checked'
     )
