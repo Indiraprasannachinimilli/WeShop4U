@@ -6129,18 +6129,36 @@ document.getElementById('submitRequest').addEventListener('click',async()=>{
       const updated=await updateCustomerRequestById(requestId,payload,sessionStorage.getItem('weshop4u_verification_phone')||payload.contactNumber);
       if(!updated) throw new Error('This request can no longer be edited.');
     }else{
-      // Save the order and upload optional images at the same time instead of serially.
+      // IMPORTANT: create the order row BEFORE uploading images. Storage policies may
+      // verify that the request exists; parallel insert/upload creates a race that is
+      // much easier to hit when several images are selected.
       const basePayload={...payload,sampleImages:[]};
-      const [newlyUploadedImages]=await Promise.all([
-        uploadCustomerSampleImages(requestId),
-        saveRequestToSupabase(basePayload)
-      ]);
-      status.textContent='Finalizing your order…';
+      status.textContent='Saving your order…';
+      await saveRequestToSupabase(basePayload);
+
+      let newlyUploadedImages=[];
+      if(selectedImageCount){
+        status.textContent=`Order saved. Uploading ${selectedImageCount} image${selectedImageCount===1?'':'s'}…`;
+        try{
+          newlyUploadedImages=await uploadCustomerSampleImages(requestId) || [];
+        }catch(imageError){
+          console.error('Order saved but image upload failed',imageError);
+          // The order itself is already safely online. Do not tell the customer that
+          // the whole order failed just because optional image storage had a problem.
+          newlyUploadedImages=[];
+          payload._imageUploadWarning=true;
+        }
+      }
+
       payload.sampleImages=newlyUploadedImages;
       lastSubmission=payload;
       if(newlyUploadedImages.length){
+        status.textContent='Finalizing your order…';
         const imageUpdate=await updateCustomerRequestById(requestId,{sampleImages:newlyUploadedImages},payload.contactNumber);
-        if(!imageUpdate) console.warn('Order saved, but image references could not be attached.');
+        if(!imageUpdate){
+          console.warn('Order saved, but image references could not be attached.');
+          payload._imageUploadWarning=true;
+        }
       }
     }
     sessionStorage.removeItem('weshop4u_prefill_request');
@@ -6162,7 +6180,7 @@ document.getElementById('submitRequest').addEventListener('click',async()=>{
   }catch(error){
     console.error(error);
     saveRequestLocally(payload);
-    status.textContent='Order NOT submitted online. A temporary browser backup was saved. Please check your connection and tap Try Submit Again.';
+    status.textContent=`Order could not be saved online. A temporary browser backup was saved. ${error?.message ? 'Reason: '+error.message+' ' : ''}Please tap Try Submit Again.`;
     status.style.color='#9B2D3F';button.disabled=false;button.innerHTML='<span>Try Submit Again</span>';
   }
 });
