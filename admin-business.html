@@ -1,0 +1,588 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WeShop4U — Finance Admin</title>
+<style>
+:root{--bg:#fffaf0;--card:#fffdf8;--gold:#b8750b;--line:#e5c98b;--maroon:#842d0d;--text:#202630;--muted:#65717d;--green:#0a8b3b}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}.wrap{max-width:1080px;margin:auto;padding:18px}.brand{text-align:center;font-family:Georgia,serif;color:var(--maroon);font-size:34px;font-weight:700}.tag{text-align:center;color:var(--muted);font-size:12px;margin:4px 0 18px}.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}.card h2,.card h3{margin:0 0 12px;color:var(--maroon);font-family:Georgia,serif}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.two{grid-template-columns:repeat(2,1fr)}label{display:block;font-size:11px;font-weight:700;margin-bottom:4px}input,select,textarea{width:100%;min-height:36px;border:1px solid #c9d3dc;border-radius:5px;padding:7px;background:white}textarea{min-height:72px}.btn{border:1px solid #a96705;background:linear-gradient(#d59a2f,#b36e07);color:white;font-weight:700;border-radius:5px;padding:9px 15px;cursor:pointer}.btn.alt{background:white;color:var(--maroon);border-color:#dbb15e}.btn.danger{background:white;color:#a21b1b;border-color:#e1aaaa}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:end}.grow{flex:1;min-width:220px}.msg{font-size:12px;color:var(--muted);margin-top:8px}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.metric{background:#fff7df;border:1px solid #e5c16d;border-radius:8px;padding:12px}.metric small{display:block;color:var(--muted)}.metric strong{display:block;font-size:22px;color:var(--maroon);margin-top:3px}.due strong{color:#a21b1b}.paid strong{color:var(--green)}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px;border-bottom:1px solid #e5e0d7;text-align:left}th{background:#fff9eb}.table-wrap{overflow:auto}.hidden{display:none!important}.topbar{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}.review{display:grid;grid-template-columns:72px 1fr auto;gap:10px;padding:10px 0;border-bottom:1px solid #eee}.review img{width:72px;height:72px;object-fit:cover;border-radius:7px}.review-images{display:flex;gap:6px;flex-wrap:wrap;align-content:flex-start}.review-images img{width:72px;height:72px;object-fit:cover;border-radius:7px;border:1px solid #e5c98b;background:#fff}.review-no-image{width:72px;height:72px;border:1px dashed #d9c39a;border-radius:7px;display:grid;place-items:center;color:var(--muted);font-size:10px;text-align:center;padding:4px}.stars{color:var(--gold)}
+.review-section-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}
+.review-count{display:inline-grid;place-items:center;min-width:25px;height:22px;padding:0 8px;border-radius:999px;background:#f7df9d;color:#6f3b00;font:700 11px Arial}
+.review-card-approved{border-color:#b8dec4;background:#fbfffc}
+.review-card-approved h2{color:#176a35}
+.btn.disable{background:#fff8df;color:#7b4a00;border-color:#e4b647}
+.review-actions{display:flex;gap:6px;flex-wrap:wrap}
+.review-actions .btn{white-space:nowrap}
+.review-date{font-size:10px;color:var(--muted);margin-top:5px}@media(max-width:700px){.grid,.two,.summary{grid-template-columns:1fr}.review{grid-template-columns:1fr}.review-images{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.review-images img{width:100%;height:110px}.review-no-image{width:100%;height:80px}.wrap{padding:10px}.brand{font-size:28px}}
+@media print{.no-print,#loginCard,#reviewsCard{display:none!important}.wrap{max-width:none}.card{border:0}.brand{font-size:26px}}
+
+.item-row{display:grid;grid-template-columns:minmax(150px,3fr) 70px 110px 110px auto;gap:8px;align-items:end;margin:8px 0}.item-total{padding:10px 2px;font-weight:bold}.receipt-only{display:none}.document-heading{font-size:20px;color:var(--maroon);margin:8px 0}.doc-table{width:100%;border-collapse:collapse}.doc-table td,.doc-table th{padding:8px;border-bottom:1px solid #ddd}.doc-total{font-size:18px;font-weight:bold}.small-note{font-size:11px;color:var(--muted)}
+@media(max-width:700px){.item-row{grid-template-columns:minmax(0,1fr) 70px 95px}.item-row .item-total{grid-column:2}.item-row button{grid-column:3}}
+@media print{body{background:white}.wrap{padding:0}.brand,.tag,#app>.topbar,#app>.card,#financeArea>.card{display:none!important}#app,#financeArea,#documentCard{display:block!important}#documentCard{border:0!important;padding:0!important}#documentCard h2,.doc-actions{display:none!important}.receipt-only{display:block!important}}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.tab{border:1px solid #d9bd84;background:white;color:#842d0d;border-radius:9px;padding:12px 16px;font-weight:bold;cursor:pointer}.tab.active{background:#842d0d;color:white}.tab-pane.hidden{display:none!important}#analyticsFrame{width:100%;border:0;min-height:1250px;background:#fffaf0;border-radius:10px}.finance-tabs-info{font-size:12px;color:#65717d;margin:6px 0 14px}@media print{.tabs,#analyticsPane,#expensesPane{display:none!important}}
+</style></head><body><div class="wrap"><div class="brand">WeShop4U</div><div class="tag">Finance • Delivery • Receipts</div><!-- feature/admin-finance login diagnostics v2 -->
+<div class="card" id="loginCard"><h2>Admin Sign In</h2><div><label>Email</label><input id="adminEmail" type="email" autocomplete="username" placeholder="Admin email"></div><div style="margin-top:10px"><label>Password</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Password"></div><div class="row" style="margin-top:10px"><button class="btn" id="login" type="button">Sign In</button><button class="btn alt hidden" id="logout">Logout</button></div><div class="msg" id="loginMsg">Sign in with your existing Supabase admin user.</div></div>
+<div id="app" class="hidden"><div class="topbar no-print"><strong id="who"></strong><div><a class="btn alt" href="./index.html?admin=1" style="text-decoration:none">Orders Admin</a> <button class="btn alt" id="logout2">Logout</button></div></div>
+<nav class="tabs no-print" aria-label="Business sections"><button type="button" class="tab active" data-tab="orders">Orders & Bills</button><button type="button" class="tab" data-tab="expenses">Expenses</button><button type="button" class="tab" data-tab="analytics">Analytics</button></nav><div class="finance-tabs-info no-print">One admin login · shared Supabase records · customer bills, expenses and analytics</div><div id="ordersPane" class="tab-pane"><div class="card no-print"><h2>Find Order</h2><div class="row"><div class="grow"><label>Order ID</label><input id="orderId" placeholder="WS-XXXXXX"></div><button class="btn" id="loadOrder">Load Order</button></div><div class="msg" id="loadMsg"></div></div>
+<div id="financeArea" class="hidden"><div class="card"><h2>Order & Delivery</h2><div class="grid"><div><label>Customer</label><input id="customer" readonly></div><div><label>Contact Number</label><input id="contact" readonly></div><div><label>Event</label><input id="event" readonly></div><div><label>Expected Delivery Date</label><input id="expectedDate" type="date"></div><div><label>Actual Delivery Date</label><input id="actualDate" type="date"></div><div><label>Order Status</label><select id="orderStatus"><option>submitted</option><option>confirmed</option><option>out_for_shopping</option><option>purchased</option><option>out_for_delivery</option><option>delivered</option><option value="closed">completed</option><option>cancelled</option></select></div></div></div>
+<div class="card no-print"><h2>Purchased Items</h2><div class="msg">Enter each product or service separately. Quantity × unit price is calculated automatically.</div><div id="itemsList"></div><div class="row" style="margin-top:10px"><button class="btn alt" type="button" id="addItem">+ Add Item</button><strong style="margin-left:auto">Items Total: <span id="itemsTotal">₹0.00</span></strong></div><div class="msg" id="itemsMsg"></div></div>
+ <div class="card no-print"><h2>Payment Summary</h2><div class="summary"><div class="metric"><small>Total Charged</small><strong id="chargedView">₹0.00</strong></div><div class="metric paid"><small>Total Paid</small><strong id="paidView">₹0.00</strong></div><div class="metric due"><small>Amount Due</small><strong id="dueView">₹0.00</strong></div></div><div class="grid two" style="margin-top:12px"><div><label>Total Amount Charged (from items)</label><input id="totalCharged" type="number" min="0" step="0.01" readonly></div><div><label>Finance / Delivery Notes</label><textarea id="financeNotes"></textarea></div></div><button class="btn no-print" id="saveFinance" style="margin-top:10px">Save Finance Details</button><div class="msg" id="saveMsg"></div></div>
+<div class="card no-print"><h2>Payments</h2><div class="grid no-print"><div><label>Amount</label><input id="payAmount" type="number" min="0.01" step="0.01"></div><div><label>Payment Type</label><select id="payType"><option value="advance">Advance</option><option value="payment">Payment</option><option value="balance">Balance</option><option value="refund">Refund</option></select></div><div><label>Method</label><select id="payMethod"><option value="UPI">UPI</option><option value="Cash">Cash</option><option value="Bank Transfer">Bank Transfer</option><option value="Card">Card</option><option value="Other">Other</option></select></div><div><label>Transaction Reference</label><input id="payRef"></div><div><label>Payment Date</label><input id="payDate" type="datetime-local"></div><div><label>Notes</label><input id="payNotes"></div></div><button class="btn no-print" id="addPayment" style="margin-top:10px">+ Add Payment</button><div class="msg" id="payMsg"></div><div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Date</th><th>Type</th><th>Method</th><th>Reference</th><th>Amount</th></tr></thead><tbody id="paymentsBody"></tbody></table></div></div>
+<div class="card" id="documentCard"><h2>Customer Bill / Invoice</h2><div class="row no-print doc-actions" style="margin-bottom:12px"><button class="btn alt" id="showBill" type="button">Customer Bill</button><button class="btn" id="showInvoice" type="button">Final Invoice</button><button class="btn alt" id="printReceipt" type="button">Print / Save PDF</button></div><div id="receipt"></div><div class="msg no-print" id="docMsg"></div></div></div>
+<div class="card no-print" id="reviewsCard">
+<div class="review-section-head"><h2 style="margin:0">Reviews Awaiting Approval</h2><span class="review-count" id="pendingReviewCount">0</span></div>
+<div class="msg" style="margin:0 0 10px">These reviews are not visible in Happy Clients until approved.</div>
+<div id="reviews"></div><div class="msg" id="reviewMsg"></div></div>
+<div class="card no-print review-card-approved" id="approvedReviewsCard">
+<div class="review-section-head"><h2 style="margin:0">Approved Reviews</h2><span class="review-count" id="approvedReviewCount">0</span></div>
+<div class="msg" style="margin:0 0 10px">Disable temporarily hides a review from Happy Clients. Delete permanently removes the review and its uploaded photos.</div>
+<div id="approvedReviews"></div><div class="msg" id="approvedReviewMsg"></div></div></div><section id="expensesPane" class="tab-pane hidden no-print"><iframe id="analyticsFrame" title="WeShop4U Expenses and Analytics" srcdoc="&lt;!doctype html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
+&lt;title&gt;WeShop4U Business Analytics&lt;/title&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://flynxttakgqemgccoryq.supabase.co&quot; crossorigin&gt;
+&lt;script src=&quot;https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js&quot;&gt;&lt;/script&gt;
+&lt;style&gt;
+:root{--wine:#7b2639;--gold:#b8750b;--cream:#fffaf0;--ink:#292d31;--muted:#6b7280;--line:#eadfca;--good:#207a4b;--bad:#b42318}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f7f4ee;color:var(--ink)}
+header{background:linear-gradient(135deg,#6d2033,#8d3549);color:#fff;padding:20px}.wrap{max-width:1240px;margin:auto;padding:18px}
+h1{margin:0;font-size:1.55rem}.sub{opacity:.86;margin-top:4px;font-size:.9rem}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 5px 18px rgba(40,30,20,.05);margin-bottom:16px}
+.grid{display:grid;gap:12px}.stats{grid-template-columns:repeat(7,1fr)}.stat span{display:block;color:var(--muted);font-size:.78rem}.stat strong{font-size:1.25rem}
+.toolbar{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.field{display:flex;flex-direction:column;gap:5px;min-width:150px}
+label{font-size:.8rem;font-weight:700}input,select,button{font:inherit;border-radius:9px;border:1px solid #d7cbb8;padding:9px 10px;background:#fff}
+button{cursor:pointer;font-weight:750}.primary{background:var(--wine);color:#fff;border-color:var(--wine)}.secondary{color:var(--wine);border-color:var(--wine)}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:16px}.chart-card{min-height:360px}.chart-wrap{height:290px}
+h2{font-size:1.05rem;margin:0 0 12px}.login{max-width:650px;margin:32px auto}.login-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:10px}
+.expense-form{display:grid;grid-template-columns:150px 220px 140px 1fr 150px auto;gap:9px;align-items:end}
+table{width:100%;border-collapse:collapse;font-size:.86rem}th,td{padding:9px;border-bottom:1px solid #eee4d5;text-align:left}th{background:#fff9ec}
+.msg{font-size:.86rem;margin-top:8px}.good{color:var(--good)}.bad{color:var(--bad)}.muted{color:var(--muted)}
+.badge{display:inline-block;padding:3px 7px;border-radius:999px;background:#fff4d7;font-size:.72rem}
+[hidden]{display:none!important}
+@media(max-width:1000px){.stats{grid-template-columns:repeat(3,1fr)}.expense-form{grid-template-columns:1fr 1fr 1fr}.charts{grid-template-columns:1fr}}
+@media(max-width:650px){.stats{grid-template-columns:1fr 1fr}.login-grid,.expense-form{grid-template-columns:1fr}.wrap{padding:10px}.chart-card{min-height:330px}}
+.embedded header,.embedded .toolbar #logoutBtn{display:none!important}.embedded .wrap{padding:10px}.embedded .card{box-shadow:none}.embedded .charts{grid-template-columns:1fr 1fr}.embedded.expenses-only .stats,.embedded.expenses-only .charts,.embedded.expenses-only #expenseChartCard{display:none!important}.embedded.analytics-only #expenseEntryCard,.embedded.analytics-only #expenseListCard{display:none!important}@media(max-width:700px){.embedded .charts{grid-template-columns:1fr}}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body class=&quot;embedded expenses-only&quot;&gt;
+&lt;header&gt;&lt;div class=&quot;wrap&quot; style=&quot;padding:0&quot;&gt;&lt;h1&gt;WeShop4U — Business Analytics&lt;/h1&gt;&lt;div class=&quot;sub&quot;&gt;Payments received, charges, outstanding amounts, expenses, profit/loss, orders and customers&lt;/div&gt;&lt;/div&gt;&lt;/header&gt;
+
+&lt;main class=&quot;wrap&quot;&gt;
+&lt;section id=&quot;loginCard&quot; class=&quot;card login&quot; hidden&gt;
+  &lt;h2&gt;Admin Login&lt;/h2&gt;
+  &lt;div class=&quot;login-grid&quot;&gt;
+    &lt;input id=&quot;email&quot; type=&quot;email&quot; placeholder=&quot;Admin email&quot; autocomplete=&quot;username&quot;&gt;
+    &lt;input id=&quot;password&quot; type=&quot;password&quot; placeholder=&quot;Password&quot; autocomplete=&quot;current-password&quot;&gt;
+    &lt;button id=&quot;loginBtn&quot; class=&quot;primary&quot;&gt;Login&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div id=&quot;loginMsg&quot; class=&quot;msg muted&quot;&gt;&lt;/div&gt;
+&lt;/section&gt;
+
+&lt;div id=&quot;app&quot; hidden&gt;
+  &lt;section class=&quot;card&quot;&gt;
+    &lt;div class=&quot;toolbar&quot;&gt;
+      &lt;div class=&quot;field&quot;&gt;&lt;label&gt;Year&lt;/label&gt;&lt;select id=&quot;yearSelect&quot;&gt;&lt;/select&gt;&lt;/div&gt;
+      &lt;button id=&quot;refreshBtn&quot; class=&quot;secondary&quot;&gt;Refresh&lt;/button&gt;
+      &lt;button id=&quot;logoutBtn&quot; class=&quot;secondary&quot;&gt;Logout&lt;/button&gt;
+      &lt;span class=&quot;muted&quot; id=&quot;updatedAt&quot;&gt;&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;grid stats&quot;&gt;
+    &lt;div class=&quot;card stat&quot;&gt;&lt;span&gt;Total Charged&lt;/span&gt;&lt;strong id=&quot;totalCharged&quot;&gt;₹0&lt;/strong&gt;&lt;/div&gt;
+    &lt;div class=&quot;card stat&quot;&gt;&lt;span&gt;Payments Received&lt;/span&gt;&lt;strong id=&quot;totalSales&quot;&gt;₹0&lt;/strong&gt;&lt;/div&gt;
+    &lt;div class=&quot;card stat&quot;&gt;&lt;span&gt;Outstanding&lt;/span&gt;&lt;strong id=&quot;totalOutstanding&quot;&gt;₹0&lt;/strong&gt;&lt;/div&gt;
+    &lt;div class=&quot;card stat&quot;&gt;&lt;span&gt;Total Expenses&lt;/span&gt;&lt;strong id=&quot;totalExpenses&quot;&gt;₹0&lt;/strong&gt;&lt;/div&gt;
+    &lt;div class=&quot;card stat&quot;&gt;&lt;span&gt;Net Profit / Loss&lt;/span&gt;&lt;strong id=&quot;netProfit&quot;&gt;₹0&lt;/strong&gt;&lt;/div&gt;
+    &lt;div class=&quot;card stat&quot;&gt;&lt;span&gt;Total Orders&lt;/span&gt;&lt;strong id=&quot;totalOrders&quot;&gt;0&lt;/strong&gt;&lt;/div&gt;
+    &lt;div class=&quot;card stat&quot;&gt;&lt;span&gt;Customers&lt;/span&gt;&lt;strong id=&quot;totalCustomers&quot;&gt;0&lt;/strong&gt;&lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;charts&quot;&gt;
+    &lt;div class=&quot;card chart-card&quot;&gt;&lt;h2&gt;Monthly Payments Received&lt;/h2&gt;&lt;div class=&quot;chart-wrap&quot;&gt;&lt;canvas id=&quot;salesChart&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;card chart-card&quot;&gt;&lt;h2&gt;Payments vs Expenses vs Profit/Loss&lt;/h2&gt;&lt;div class=&quot;chart-wrap&quot;&gt;&lt;canvas id=&quot;profitChart&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;card chart-card&quot;&gt;&lt;h2&gt;Monthly Orders&lt;/h2&gt;&lt;div class=&quot;chart-wrap&quot;&gt;&lt;canvas id=&quot;ordersChart&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;card chart-card&quot;&gt;&lt;h2&gt;Monthly Customers&lt;/h2&gt;&lt;div class=&quot;chart-wrap&quot;&gt;&lt;canvas id=&quot;customersChart&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;&lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;card&quot; id=&quot;expenseEntryCard&quot;&gt;
+    &lt;h2&gt;Add Expense / Investment&lt;/h2&gt;
+    &lt;div class=&quot;expense-form&quot;&gt;
+      &lt;div class=&quot;field&quot;&gt;&lt;label&gt;Date&lt;/label&gt;&lt;input id=&quot;expenseDate&quot; type=&quot;date&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;field&quot;&gt;&lt;label&gt;Category&lt;/label&gt;
+        &lt;select id=&quot;expenseCategory&quot;&gt;
+          &lt;option&gt;Purchased Items&lt;/option&gt;&lt;option&gt;Customization / Production&lt;/option&gt;&lt;option&gt;Packaging&lt;/option&gt;
+          &lt;option&gt;Marketing&lt;/option&gt;&lt;option&gt;Petrol / Travel&lt;/option&gt;&lt;option&gt;Delivery / Courier&lt;/option&gt;
+          &lt;option&gt;Website / Technology&lt;/option&gt;&lt;option&gt;Equipment / Investment&lt;/option&gt;&lt;option&gt;Other Expenses&lt;/option&gt;
+        &lt;/select&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;field&quot;&gt;&lt;label&gt;Amount (₹)&lt;/label&gt;&lt;input id=&quot;expenseAmount&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;0.01&quot; placeholder=&quot;0&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;field&quot;&gt;&lt;label&gt;Description&lt;/label&gt;&lt;input id=&quot;expenseDescription&quot; maxlength=&quot;250&quot; placeholder=&quot;What was this expense for?&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;field&quot;&gt;&lt;label&gt;Order ID (optional)&lt;/label&gt;&lt;input id=&quot;expenseOrderId&quot; maxlength=&quot;40&quot; placeholder=&quot;WS-...&quot;&gt;&lt;/div&gt;
+      &lt;button id=&quot;saveExpenseBtn&quot; class=&quot;primary&quot;&gt;Save Expense&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;expenseMsg&quot; class=&quot;msg&quot;&gt;&lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;card&quot; id=&quot;expenseListCard&quot;&gt;
+    &lt;h2&gt;Expenses for selected year&lt;/h2&gt;
+    &lt;div style=&quot;overflow:auto&quot;&gt;
+      &lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Date&lt;/th&gt;&lt;th&gt;Category&lt;/th&gt;&lt;th&gt;Description&lt;/th&gt;&lt;th&gt;Order ID&lt;/th&gt;&lt;th&gt;Amount&lt;/th&gt;&lt;th&gt;&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+      &lt;tbody id=&quot;expenseRows&quot;&gt;&lt;/tbody&gt;&lt;/table&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;card&quot; id=&quot;expenseChartCard&quot;&gt;
+    &lt;h2&gt;Expense Breakdown&lt;/h2&gt;
+    &lt;div class=&quot;chart-wrap&quot;&gt;&lt;canvas id=&quot;expenseChart&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;
+  &lt;/section&gt;
+&lt;/div&gt;
+&lt;/main&gt;
+
+&lt;script&gt;
+const SUPABASE_URL=&#x27;https://flynxttakgqemgccoryq.supabase.co&#x27;;
+const SUPABASE_KEY=&#x27;sb_publishable_P32mETIY1qBGk8Xf6foNog_C1-ZS31Q&#x27;;
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const months=[&#x27;Jan&#x27;,&#x27;Feb&#x27;,&#x27;Mar&#x27;,&#x27;Apr&#x27;,&#x27;May&#x27;,&#x27;Jun&#x27;,&#x27;Jul&#x27;,&#x27;Aug&#x27;,&#x27;Sep&#x27;,&#x27;Oct&#x27;,&#x27;Nov&#x27;,&#x27;Dec&#x27;];
+const money=n=&gt;&#x27;₹&#x27;+Number(n||0).toLocaleString(&#x27;en-IN&#x27;,{maximumFractionDigits:2});
+let charts={};
+
+function destroyChart(name){if(charts[name]){charts[name].destroy();delete charts[name]}}
+function makeChart(name,canvas,datasets,rupees=false){
+  destroyChart(name);
+  charts[name]=new Chart(document.getElementById(canvas),{
+    type:&#x27;bar&#x27;,data:{labels:months,datasets},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:&#x27;index&#x27;,intersect:false},
+      scales:{y:{beginAtZero:true,ticks:{callback:v=&gt;rupees?money(v):v}}},
+      plugins:{tooltip:{callbacks:{label:c=&gt;`${c.dataset.label}: ${rupees?money(c.raw):c.raw}`}}}}
+  });
+}
+function yearOf(v){const d=new Date(v);return isNaN(d)?null:d.getFullYear()}
+function monthOf(v){const d=new Date(v);return isNaN(d)?null:d.getMonth()}
+function normalizeStatus(s){return String(s||&#x27;submitted&#x27;).trim().toLowerCase()}
+function customerKey(r){return String(r.contact_number||r.whatsapp_number||r.whatsapp||r.name||&#x27;&#x27;).trim().toLowerCase()}
+function saleDate(r){return r.completed_at||r.updated_at||r.submitted_at}
+function isCompleted(r){return [&#x27;completed&#x27;,&#x27;closed&#x27;].includes(normalizeStatus(r.status))}
+
+async function ensureLoggedIn(){
+  const {data}=await sb.auth.getSession();
+  if(data?.session?.user){showApp();return true}
+  return false;
+}
+function showApp(){document.getElementById(&#x27;loginCard&#x27;).hidden=true;document.getElementById(&#x27;app&#x27;).hidden=false;loadAll()}
+document.getElementById(&#x27;loginBtn&#x27;).onclick=async()=&gt;{
+  const msg=document.getElementById(&#x27;loginMsg&#x27;);msg.textContent=&#x27;Signing in…&#x27;;
+  const {error}=await sb.auth.signInWithPassword({email:email.value.trim(),password:password.value});
+  if(error){msg.textContent=&#x27;Login failed: &#x27;+error.message;return}
+  msg.textContent=&#x27;&#x27;;showApp();
+};
+document.getElementById(&#x27;logoutBtn&#x27;).onclick=async()=&gt;{await sb.auth.signOut();location.reload()};
+document.getElementById(&#x27;refreshBtn&#x27;).onclick=loadAll;
+document.getElementById(&#x27;yearSelect&#x27;).onchange=loadAll;
+
+async function fetchData(){
+  const [ordersRes,financeRes,paymentsRes,expensesRes]=await Promise.all([
+    sb.from(&#x27;customer_requests&#x27;).select(&#x27;request_id,submitted_at,updated_at,completed_at,name,contact_number,whatsapp_number,whatsapp,status&#x27;),
+    sb.from(&#x27;order_finance&#x27;).select(&#x27;order_id,total_amount_charged&#x27;),
+    sb.from(&#x27;order_payments&#x27;).select(&#x27;order_id,amount,payment_type,payment_date&#x27;),
+    sb.from(&#x27;business_expenses&#x27;).select(&#x27;id,expense_date,category,description,amount,order_id,created_at&#x27;).order(&#x27;expense_date&#x27;,{ascending:false})
+  ]);
+  if(ordersRes.error) throw ordersRes.error;
+  if(financeRes.error) throw financeRes.error;
+  if(paymentsRes.error) throw paymentsRes.error;
+  if(expensesRes.error) throw expensesRes.error;
+  return {
+    orders:ordersRes.data||[],
+    finance:financeRes.data||[],
+    payments:paymentsRes.data||[],
+    expenses:expensesRes.data||[]
+  };
+}
+function populateYears(orders,expenses){
+  const select=document.getElementById(&#x27;yearSelect&#x27;), current=Number(select.value)||new Date().getFullYear();
+  const years=new Set([new Date().getFullYear()]);
+  orders.forEach(r=&gt;{const y=yearOf(r.submitted_at);if(y)years.add(y);const sy=yearOf(saleDate(r));if(sy)years.add(sy)});
+  expenses.forEach(e=&gt;{const y=yearOf(e.expense_date);if(y)years.add(y)});
+  const sorted=[...years].sort((a,b)=&gt;b-a);
+  select.innerHTML=sorted.map(y=&gt;`&lt;option value=&quot;${y}&quot;&gt;${y}&lt;/option&gt;`).join(&#x27;&#x27;);
+  select.value=years.has(current)?current:sorted[0];
+}
+async function loadAll(){
+  try{
+    const data=await fetchData();
+    if(!yearSelect.options.length) populateYears(data.orders,data.expenses);
+    render(data.orders,data.finance,data.payments,data.expenses,Number(yearSelect.value));
+    updatedAt.textContent=&#x27;Updated &#x27;+new Date().toLocaleString();
+  }catch(e){alert(&#x27;Unable to load analytics: &#x27;+e.message)}
+}
+function render(orders,finance,payments,expenses,year){
+  const sales=Array(12).fill(0), costs=Array(12).fill(0), profit=Array(12).fill(0);
+  const requests=Array(12).fill(0), completed=Array(12).fill(0), customers=Array(12).fill(0);
+  const monthlyCustomerSets=Array.from({length:12},()=&gt;new Set());
+  const ordersById=new Map(orders.map(r=&gt;[r.request_id,r]));
+  const financeById=new Map(finance.map(f=&gt;[f.order_id,f]));
+
+  orders.forEach(r=&gt;{
+    if(yearOf(r.submitted_at)===year){
+      const m=monthOf(r.submitted_at); requests[m]++;
+      const k=customerKey(r);if(k)monthlyCustomerSets[m].add(k);
+    }
+    if(isCompleted(r)&amp;&amp;yearOf(saleDate(r))===year){
+      const m=monthOf(saleDate(r));completed[m]++;
+    }
+  });
+
+  // Revenue is based on actual payment records, not customer_requests.actual_sale_amount.
+  // Refunds reduce received revenue in the month in which the refund was recorded.
+  payments.forEach(p=&gt;{
+    if(yearOf(p.payment_date)!==year)return;
+    const m=monthOf(p.payment_date);
+    if(m===null)return;
+    const amount=Number(p.amount||0);
+    sales[m]+=normalizeStatus(p.payment_type)===&#x27;refund&#x27;?-amount:amount;
+  });
+
+  expenses.filter(e=&gt;yearOf(e.expense_date)===year).forEach(e=&gt;{
+    const m=monthOf(e.expense_date);
+    if(m!==null)costs[m]+=Number(e.amount||0);
+  });
+  for(let i=0;i&lt;12;i++){customers[i]=monthlyCustomerSets[i].size;profit[i]=sales[i]-costs[i]}
+
+  // Charged/outstanding are shown for orders created in the selected year.
+  // Cancelled orders are excluded from outstanding balances.
+  let chargedTotal=0, outstandingTotal=0;
+  orders.filter(r=&gt;yearOf(r.submitted_at)===year).forEach(r=&gt;{
+    const charged=Number(financeById.get(r.request_id)?.total_amount_charged||0);
+    chargedTotal+=charged;
+    if(normalizeStatus(r.status)!==&#x27;cancelled&#x27;){
+      const paidForOrder=payments
+        .filter(p=&gt;p.order_id===r.request_id)
+        .reduce((sum,p)=&gt;sum+(normalizeStatus(p.payment_type)===&#x27;refund&#x27;?-Number(p.amount||0):Number(p.amount||0)),0);
+      outstandingTotal+=Math.max(0,charged-paidForOrder);
+    }
+  });
+
+  totalCharged.textContent=money(chargedTotal);
+  totalSales.textContent=money(sales.reduce((a,b)=&gt;a+b,0));
+  totalOutstanding.textContent=money(outstandingTotal);
+  totalExpenses.textContent=money(costs.reduce((a,b)=&gt;a+b,0));
+  const np=profit.reduce((a,b)=&gt;a+b,0);netProfit.textContent=money(np);netProfit.className=np&gt;=0?&#x27;good&#x27;:&#x27;bad&#x27;;
+  totalOrders.textContent=requests.reduce((a,b)=&gt;a+b,0);
+  totalCustomers.textContent=new Set(orders.filter(r=&gt;yearOf(r.submitted_at)===year).map(customerKey).filter(Boolean)).size;
+
+  makeChart(&#x27;sales&#x27;,&#x27;salesChart&#x27;,[{label:&#x27;Payments Received&#x27;,data:sales}],true);
+  makeChart(&#x27;profit&#x27;,&#x27;profitChart&#x27;,[
+    {label:&#x27;Payments Received&#x27;,data:sales},{label:&#x27;Expenses&#x27;,data:costs},{label:&#x27;Profit / Loss&#x27;,data:profit}
+  ],true);
+  makeChart(&#x27;orders&#x27;,&#x27;ordersChart&#x27;,[{label:&#x27;Requests&#x27;,data:requests},{label:&#x27;Completed&#x27;,data:completed}],false);
+  makeChart(&#x27;customers&#x27;,&#x27;customersChart&#x27;,[{label:&#x27;Customers&#x27;,data:customers}],false);
+
+  const yearExpenses=expenses.filter(e=&gt;yearOf(e.expense_date)===year);
+  expenseRows.innerHTML=yearExpenses.length?yearExpenses.map(e=&gt;`&lt;tr&gt;
+    &lt;td&gt;${e.expense_date||&#x27;&#x27;}&lt;/td&gt;&lt;td&gt;&lt;span class=&quot;badge&quot;&gt;${escapeHtml(e.category||&#x27;&#x27;)}&lt;/span&gt;&lt;/td&gt;
+    &lt;td&gt;${escapeHtml(e.description||&#x27;&#x27;)}&lt;/td&gt;&lt;td&gt;${escapeHtml(e.order_id||&#x27;—&#x27;)}&lt;/td&gt;
+    &lt;td&gt;${money(e.amount)}&lt;/td&gt;&lt;td&gt;&lt;button class=&quot;secondary&quot; onclick=&quot;deleteExpense(&#x27;${e.id}&#x27;)&quot;&gt;Delete&lt;/button&gt;&lt;/td&gt;
+  &lt;/tr&gt;`).join(&#x27;&#x27;):&#x27;&lt;tr&gt;&lt;td colspan=&quot;6&quot; class=&quot;muted&quot;&gt;No expenses entered for this year.&lt;/td&gt;&lt;/tr&gt;&#x27;;
+
+  const byCat={};yearExpenses.forEach(e=&gt;byCat[e.category]=(byCat[e.category]||0)+Number(e.amount||0));
+  destroyChart(&#x27;expense&#x27;);
+  charts.expense=new Chart(document.getElementById(&#x27;expenseChart&#x27;),{
+    type:&#x27;bar&#x27;,data:{labels:Object.keys(byCat),datasets:[{label:&#x27;Expenses&#x27;,data:Object.values(byCat)}]},
+    options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{callback:v=&gt;money(v)}}},
+      plugins:{tooltip:{callbacks:{label:c=&gt;&#x27;Expenses: &#x27;+money(c.raw)}}}}
+  });
+}
+
+function escapeHtml(v){return String(v??&#x27;&#x27;).replace(/[&amp;&lt;&gt;&quot;&#x27;]/g,c=&gt;({&#x27;&amp;&#x27;:&#x27;&amp;amp;&#x27;,&#x27;&lt;&#x27;:&#x27;&amp;lt;&#x27;,&#x27;&gt;&#x27;:&#x27;&amp;gt;&#x27;,&#x27;&quot;&#x27;:&#x27;&amp;quot;&#x27;,&quot;&#x27;&quot;:&#x27;&amp;#39;&#x27;}[c]))}
+
+document.getElementById(&#x27;saveExpenseBtn&#x27;).onclick=async()=&gt;{
+  const msg=expenseMsg, amount=Number(expenseAmount.value);
+  if(!expenseDate.value||!amount||amount&lt;=0){msg.textContent=&#x27;Enter a date and an amount greater than zero.&#x27;;msg.className=&#x27;msg bad&#x27;;return}
+  msg.textContent=&#x27;Saving…&#x27;;msg.className=&#x27;msg muted&#x27;;
+  const {error}=await sb.from(&#x27;business_expenses&#x27;).insert({
+    expense_date:expenseDate.value,category:expenseCategory.value,amount,
+    description:expenseDescription.value.trim()||null,order_id:expenseOrderId.value.trim().toUpperCase()||null
+  });
+  if(error){msg.textContent=&#x27;Unable to save: &#x27;+error.message;msg.className=&#x27;msg bad&#x27;;return}
+  msg.textContent=&#x27;Expense saved.&#x27;;msg.className=&#x27;msg good&#x27;;
+  expenseAmount.value=&#x27;&#x27;;expenseDescription.value=&#x27;&#x27;;expenseOrderId.value=&#x27;&#x27;;
+  await loadAll();
+};
+window.deleteExpense=async id=&gt;{
+  if(!confirm(&#x27;Delete this expense?&#x27;))return;
+  const {error}=await sb.from(&#x27;business_expenses&#x27;).delete().eq(&#x27;id&#x27;,id);
+  if(error){alert(error.message);return}await loadAll();
+};
+expenseDate.value=new Date().toISOString().slice(0,10);
+window.addEventListener(&#x27;message&#x27;,e=&gt;{if(e.origin!==location.origin||!e.data||e.data.kind!==&#x27;weshop4u-tab&#x27;)return;document.body.classList.toggle(&#x27;expenses-only&#x27;,e.data.tab===&#x27;expenses&#x27;);document.body.classList.toggle(&#x27;analytics-only&#x27;,e.data.tab===&#x27;analytics&#x27;);if(!document.getElementById(&#x27;app&#x27;).hidden)loadAll();});
+ensureLoggedIn().then(ok=&gt;{if(!ok)document.getElementById(&#x27;loginCard&#x27;).hidden=false});
+&lt;/script&gt;
+&lt;/body&gt;&lt;/html&gt;" loading="eager"></iframe></section></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+const SUPABASE_URL='https://flynxttakgqemgccoryq.supabase.co';
+const KEY='sb_publishable_P32mETIY1qBGk8Xf6foNog_C1-ZS31Q';
+let sb=null,order=null,finance=null,payments=[],items=[],documentMode="bill",saving=false,addingPayment=false;
+const $=id=>document.getElementById(id);
+const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function localInputNow(){const d=new Date(Date.now()-new Date().getTimezoneOffset()*60000);return d.toISOString().slice(0,16)}
+if($('payDate')) $('payDate').value=localInputNow();
+
+function initSupabase(){
+  if(sb) return true;
+  try{
+    if(!globalThis.supabase || typeof globalThis.supabase.createClient!=='function') throw new Error('Supabase library did not load.');
+    sb=globalThis.supabase.createClient(SUPABASE_URL,KEY);
+    return true;
+  }catch(e){
+    $('loginMsg').textContent='Supabase initialization failed: '+(e?.message||String(e));
+    return false;
+  }
+}
+async function showAuthenticated(user){
+  $('app').classList.remove('hidden');
+  $('login').classList.add('hidden');
+  $('logout').classList.remove('hidden');
+  $('who').textContent='Signed in: '+(user?.email||'Admin');
+  $('loginMsg').textContent='Signed in successfully.';
+  await Promise.all([loadReviews(),loadApprovedReviews()]);
+}
+async function signIn(){
+  if(!initSupabase()) return;
+  const email=($('adminEmail').value||'').trim();
+  const password=$('adminPassword').value||'';
+  if(!email || !password){$('loginMsg').textContent='Enter both email and password.';return;}
+  $('loginMsg').textContent='Signing in…';
+  $('login').disabled=true;
+  try{
+    const {data,error}=await sb.auth.signInWithPassword({email,password});
+    if(error) throw error;
+    if(!data?.user) throw new Error('No authenticated user returned.');
+    await showAuthenticated(data.user);
+  }catch(e){
+    $('loginMsg').textContent='Sign in failed: '+(e?.message||String(e));
+  }finally{
+    $('login').disabled=false;
+  }
+}
+async function signOut(){
+  if(initSupabase()) await sb.auth.signOut();
+  $('app').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  $('logout').classList.add('hidden');
+  $('who').textContent='';
+  $('adminPassword').value='';
+  $('loginMsg').textContent='Signed out.';
+}
+$('login').addEventListener('click',signIn);
+$('adminPassword').addEventListener('keydown',e=>{if(e.key==='Enter')signIn()});
+$('logout').onclick=signOut;
+$('logout2').onclick=signOut;
+
+async function restoreSession(){
+  if(!initSupabase()) return;
+  const {data,error}=await sb.auth.getSession();
+  if(!error && data?.session?.user) await showAuthenticated(data.session.user);
+}
+restoreSession();
+$('loadOrder').onclick=loadOrder;
+function addItemRow(item={}){items.push({description:item.description||'',quantity:Number(item.quantity)||1,unit_price:Number(item.unit_price)||0});renderItems()}
+function itemsTotal(){return Math.round(items.reduce((sum,i)=>sum+(Number(i.quantity)||0)*(Number(i.unit_price)||0),0)*100)/100}
+function renderItems(){const holder=$('itemsList');holder.innerHTML=items.map((i,n)=>`<div class="item-row"><div><label>Item / Service</label><input data-item="${n}" data-field="description" placeholder="e.g. Customized handkerchief" value="${esc(i.description)}"></div><div><label>Qty</label><input data-item="${n}" data-field="quantity" type="number" min="0.01" step="0.01" value="${i.quantity}"></div><div><label>Unit Price ₹</label><input data-item="${n}" data-field="unit_price" type="number" min="0" step="0.01" value="${i.unit_price}"></div><div class="item-total">${money(i.quantity*i.unit_price)}</div><button class="btn danger" data-remove="${n}" type="button">Remove</button></div>`).join('');holder.querySelectorAll('[data-item]').forEach(el=>el.addEventListener('change',()=>{const i=Number(el.dataset.item),f=el.dataset.field;items[i][f]=f==='description'?el.value:Number(el.value);renderItems();render()}));holder.querySelectorAll('[data-remove]').forEach(el=>el.onclick=()=>{items.splice(Number(el.dataset.remove),1);renderItems();render()});$('itemsTotal').textContent=money(itemsTotal());$('totalCharged').value=itemsTotal();}
+$('addItem').onclick=()=>addItemRow();
+async function loadOrder(){if(!initSupabase())return;const id=$('orderId').value.trim().toUpperCase();if(!id)return;$('loadMsg').textContent='Loading…';const r=await sb.from('customer_requests').select('request_id,name,contact_number,whatsapp_number,whatsapp,event,delivery_expected_date,status').eq('request_id',id).maybeSingle();if(r.error||!r.data){$('loadMsg').textContent=r.error?'Unable to load: '+r.error.message:'Order not found.';return}const f=await sb.from('order_finance').select('*').eq('order_id',id).maybeSingle();if(f.error){$('loadMsg').textContent='Finance table unavailable: '+f.error.message;return}const p=await sb.from('order_payments').select('*').eq('order_id',id).order('payment_date',{ascending:false});if(p.error){$('loadMsg').textContent='Payments unavailable: '+p.error.message;return}const it=await sb.from('order_finance_items').select('description,quantity,unit_price').eq('order_id',id).order('position',{ascending:true});if(it.error){$('loadMsg').textContent='Item table unavailable. Run the supplied SQL migration first: '+it.error.message;return}order=r.data;finance=f.data||null;payments=p.data||[];items=(it.data||[]).map(x=>({description:x.description,quantity:Number(x.quantity),unit_price:Number(x.unit_price)}));$('customer').value=order.name||'';$('contact').value=order.contact_number||order.whatsapp_number||order.whatsapp||'';$('event').value=order.event||'';$('expectedDate').value=finance?.expected_delivery_date||order.delivery_expected_date||'';$('actualDate').value=finance?.actual_delivery_date||'';$('orderStatus').value=finance?.order_status||order.status||'submitted';$('financeNotes').value=finance?.notes||'';if(!items.length&&Number(finance?.total_amount_charged)>0){items=[{description:'Previous order total — update with purchased items',quantity:1,unit_price:Number(finance.total_amount_charged)}]}renderItems();$('financeArea').classList.remove('hidden');$('loadMsg').textContent='Order loaded.';render()}
+function paidTotal(){return Math.round(payments.reduce((t,p)=>t+(p.payment_type==='refund'?-Number(p.amount):Number(p.amount)),0)*100)/100}
+// Complete only after confirmed delivery AND net payment covers the saved order total.
+// Use existing 'closed' status as completed to avoid a database status migration.
+function deliveredConfirmed(){return ['delivered','closed'].includes($('orderStatus').value)}
+function completionEligible(){return !!order && !!finance && Number(finance.total_amount_charged)>0 && Math.abs(Number(finance.total_amount_charged)-itemsTotal())<0.005 && paidTotal()+0.005>=Number(finance.total_amount_charged) && deliveredConfirmed() && !payments.some(p=>p.payment_type==='refund')}
+async function syncOrderCompletion(){
+  if(!order || ['cancelled'].includes($('orderStatus').value))return false;
+  if(!completionEligible() || $('orderStatus').value==='closed')return false;
+  const now=new Date().toISOString();
+  const {error:fe}=await sb.from('order_finance').update({order_status:'closed',updated_at:now}).eq('order_id',order.request_id);
+  if(fe)throw fe;
+  const {error:oe}=await sb.from('customer_requests').update({status:'closed',updated_at:now}).eq('request_id',order.request_id);
+  if(oe)throw oe;
+  $('orderStatus').value='closed';finance.order_status='closed';order.status='closed';render();return true;
+}
+function paymentStatus(charged,paid){if(payments.some(p=>p.payment_type==='refund')){const received=payments.filter(p=>p.payment_type!=='refund').reduce((t,p)=>t+Number(p.amount),0);const refunded=payments.filter(p=>p.payment_type==='refund').reduce((t,p)=>t+Number(p.amount),0);if(received>0&&refunded>=received)return 'Fully Refunded';return 'Partially Refunded'}if(paid<=0)return 'Unpaid';if(paid>=charged&&charged>0)return 'Paid';if(payments.some(p=>p.payment_type==='advance'))return 'Advance Paid';return 'Partially Paid'}
+function render(){const charged=itemsTotal(),paid=paidTotal(),due=Math.max(0,charged-paid);$('chargedView').textContent=money(charged);$('paidView').textContent=money(paid);$('dueView').textContent=money(due);$('paymentsBody').innerHTML=payments.length?payments.map(p=>`<tr><td>${esc(new Date(p.payment_date).toLocaleString())}</td><td>${esc(p.payment_type)}</td><td>${esc(p.payment_method||'')}</td><td>${esc(p.transaction_reference||'')}</td><td>${money(p.payment_type==='refund'?-p.amount:p.amount)}</td></tr>`).join(''):'<tr><td colspan="5">No payments recorded.</td></tr>';const invoice=documentMode==='invoice';$('showInvoice').disabled=!(charged>0&&paid>=charged&&!payments.some(p=>p.payment_type==='refund'));if(invoice&&$('showInvoice').disabled)documentMode='bill';const status=paymentStatus(charged,paid);$('receipt').innerHTML=`<div class="document-heading">${documentMode==='invoice'?'FINAL INVOICE':'CUSTOMER BILL'}</div><p><strong>Order:</strong> ${esc(order?.request_id||'')} &nbsp; <strong>Date:</strong> ${esc(new Date().toLocaleDateString('en-IN'))}</p><p><strong>Customer:</strong> ${esc(order?.name||'')} &nbsp; <strong>Contact:</strong> ${esc($('contact').value)}</p><p><strong>Event:</strong> ${esc(order?.event||'')}</p><table class="doc-table"><thead><tr><th>Purchased Item / Service</th><th>Qty</th><th>Unit Price</th><th>Amount</th></tr></thead><tbody>${items.map(i=>`<tr><td>${esc(i.description)}</td><td>${esc(i.quantity)}</td><td>${money(i.unit_price)}</td><td>${money(i.quantity*i.unit_price)}</td></tr>`).join('')||'<tr><td colspan="4">No items added</td></tr>'}</tbody></table><p class="doc-total">Total: ${money(charged)}</p><p>Net Payment Received: ${money(paid)}<br>Balance Due: ${money(due)}<br>Payment Status: <strong>${esc(status)}</strong></p><p class="small-note">${documentMode==='invoice'?'Payment received. Thank you for shopping with WeShop4U!':'Please review the items and amount. Thank you for choosing WeShop4U!'}</p>`;}
+$('showBill').onclick=()=>{documentMode='bill';render()};$('showInvoice').onclick=()=>{documentMode='invoice';render()};
+$('saveFinance').onclick=async()=>{if(!order||saving)return;if(!items.length||items.some(i=>!i.description.trim()||!(i.quantity>0)||i.unit_price<0)){ $('saveMsg').textContent='Add valid item descriptions, quantities and prices.';return}saving=true;$('saveFinance').disabled=true;$('saveMsg').textContent='Saving…';try{const payload={order_id:order.request_id,expected_delivery_date:$('expectedDate').value||null,actual_delivery_date:$('actualDate').value||null,total_amount_charged:itemsTotal(),order_status:$('orderStatus').value,notes:$('financeNotes').value.trim()||null,updated_at:new Date().toISOString()};const {error}=await sb.from('order_finance').upsert(payload,{onConflict:'order_id'});if(error)throw error;const {error:itemError}=await sb.rpc('replace_order_finance_items',{p_order_id:order.request_id,p_items:items.map((i,n)=>({description:i.description.trim(),quantity:i.quantity,unit_price:i.unit_price,position:n}))});if(itemError)throw itemError;const {error:orderError}=await sb.from('customer_requests').update({status:payload.order_status,updated_at:new Date().toISOString()}).eq('request_id',order.request_id);if(orderError)throw orderError;finance=payload;order.status=payload.order_status;const autoCompleted=await syncOrderCompletion();$('saveMsg').textContent=autoCompleted?'Saved. Fully paid and delivered — order completed automatically.':'Items and finance saved successfully.';render()}catch(e){$('saveMsg').textContent='Save failed: '+e.message+' — check items and retry.'}finally{saving=false;$('saveFinance').disabled=false}};
+$('addPayment').onclick=async()=>{if(!order||addingPayment)return;const amount=Number($('payAmount').value);if(!(amount>0)){ $('payMsg').textContent='Enter a valid amount.';return }if(!finance){$('payMsg').textContent='Save Finance Details first.';return}if(!confirm(`Record ${$('payType').value} of ${money(amount)}?`))return;addingPayment=true;$('addPayment').disabled=true;try{const payload={order_id:order.request_id,amount,payment_type:$('payType').value,payment_method:$('payMethod').value,transaction_reference:$('payRef').value.trim()||null,payment_date:$('payDate').value?new Date($('payDate').value).toISOString():new Date().toISOString(),notes:$('payNotes').value.trim()||null};const {data,error}=await sb.from('order_payments').insert(payload).select().single();if(error)throw error;payments.unshift(data);$('payAmount').value='';$('payRef').value='';$('payNotes').value='';const autoCompleted=await syncOrderCompletion();$('payMsg').textContent=autoCompleted?'Payment recorded. Delivered and fully paid — order completed automatically.':'Payment recorded.';render()}catch(e){$('payMsg').textContent='Unable to add payment: '+e.message}finally{addingPayment=false;$('addPayment').disabled=false}};
+$('printReceipt').onclick=()=>{if(!order)return;if(!finance||Math.abs(Number(finance.total_amount_charged)-itemsTotal())>0.001){$('docMsg').textContent='Save Finance Details before printing.';return}window.print()};
+async function reviewRows(approved){
+  const {data,error}=await sb.from('customer_reviews').select('*').eq('approved',approved).order('created_at',{ascending:false}).limit(100);
+  if(error) throw error;
+  return Promise.all((data||[]).map(async r=>{
+    const paths=(Array.isArray(r.image_paths)?r.image_paths:[]).filter(Boolean).slice(0,5);
+    if(!paths.length&&r.image_path)paths.push(r.image_path);
+    const signedUrls=[];
+    if(paths.length){
+      try{
+        const signed=await sb.storage.from('weshop4u-review-images').createSignedUrls(paths,60*30);
+        (signed.data||[]).forEach(item=>{if(item?.signedUrl)signedUrls.push(item.signedUrl)});
+      }catch(e){
+        console.warn('Review images could not be loaded',e);
+      }
+    }
+    return {...r,_paths:paths,_imgs:signedUrls};
+  }));
+}
+function reviewMarkup(r,approved){
+  const dateValue=approved?(r.approved_at||r.created_at):r.created_at;
+  const dateLabel=approved?'Approved':'Submitted';
+  return `<div class="review">
+    <div class="review-images">${r._imgs.length?r._imgs.map((url,i)=>`<img src="${esc(url)}" alt="Review photo ${i+1}" loading="lazy">`).join(''):`<div class="review-no-image">No photos</div>`}</div>
+    <div><div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(Math.max(0,5-r.rating))}</div>
+      <strong>${esc(r.customer_display_name||'WeShop4U Customer')}</strong> · ${esc(r.event_type||'')}
+      <p>${esc(r.review_text)}</p><small>${esc(r.order_id)}</small>
+      ${r._imgs.length?`<div class="msg">${r._imgs.length} photo${r._imgs.length===1?'':'s'} attached</div>`:''}
+      <div class="review-date">${dateLabel}: ${dateValue?esc(new Date(dateValue).toLocaleString()):'—'}</div>
+    </div>
+    <div class="review-actions">${approved
+      ? `<button class="btn disable" data-disable="${r.id}">Disable</button><button class="btn danger" data-delete="${r.id}">Delete</button>`
+      : `<button class="btn" data-approve="${r.id}">Approve</button><button class="btn danger" data-delete="${r.id}">Delete</button>`}
+    </div>
+  </div>`;
+}
+async function loadReviews(){
+  if(!initSupabase())return;
+  $('reviewMsg').textContent='Loading reviews…';
+  try{
+    const rows=await reviewRows(false);
+    $('pendingReviewCount').textContent=String(rows.length);
+    const box=$('reviews');
+    box.innerHTML=rows.length?rows.map(r=>reviewMarkup(r,false)).join(''):'No reviews awaiting approval.';
+    box.querySelectorAll('[data-approve]').forEach(b=>b.onclick=()=>approveReview(b.dataset.approve));
+    box.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>deleteReview(b.dataset.delete));
+    $('reviewMsg').textContent='';
+  }catch(e){$('reviewMsg').textContent='Reviews unavailable: '+(e?.message||String(e));}
+}
+async function loadApprovedReviews(){
+  if(!initSupabase())return;
+  $('approvedReviewMsg').textContent='Loading approved reviews…';
+  try{
+    const rows=await reviewRows(true);
+    const publicRows=rows.filter(r=>r.public_consent && (r._paths||[]).length);
+    if(publicRows.length){
+      await Promise.allSettled(publicRows.map(r=>syncReviewPublicImages(r.id,'publish')));
+    }
+    $('approvedReviewCount').textContent=String(rows.length);
+    const box=$('approvedReviews');
+    box.innerHTML=rows.length?rows.map(r=>reviewMarkup(r,true)).join(''):'No approved reviews.';
+    box.querySelectorAll('[data-disable]').forEach(b=>b.onclick=()=>disableReview(b.dataset.disable));
+    box.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>deleteReview(b.dataset.delete));
+    $('approvedReviewMsg').textContent='';
+  }catch(e){$('approvedReviewMsg').textContent='Approved reviews unavailable: '+(e?.message||String(e));}
+}
+async function syncReviewPublicImages(id,action){
+  if(!initSupabase()) throw new Error('Supabase is unavailable.');
+
+  const {data:review,error:reviewError}=await sb
+    .from('customer_reviews')
+    .select('approved,public_consent,image_path,image_paths')
+    .eq('id',Number(id))
+    .maybeSingle();
+
+  if(reviewError) throw reviewError;
+  if(!review) throw new Error('Review not found.');
+
+  const paths=[...(Array.isArray(review.image_paths)?review.image_paths:[]),review.image_path]
+    .filter(Boolean);
+  const unique=[...new Set(paths)].slice(0,5);
+  const publicBucket=sb.storage.from('weshop4u-public-review-images');
+
+  if(action==='unpublish'){
+    if(!unique.length) return {ok:true,paths:[]};
+    const {error}=await publicBucket.remove(unique);
+    if(error) throw error;
+    return {ok:true,paths:[]};
+  }
+
+  if(action!=='publish') throw new Error('Invalid image sync action.');
+  if(!review.approved || !review.public_consent) return {ok:true,paths:[]};
+
+  const privateBucket=sb.storage.from('weshop4u-review-images');
+  const copied=[];
+
+  for(const path of unique){
+    const {data:file,error:downloadError}=await privateBucket.download(path);
+    if(downloadError || !file) throw new Error('Unable to read review photo: '+(downloadError?.message||path));
+
+    const lower=String(path).toLowerCase();
+    const contentType=file.type ||
+      (lower.endsWith('.png')?'image/png':
+       lower.endsWith('.webp')?'image/webp':'image/jpeg');
+
+    const {error:uploadError}=await publicBucket.upload(path,file,{
+      upsert:true,
+      cacheControl:'31536000',
+      contentType
+    });
+    if(uploadError) throw new Error('Unable to publish review photo: '+uploadError.message);
+    copied.push(path);
+  }
+
+  return {ok:true,paths:copied};
+}
+
+async function refreshReviews(){await Promise.all([loadReviews(),loadApprovedReviews()]);}
+async function approveReview(id){
+  if(!initSupabase())return;
+  try{
+    const {error}=await sb.rpc('approve_customer_review_admin',{p_review_id:Number(id)});
+    if(error)throw error;
+    try{await syncReviewPublicImages(id,'publish');}catch(e){console.warn('Public image sync pending:',e);}
+    await refreshReviews();
+  }catch(e){
+    alert('Unable to approve review: '+(e?.message||String(e)));
+  }
+}
+
+async function disableReview(id){
+  if(!initSupabase())return;
+  if(!confirm('Disable this review? It will disappear from Happy Clients but will not be deleted.'))return;
+  try{
+    const {error}=await sb.rpc('disable_customer_review_admin',{p_review_id:Number(id)});
+    if(error)throw error;
+    try{await syncReviewPublicImages(id,'unpublish');}catch(e){console.warn('Public image cleanup pending:',e);}
+    await refreshReviews();
+  }catch(e){
+    alert('Unable to disable review: '+(e?.message||String(e)));
+  }
+}
+
+async function deleteReview(id){
+  if(!initSupabase())return;
+  if(!confirm('Permanently delete this review and its uploaded photos? This cannot be undone.'))return;
+  const {data:review,error:readError}=await sb.from('customer_reviews').select('image_path,image_paths').eq('id',id).maybeSingle();
+  if(readError){alert(readError.message);return;}
+  const paths=[...(Array.isArray(review?.image_paths)?review.image_paths:[]),review?.image_path].filter(Boolean);
+  const unique=[...new Set(paths)];
+  try{
+    await syncReviewPublicImages(id,'unpublish');
+  }catch(e){
+    alert('Could not remove public review photos: '+(e?.message||String(e)));
+    return;
+  }
+  if(unique.length){
+    const {error:storageError}=await sb.storage.from('weshop4u-review-images').remove(unique);
+    if(storageError){alert('Could not delete private review photos: '+storageError.message);return;}
+  }
+  const {error}=await sb.from('customer_reviews').delete().eq('id',id);
+  if(error)alert(error.message);else await refreshReviews();
+}
+const q=new URLSearchParams(location.search).get('orderId');if(q){$('orderId').value=q;loadOrder()}
+</script><script>
+(function(){
+const frame=document.getElementById('analyticsFrame');
+function activate(tab){
+ document.querySelectorAll('[data-tab]').forEach(b=>{b.classList.toggle('active',b.dataset.tab===tab);b.setAttribute('aria-selected',String(b.dataset.tab===tab))});
+ document.getElementById('ordersPane').classList.toggle('hidden',tab!=='orders');
+ document.getElementById('expensesPane').classList.toggle('hidden',tab==='orders');
+ if(tab!=='orders'&&frame.contentWindow)frame.contentWindow.postMessage({kind:'weshop4u-tab',tab},location.origin);
+}
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>activate(b.dataset.tab)));
+frame.addEventListener('load',()=>{const active=document.querySelector('[data-tab].active');if(active&&active.dataset.tab!=='orders')activate(active.dataset.tab)});
+})();
+</script></body></html>
