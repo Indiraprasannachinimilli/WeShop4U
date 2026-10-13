@@ -51,7 +51,7 @@
 <div class="card" id="loginCard"><h2>Admin Sign In</h2><div><label>Email</label><input id="adminEmail" type="email" autocomplete="username" placeholder="Admin email"></div><div style="margin-top:10px"><label>Password</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Password"></div><div class="row" style="margin-top:10px"><button class="btn" id="login" type="button">Sign In</button><button class="btn alt hidden" id="logout">Logout</button></div><div class="msg" id="loginMsg">Sign in with your existing Supabase admin user.</div></div>
 <div id="app" class="hidden"><div class="topbar no-print"><strong id="who"></strong><div><a class="btn alt" href="./index.html?admin=1" style="text-decoration:none">Orders Admin</a> <button class="btn alt" id="logout2">Logout</button></div></div>
 <nav class="tabs no-print" aria-label="Business sections"><button type="button" class="tab active" data-tab="orders">Orders & Bills</button><button type="button" class="tab" data-tab="expenses">Expenses</button><button type="button" class="tab" data-tab="analytics">Analytics</button></nav><div class="finance-tabs-info no-print">One admin login · shared Supabase records · customer bills, expenses and analytics</div><div id="ordersPane" class="tab-pane"><div class="card no-print"><h2>Find Order</h2><div class="row"><div class="grow"><label>Order ID</label><input id="orderId" placeholder="WS-XXXXXX"></div><button class="btn" id="loadOrder">Load Order</button></div><div class="msg" id="loadMsg"></div></div>
-<div id="financeArea" class="hidden"><div class="card"><h2>Order & Delivery</h2><div class="grid"><div><label>Customer</label><input id="customer" readonly></div><div><label>Contact Number</label><input id="contact" readonly></div><div><label>Event</label><input id="event" readonly></div><div><label>Expected Delivery Date</label><input id="expectedDate" type="date"></div><div><label>Actual Delivery Date</label><input id="actualDate" type="date"></div><div><label>Order Status</label><select id="orderStatus"><option>submitted</option><option>confirmed</option><option>out_for_shopping</option><option>purchased</option><option>out_for_delivery</option><option>delivered</option><option value="closed">completed</option><option>cancelled</option></select></div></div></div>
+<div id="financeArea" class="hidden"><div class="card"><h2>Order & Delivery</h2><div class="grid"><div><label>Customer</label><input id="customer" readonly></div><div><label>Contact Number</label><input id="contact" readonly></div><div><label>Event</label><input id="event" readonly></div><div><label>Expected Delivery Date</label><input id="expectedDate" type="date"></div><div><label>Actual Delivery Date</label><input id="actualDate" type="date"></div><div><label>Order Status</label><select id="orderStatus"><option>submitted</option><option>confirmed</option><option>out_for_shopping</option><option>purchased</option><option>out_for_delivery</option><option>delivered</option><option value="closed">completed</option><option>cancelled</option></select></div></div><div class="row no-print" style="margin-top:12px"><button class="btn" type="button" id="saveOrderStatus">Save Order Status</button><span class="msg" id="statusSaveMsg" role="status"></span></div><div class="small-note" style="margin-top:8px">Save the order status separately from purchased items and finance details.</div></div>
 <div class="card no-print"><h2>Purchased Items</h2><div class="msg">Enter each product or service separately. Quantity × unit price is calculated automatically.</div><div id="itemsList"></div><div class="row" style="margin-top:10px"><button class="btn alt" type="button" id="addItem">+ Add Item</button><strong style="margin-left:auto">Items Total: <span id="itemsTotal">₹0.00</span></strong></div><div class="msg" id="itemsMsg"></div></div>
  <div class="card no-print"><h2>Payment Summary</h2><div class="summary"><div class="metric"><small>Total Charged</small><strong id="chargedView">₹0.00</strong></div><div class="metric paid"><small>Total Paid</small><strong id="paidView">₹0.00</strong></div><div class="metric due"><small>Amount Due</small><strong id="dueView">₹0.00</strong></div></div><div class="grid two" style="margin-top:12px"><div><label>Total Amount Charged (from items)</label><input id="totalCharged" type="number" min="0" step="0.01" readonly></div><div><label>Finance / Delivery Notes</label><textarea id="financeNotes"></textarea></div></div><button class="btn no-print" id="saveFinance" style="margin-top:10px">Save Finance Details</button><div class="msg" id="saveMsg"></div></div>
 <div class="card no-print"><h2>Payments</h2><div class="grid no-print"><div><label>Amount</label><input id="payAmount" type="number" min="0.01" step="0.01"></div><div><label>Payment Type</label><select id="payType"><option value="advance">Advance</option><option value="payment">Payment</option><option value="balance">Balance</option><option value="refund">Refund</option></select></div><div><label>Method</label><select id="payMethod"><option value="UPI">UPI</option><option value="Cash">Cash</option><option value="Bank Transfer">Bank Transfer</option><option value="Card">Card</option><option value="Other">Other</option></select></div><div><label>Transaction Reference</label><input id="payRef"></div><div><label>Payment Date</label><input id="payDate" type="datetime-local"></div><div><label>Notes</label><input id="payNotes"></div></div><button class="btn no-print" id="addPayment" style="margin-top:10px">+ Add Payment</button><div class="msg" id="payMsg"></div><div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Date</th><th>Type</th><th>Method</th><th>Reference</th><th>Amount</th></tr></thead><tbody id="paymentsBody"></tbody></table></div></div>
@@ -131,7 +131,8 @@ table{width:100%;border-collapse:collapse;font-size:.86rem}th,td{padding:9px;bor
   &lt;section class=&quot;charts&quot;&gt;
     &lt;div class=&quot;card chart-card&quot;&gt;&lt;h2&gt;Monthly Payments Received&lt;/h2&gt;&lt;div class=&quot;chart-wrap&quot;&gt;&lt;canvas id=&quot;salesChart&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;&lt;/div&gt;
     &lt;div class=&quot;card chart-card&quot;&gt;&lt;h2&gt;Payments vs Expenses vs Profit/Loss&lt;/h2&gt;&lt;div class=&quot;chart-wrap&quot;&gt;&lt;canvas id=&quot;profitChart&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;&lt;/div&gt;
-    &lt;div class=&quot;card chart-card&quot;&gt;&lt;h2&gt;Monthly Orders&lt;/h2&gt;&lt;div class=&quot;chart-wrap&quot;&gt;&lt;canvas id=&quot;ordersChart&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;card chart-card&quot;&gt;&lt;h2&gt;Monthly Orders Trend — Total, Open, Completed &amp;amp; Cancelled&lt;/h2&gt;&lt;div class=&quot;chart-wrap&quot;&gt;&lt;canvas id=&quot;receivedChart&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;&lt;/div&gt;
+     &lt;div class=&quot;card chart-card&quot;&gt;&lt;h2&gt;Monthly Orders by Current Status&lt;/h2&gt;&lt;div class=&quot;chart-wrap&quot;&gt;&lt;canvas id=&quot;ordersChart&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;&lt;/div&gt;
     &lt;div class=&quot;card chart-card&quot;&gt;&lt;h2&gt;Monthly Customers&lt;/h2&gt;&lt;div class=&quot;chart-wrap&quot;&gt;&lt;canvas id=&quot;customersChart&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;&lt;/div&gt;
   &lt;/section&gt;
 
@@ -178,10 +179,10 @@ const money=n=&gt;&#x27;₹&#x27;+Number(n||0).toLocaleString(&#x27;en-IN&#x27;,
 let charts={};
 
 function destroyChart(name){if(charts[name]){charts[name].destroy();delete charts[name]}}
-function makeChart(name,canvas,datasets,rupees=false){
+function makeChart(name,canvas,datasets,rupees=false,chartType=&#x27;bar&#x27;){
   destroyChart(name);
   charts[name]=new Chart(document.getElementById(canvas),{
-    type:&#x27;bar&#x27;,data:{labels:months,datasets},
+    type:chartType,data:{labels:months,datasets},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:&#x27;index&#x27;,intersect:false},
       scales:{y:{beginAtZero:true,ticks:{callback:v=&gt;rupees?money(v):v}}},
       plugins:{tooltip:{callbacks:{label:c=&gt;`${c.dataset.label}: ${rupees?money(c.raw):c.raw}`}}}}
@@ -247,19 +248,22 @@ async function loadAll(){
 }
 function render(orders,finance,payments,expenses,year){
   const sales=Array(12).fill(0), costs=Array(12).fill(0), profit=Array(12).fill(0);
-  const requests=Array(12).fill(0), completed=Array(12).fill(0), customers=Array(12).fill(0);
+  const requests=Array(12).fill(0), completed=Array(12).fill(0), inProgress=Array(12).fill(0), pending=Array(12).fill(0), cancelled=Array(12).fill(0), customers=Array(12).fill(0);
   const monthlyCustomerSets=Array.from({length:12},()=&gt;new Set());
   const ordersById=new Map(orders.map(r=&gt;[r.request_id,r]));
   const financeById=new Map(finance.map(f=&gt;[f.order_id,f]));
 
   orders.forEach(r=&gt;{
     if(yearOf(r.submitted_at)===year){
-      const m=monthOf(r.submitted_at); requests[m]++;
+      const m=monthOf(r.submitted_at);if(m===null)return;requests[m]++;
+      const status=normalizeStatus(r.status);
+      if(isCompleted(r)||status===&#x27;delivered&#x27;)completed[m]++;
+      else if(status===&#x27;cancelled&#x27;)cancelled[m]++;
+      else if([&#x27;confirmed&#x27;,&#x27;out_for_shopping&#x27;,&#x27;purchased&#x27;,&#x27;out_for_delivery&#x27;,&#x27;in_progress&#x27;,&#x27;inprogress&#x27;,&#x27;processing&#x27;].includes(status))inProgress[m]++;
+      else pending[m]++;
       const k=customerKey(r);if(k)monthlyCustomerSets[m].add(k);
     }
-    if(isCompleted(r)&amp;&amp;yearOf(saleDate(r))===year){
-      const m=monthOf(saleDate(r));completed[m]++;
-    }
+
   });
 
   // Revenue is based on actual payment records, not customer_requests.actual_sale_amount.
@@ -304,7 +308,21 @@ function render(orders,finance,payments,expenses,year){
   makeChart(&#x27;profit&#x27;,&#x27;profitChart&#x27;,[
     {label:&#x27;Payments Received&#x27;,data:sales},{label:&#x27;Expenses&#x27;,data:costs},{label:&#x27;Profit / Loss&#x27;,data:profit}
   ],true);
-  makeChart(&#x27;orders&#x27;,&#x27;ordersChart&#x27;,[{label:&#x27;Requests&#x27;,data:requests},{label:&#x27;Completed&#x27;,data:completed}],false);
+  // Current order status, grouped by the month each order was originally received.
+  const openOrders=requests.map((_,i)=&gt;pending[i]+inProgress[i]);
+  const trendLine=(label,data,color,width=2)=&gt;({label,data,borderColor:color,backgroundColor:color,pointBackgroundColor:color,pointRadius:3,pointHoverRadius:7,borderWidth:width,tension:0,fill:false});
+  makeChart(&#x27;received&#x27;,&#x27;receivedChart&#x27;,[
+    trendLine(&#x27;Total Orders Received&#x27;,requests,&#x27;#b8750b&#x27;,3),
+    trendLine(&#x27;Open Orders (Pending + In Progress)&#x27;,openOrders,&#x27;#3179b8&#x27;),
+    trendLine(&#x27;Completed / Delivered&#x27;,completed,&#x27;#207a4b&#x27;),
+    trendLine(&#x27;Cancelled&#x27;,cancelled,&#x27;#bd4a4a&#x27;)
+  ],false,&#x27;line&#x27;);
+   makeChart(&#x27;orders&#x27;,&#x27;ordersChart&#x27;,[
+     {label:&#x27;Completed / Delivered&#x27;,data:completed,backgroundColor:&#x27;#207a4b&#x27;,stack:&#x27;status&#x27;},
+     {label:&#x27;In Progress&#x27;,data:inProgress,backgroundColor:&#x27;#3179b8&#x27;,stack:&#x27;status&#x27;},
+     {label:&#x27;Pending&#x27;,data:pending,backgroundColor:&#x27;#e3ac42&#x27;,stack:&#x27;status&#x27;},
+     {label:&#x27;Cancelled&#x27;,data:cancelled,backgroundColor:&#x27;#bd4a4a&#x27;,stack:&#x27;status&#x27;}
+   ],false);
   makeChart(&#x27;customers&#x27;,&#x27;customersChart&#x27;,[{label:&#x27;Customers&#x27;,data:customers}],false);
 
   const yearExpenses=expenses.filter(e=&gt;yearOf(e.expense_date)===year);
@@ -344,7 +362,7 @@ window.deleteExpense=async id=&gt;{
   if(error){alert(error.message);return}await loadAll();
 };
 expenseDate.value=new Date().toISOString().slice(0,10);
-window.addEventListener(&#x27;message&#x27;,e=&gt;{if(e.source!==window.parent||!e.data||e.data.kind!==&#x27;weshop4u-tab&#x27;)return;document.body.classList.toggle(&#x27;expenses-only&#x27;,e.data.tab===&#x27;expenses&#x27;);document.body.classList.toggle(&#x27;analytics-only&#x27;,e.data.tab===&#x27;analytics&#x27;);if(document.getElementById(&#x27;app&#x27;).hidden){ensureLoggedIn()}else{loadAll()};});
+window.addEventListener(&#x27;message&#x27;,e=&gt;{if(e.source!==window.parent||!e.data)return;if(e.data.kind===&#x27;weshop4u-refresh&#x27;){if(!document.getElementById(&#x27;app&#x27;).hidden)loadAll();return;}if(e.data.kind!==&#x27;weshop4u-tab&#x27;)return;document.body.classList.toggle(&#x27;expenses-only&#x27;,e.data.tab===&#x27;expenses&#x27;);document.body.classList.toggle(&#x27;analytics-only&#x27;,e.data.tab===&#x27;analytics&#x27;);if(document.getElementById(&#x27;app&#x27;).hidden){ensureLoggedIn()}else{loadAll()};});
 ensureLoggedIn().then(ok=&gt;{if(!ok){document.getElementById(&#x27;loginCard&#x27;).hidden=false;document.getElementById(&#x27;loginMsg&#x27;).textContent=&#x27;Please sign in to view analytics.&#x27;}});
 &lt;/script&gt;
 &lt;/body&gt;&lt;/html&gt;" loading="eager"></iframe></section></div></div>
@@ -420,7 +438,29 @@ function addItemRow(item={}){items.push({description:item.description||'',quanti
 function itemsTotal(){return Math.round(items.reduce((sum,i)=>sum+(Number(i.quantity)||0)*(Number(i.unit_price)||0),0)*100)/100}
 function renderItems(){const holder=$('itemsList');holder.innerHTML=items.map((i,n)=>`<div class="item-row"><div><label>Item / Service</label><input data-item="${n}" data-field="description" placeholder="e.g. Customized handkerchief" value="${esc(i.description)}"></div><div><label>Qty</label><input data-item="${n}" data-field="quantity" type="number" min="0.01" step="0.01" value="${i.quantity}"></div><div><label>Unit Price ₹</label><input data-item="${n}" data-field="unit_price" type="number" min="0" step="0.01" value="${i.unit_price}"></div><div class="item-total">${money(i.quantity*i.unit_price)}</div><button class="btn danger" data-remove="${n}" type="button">Remove</button></div>`).join('');holder.querySelectorAll('[data-item]').forEach(el=>el.addEventListener('change',()=>{const i=Number(el.dataset.item),f=el.dataset.field;items[i][f]=f==='description'?el.value:Number(el.value);renderItems();render()}));holder.querySelectorAll('[data-remove]').forEach(el=>el.onclick=()=>{items.splice(Number(el.dataset.remove),1);renderItems();render()});$('itemsTotal').textContent=money(itemsTotal());$('totalCharged').value=itemsTotal();}
 $('addItem').onclick=()=>addItemRow();
-async function loadOrder(){if(!initSupabase())return;const id=$('orderId').value.trim().toUpperCase();if(!id)return;$('loadMsg').textContent='Loading…';const r=await sb.from('customer_requests').select('request_id,name,contact_number,whatsapp_number,whatsapp,event,delivery_expected_date,status').eq('request_id',id).maybeSingle();if(r.error||!r.data){$('loadMsg').textContent=r.error?'Unable to load: '+r.error.message:'Order not found.';return}const f=await sb.from('order_finance').select('*').eq('order_id',id).maybeSingle();if(f.error){$('loadMsg').textContent='Finance table unavailable: '+f.error.message;return}const p=await sb.from('order_payments').select('*').eq('order_id',id).order('payment_date',{ascending:false});if(p.error){$('loadMsg').textContent='Payments unavailable: '+p.error.message;return}const it=await sb.from('order_finance_items').select('description,quantity,unit_price').eq('order_id',id).order('position',{ascending:true});if(it.error){$('loadMsg').textContent='Item table unavailable. Run the supplied SQL migration first: '+it.error.message;return}order=r.data;finance=f.data||null;payments=p.data||[];items=(it.data||[]).map(x=>({description:x.description,quantity:Number(x.quantity),unit_price:Number(x.unit_price)}));$('customer').value=order.name||'';$('contact').value=order.contact_number||order.whatsapp_number||order.whatsapp||'';$('event').value=order.event||'';$('expectedDate').value=finance?.expected_delivery_date||order.delivery_expected_date||'';$('actualDate').value=finance?.actual_delivery_date||'';$('orderStatus').value=finance?.order_status||order.status||'submitted';$('financeNotes').value=finance?.notes||'';if(!items.length&&Number(finance?.total_amount_charged)>0){$('itemsMsg').textContent='No saved item descriptions found. Enter actual products/services and save before sharing an invoice.'}else{$('itemsMsg').textContent=''}renderItems();$('financeArea').classList.remove('hidden');$('loadMsg').textContent='Order loaded.';render()}
+async function loadOrder(){if(!initSupabase())return;const id=$('orderId').value.trim().toUpperCase();if(!id)return;$('loadMsg').textContent='Loading…';const r=await sb.from('customer_requests').select('request_id,name,contact_number,whatsapp_number,whatsapp,event,delivery_expected_date,status').eq('request_id',id).maybeSingle();if(r.error||!r.data){$('loadMsg').textContent=r.error?'Unable to load: '+r.error.message:'Order not found.';return}const f=await sb.from('order_finance').select('*').eq('order_id',id).maybeSingle();if(f.error){$('loadMsg').textContent='Finance table unavailable: '+f.error.message;return}const p=await sb.from('order_payments').select('*').eq('order_id',id).order('payment_date',{ascending:false});if(p.error){$('loadMsg').textContent='Payments unavailable: '+p.error.message;return}const it=await sb.from('order_finance_items').select('description,quantity,unit_price').eq('order_id',id).order('position',{ascending:true});if(it.error){$('loadMsg').textContent='Item table unavailable. Run the supplied SQL migration first: '+it.error.message;return}order=r.data;finance=f.data||null;payments=p.data||[];items=(it.data||[]).map(x=>({description:x.description,quantity:Number(x.quantity),unit_price:Number(x.unit_price)}));$('customer').value=order.name||'';$('contact').value=order.contact_number||order.whatsapp_number||order.whatsapp||'';$('event').value=order.event||'';$('expectedDate').value=finance?.expected_delivery_date||order.delivery_expected_date||'';$('actualDate').value=finance?.actual_delivery_date||'';$('orderStatus').value=order.status||finance?.order_status||'submitted';if(!$('orderStatus').value)$('orderStatus').value='submitted';$('statusSaveMsg').textContent='';$('financeNotes').value=finance?.notes||'';if(!items.length&&Number(finance?.total_amount_charged)>0){$('itemsMsg').textContent='No saved item descriptions found. Enter actual products/services and save before sharing an invoice.'}else{$('itemsMsg').textContent=''}renderItems();$('financeArea').classList.remove('hidden');$('loadMsg').textContent='Order loaded.';render()}
+$('saveOrderStatus').onclick=async()=>{
+ if(!order||saving)return;
+ const btn=$('saveOrderStatus'),msg=$('statusSaveMsg'),status=$('orderStatus').value;
+ btn.disabled=true;msg.textContent='Saving status…';
+ try{
+   const now=new Date().toISOString();
+   const {data,error}=await sb.from('customer_requests').update({status,updated_at:now}).eq('request_id',order.request_id).select('request_id,status').maybeSingle();
+   if(error)throw error;
+   if(!data)throw new Error('No order was updated. Check Supabase permissions.');
+   order.status=data.status;
+   // Keep the finance status in sync when a finance row already exists.
+   if(finance){
+     const {error:fe}=await sb.from('order_finance').update({order_status:data.status,updated_at:now}).eq('order_id',order.request_id);
+     if(fe){msg.textContent='Order status saved, but finance status sync failed: '+fe.message;render();return;}
+     finance.order_status=data.status;
+   }
+   msg.textContent='Order status saved successfully: '+(data.status==='closed'?'completed':data.status.replaceAll('_',' '))+'.';
+   render();
+   const frame=$('analyticsFrame');if(frame?.contentWindow)frame.contentWindow.postMessage({kind:'weshop4u-refresh'},'*');
+ }catch(e){msg.textContent='Status save failed: '+e.message;}
+ finally{btn.disabled=false;}
+};
 function paidTotal(){return Math.round(payments.reduce((t,p)=>t+(p.payment_type==='refund'?-Number(p.amount):Number(p.amount)),0)*100)/100}
 // Complete only after confirmed delivery AND net payment covers the saved order total.
 // Use existing 'closed' status as completed to avoid a database status migration.

@@ -6784,7 +6784,7 @@ async function updateOrderStatusByEmailToken(requestId,token,newStatus){
   const {data,error}=await weshopSupabase.functions.invoke('update-order-status-by-token',{
     body:{requestId,token,status:newStatus}
   });
-  if(error) throw error;
+  if(error) throw new Error('Status service failed: '+(error.message||String(error)));
   if(!data?.ok) throw new Error(data?.error||'Could not update order status');
   return data;
 }
@@ -8623,12 +8623,13 @@ function exportAdminCsv(){
 
 let customerLinkedRequest=null;
 
-const ORDER_STATUS_FLOW=['submitted','reviewing','confirmed','shopping','out_for_delivery','delivered'];
-const ORDER_STATUS_LABELS={submitted:'Submitted',pending:'Submitted',reviewing:'Reviewing',confirmed:'Confirmed',shopping:'Shopping',out_for_delivery:'Out for Delivery',delivered:'Delivered',cancelled:'Cancelled'};
-function normalizedOrderStatus(status){const v=String(status||'submitted').toLowerCase().replace(/\s+/g,'_');return v==='pending'?'submitted':v;}
+const ORDER_STATUS_FLOW=['submitted','reviewing','confirmed','shopping','out_for_delivery','delivered','closed'];
+const ORDER_STATUS_LABELS={submitted:'Submitted',pending:'Submitted',reviewing:'Reviewing',confirmed:'Confirmed',shopping:'Shopping',out_for_delivery:'Out for Delivery',delivered:'Delivered',closed:'Completed',completed:'Completed',cancelled:'Cancelled'};
+function normalizedOrderStatus(status){const v=String(status||'submitted').toLowerCase().replace(/\s+/g,'_');return v==='pending'?'submitted':v==='completed'?'closed':v;}
 function orderStatusHtml(status){
   const current=normalizedOrderStatus(status);
   if(current==='cancelled') return '<div class="reference-tip">Order Status: <strong>Cancelled</strong></div>';
+  if(current==='closed') return '<div class="reference-tip">Order Status: <strong>Completed</strong></div>';
   const idx=Math.max(0,ORDER_STATUS_FLOW.indexOf(current));
   return `<div class="order-status-track">${ORDER_STATUS_FLOW.map((v,i)=>`<div class="order-status-step ${i<idx?'done':i===idx?'current':''}"><div class="order-status-dot">${i<idx?'✓':i+1}</div><div>${ORDER_STATUS_LABELS[v]}</div></div>`).join('')}</div>`;
 }
@@ -8666,7 +8667,7 @@ async function renderCustomerLinkedRequest(data){
         <strong>Admin Order Status</strong>
         <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
           <select class="form-select" id="emailOrderStatusSelect" style="max-width:240px">
-            ${['submitted','reviewing','confirmed','shopping','out_for_delivery','delivered','cancelled'].map(v=>`<option value="${v}" ${normalizedOrderStatus(data.status)===v?'selected':''}>${ORDER_STATUS_LABELS[v]}</option>`).join('')}
+            ${['submitted','reviewing','confirmed','shopping','out_for_delivery','delivered','closed','cancelled'].map(v=>`<option value="${v}" ${normalizedOrderStatus(data.status)===v?'selected':''}>${ORDER_STATUS_LABELS[v]}</option>`).join('')}
           </select>
           <button type="button" class="btn-marigold" id="emailOrderStatusSave">Save Status</button>
           <button type="button" class="btn-wine-outline" id="emailOrderWhatsApp" hidden>Notify Customer on WhatsApp</button>
@@ -8743,7 +8744,7 @@ async function renderCustomerLinkedRequest(data){
         if(notifyWhatsApp) notifyWhatsApp.hidden=false;
       }catch(error){
         console.error(error);
-        if(statusMsg){statusMsg.textContent='Could not save status';statusMsg.style.color='#9B2D3F';}
+        if(statusMsg){statusMsg.textContent='Could not save status: '+(error?.message||String(error));statusMsg.style.color='#9B2D3F';}
       }finally{
         saveStatus.disabled=false;
         if(statusSelect) statusSelect.disabled=false;
@@ -9248,11 +9249,13 @@ function setupCustomerRequestIdAccess(){
 let centralizedAdminRows=[];
 
 async function updateAdminOrderStatus(requestId,newStatus){
-  try{ await ensureSupabase(); }catch(error){ console.warn('Supabase unavailable',error); return null; }
-  if(!weshopSupabase) throw new Error('Service unavailable');
-  const {data,error}=await weshopSupabase.from('customer_requests').update({status:newStatus,updated_at:new Date().toISOString()}).eq('request_id',requestId).select('request_id').single();
-  if(error) throw error;
-  return !!data;
+  await ensureSupabase();
+  if(!weshopSupabase) throw new Error('Supabase service unavailable');
+  const canonicalStatus=normalizedOrderStatus(newStatus);
+  const {data,error}=await weshopSupabase.from('customer_requests').update({status:canonicalStatus,updated_at:new Date().toISOString()}).eq('request_id',requestId).select('request_id,status').maybeSingle();
+  if(error) throw new Error('Database rejected status update: '+error.message+(error.code?' ['+error.code+']':''));
+  if(!data) throw new Error('No order updated. Check admin login and Supabase update permissions (RLS).');
+  return data;
 }
 
 async function renderAdminResponses(){
@@ -9310,7 +9313,7 @@ async function renderAdminResponses(){
       <td><div class="admin-response-images admin-images-lazy" data-image-index="${index}" data-image-request="${escapeHtml(r.requestId||'')}"><span class="loading-soft">${Array.isArray(r.sampleImages)&&r.sampleImages.length?'Loading…':'No images'}</span></div></td>
       <td>${escapeHtml(r.rating ? `${r.rating} / 5` : '—')}</td>
       <td>${escapeHtml(r.feedback || '—')}</td>
-      <td><select class="form-select admin-status-select" data-status-index="${index}">${['submitted','reviewing','confirmed','shopping','out_for_delivery','delivered','cancelled'].map(v=>`<option value="${v}" ${normalizedOrderStatus(r.status)===v?'selected':''}>${ORDER_STATUS_LABELS[v]}</option>`).join('')}</select><div class="admin-status-msg" data-status-msg="${index}"></div><button type="button" class="btn-wine-outline admin-status-whatsapp mt-2" data-whatsapp-index="${index}" hidden style="padding:.35rem .55rem;font-size:.72rem;">Notify Customer on WhatsApp</button></td>
+      <td><select class="form-select admin-status-select" data-status-index="${index}">${['submitted','reviewing','confirmed','shopping','out_for_delivery','delivered','closed','cancelled'].map(v=>`<option value="${v}" ${normalizedOrderStatus(r.status)===v?'selected':''}>${ORDER_STATUS_LABELS[v]}</option>`).join('')}</select><div class="admin-status-msg" data-status-msg="${index}"></div><button type="button" class="btn-wine-outline admin-status-whatsapp mt-2" data-whatsapp-index="${index}" hidden style="padding:.35rem .55rem;font-size:.72rem;">Notify Customer on WhatsApp</button></td>
       <td>
         <button type="button" class="btn-wine-outline admin-download-one"
           data-index="${index}" style="padding:.35rem .55rem;font-size:.72rem;">
@@ -9325,7 +9328,7 @@ async function renderAdminResponses(){
       const index=Number(select.dataset.statusIndex), row=rows[index], msg=tbody.querySelector(`[data-status-msg="${index}"]`);
       const previous=row.status; select.disabled=true; if(msg)msg.textContent='Saving…';
       try{await updateAdminOrderStatus(row.requestId,select.value);row.status=select.value;if(msg){msg.textContent='Saved ✓';msg.style.color='#54745F';}const wa=tbody.querySelector(`[data-whatsapp-index="${index}"]`);if(wa)wa.hidden=false;}
-      catch(error){console.error(error);select.value=normalizedOrderStatus(previous);if(msg){msg.textContent='Could not save';msg.style.color='#9B2D3F';}}
+      catch(error){console.error(error);select.value=normalizedOrderStatus(previous);if(msg){msg.textContent='Could not save: '+(error?.message||String(error));msg.style.color='#9B2D3F';}}
       finally{select.disabled=false;}
     });
   });
