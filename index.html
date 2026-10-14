@@ -2494,6 +2494,48 @@ body.ss-inside:not(.ss-admin-mode) #w4uCreations,body.ss-admin-mode #w4uCreation
 .w4uc-pending-card .w4uc-crop-edit{display:block;width:100%;margin:8px 0}
 @media(max-width:575px){#w4uCreations .w4uc-card{flex:0 0 calc((100% - 12px)/2);box-sizing:border-box;padding:6px}#w4uCreations .w4uc-image{height:auto;aspect-ratio:1}#w4uCreations .w4uc-cta{font-size:11px;padding:8px 3px;line-height:1.25}#w4uCreations .w4uc-name{font-size:12px}#w4uCreations .w4uc-play{font-size:9px;padding:5px 6px;max-width:90%}#w4uCreations .w4uc-nav{margin:3px 0}#w4uCreations .w4uc-head h2{font-size:19px}}
 </style>
+<style id="w4uc-gallery-detail-redesign">
+/* Keep the product photograph clear: size and reel action are below it. */
+#w4uCreations .w4uc-details{display:flex;align-items:center;justify-content:space-between;gap:5px;min-height:29px;margin-top:7px;flex-wrap:wrap}
+#w4uCreations .w4uc-size{position:static;display:inline-flex;align-items:center;background:#f9f0df;color:#76451c;border:1px solid #ead8b6;border-radius:6px;font-size:10px;font-weight:600;line-height:1.3;padding:4px 6px;white-space:nowrap}
+#w4uCreations .w4uc-play{position:static;display:inline-flex;align-items:center;justify-content:center;box-shadow:none;background:transparent;border:1px solid #e2c9a5;border-radius:6px;color:#842d0d;padding:4px 6px;font-size:10px;font-weight:700;line-height:1.3;white-space:nowrap;cursor:pointer}
+#w4uCreations .w4uc-play:hover,#w4uCreations .w4uc-play:focus-visible{background:#fff3dd}
+#w4uCreations .w4uc-image img{object-fit:contain}
+@media(max-width:575px){
+ #w4uCreations .w4uc-card{flex:0 0 min(46%,180px);box-sizing:border-box}
+ #w4uCreations .w4uc-details{gap:4px;min-height:24px}
+ #w4uCreations .w4uc-size,#w4uCreations .w4uc-play{font-size:9px;padding:4px 5px}
+ #w4uCreations .w4uc-name{font-size:12px;line-height:1.3}
+ #w4uCreations .w4uc-cta{font-size:11px;padding:9px 4px}
+}
+</style>
+<style id="w4uc-small-expand-control">
+/* Discreet image expand control, clear of the product design. */
+#w4uCreations .w4uc-zoom{position:absolute;top:7px;left:7px;display:flex;align-items:center;justify-content:center;width:25px;height:25px;min-width:25px;min-height:25px;padding:0;border:1px solid #e8dfd2;border-radius:7px;background:rgba(255,253,248,.88);color:#79552f;font-size:14px;font-weight:400;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+@media(max-width:575px){#w4uCreations .w4uc-zoom{top:5px;left:5px;width:22px;height:22px;min-width:22px;min-height:22px;font-size:12px}}
+</style>
+<style id="w4uc-compact-gallery-fix">
+/* Compact mobile gallery: keep Happy Clients near the top and avoid unused space. */
+@media(max-width:575px){
+ #w4uCreations{padding:9px 10px;margin:8px 8px 12px}
+ #w4uCreations .w4uc-head{margin-bottom:8px;gap:6px}
+ #w4uCreations .w4uc-head h2{font-size:18px;line-height:1.2}
+ #w4uCreations .w4uc-sub{font-size:11px;line-height:1.3}
+ #w4uCreations .w4uc-track{gap:8px;padding:2px 0 5px;align-items:flex-start}
+ #w4uCreations .w4uc-card{flex:0 0 min(43%,155px);padding:5px}
+ #w4uCreations .w4uc-image{height:120px;aspect-ratio:auto}
+ #w4uCreations .w4uc-image img{object-fit:contain}
+ #w4uCreations .w4uc-details{margin-top:3px;min-height:0;gap:3px}
+ #w4uCreations .w4uc-size,#w4uCreations .w4uc-play{font-size:9px;padding:3px 5px}
+ #w4uCreations .w4uc-nav{margin:3px 0}
+ #w4uCreations .w4uc-nav[hidden]{display:none!important}
+ #w4uCreations .w4uc-name{font-size:11px;min-height:0;margin:5px 0 4px}
+ #w4uCreations .w4uc-cta{font-size:10px;padding:7px 3px;line-height:1.2}
+ #w4uCreations.w4uc-single .w4uc-track{justify-content:center;overflow:visible}
+ #w4uCreations.w4uc-single .w4uc-card{flex-basis:min(56%,185px)}
+ #w4uCreations.w4uc-single .w4uc-image{height:135px}
+}
+</style>
 </head>
 
 
@@ -10185,11 +10227,11 @@ function isAdmin(){return document.body.classList.contains('ss-admin-mode')}
 function setup(){
  const home=$('happyClientsSection'),mobile=$('happyClientsMobileSection'),dashboard=$('adminDashboard');
  if(!home||!mobile||!dashboard)return;
- const gallery=document.createElement('section');gallery.id='w4uCreations';gallery.setAttribute('aria-label','Our Creations');home.before(gallery);
+ const gallery=document.createElement('section');gallery.id='w4uCreations';gallery.setAttribute('aria-label','WeShop4U Creations');home.before(gallery);
  const mg=document.createElement('section');mg.id='w4uCreationsMobile';mg.style.display='none';mobile.before(mg);
  // Gallery is moved ahead of Happy Clients on desktop and mobile. Mobile uses the same element.
  const admin=document.createElement('section');admin.id='w4uCreationAdmin';admin.className='w4uc-admin';admin.hidden=true;
- admin.innerHTML=`<h3>Our Creations — Supabase Admin</h3><p class="w4uc-test-note">Changes are saved to Supabase and shown to all visitors.</p><p id="w4ucAdminStatus" class="w4uc-test-note">Sign in above to manage creations.</p><button type="button" class="w4uc-small-button" id="w4ucReload">Refresh creations</button><div class="w4uc-fields"><label>Creation name<input id="w4ucName" maxlength="90" placeholder="Custom T-Shirt"></label><label>Category<select id="w4ucCategory"><option>T-Shirt</option><option>Handkerchief</option><option>Keepsake</option><option>Other small product</option></select></label><label>Description<input id="w4ucDesc" maxlength="240" placeholder="Optional description"></label><label>Display order<input id="w4ucSort" type="number" value="1" min="0"></label></div><p><button type="button" class="w4uc-save" id="w4ucAdd">Add Creation</button></p><div id="w4ucAdminList"></div>`;
+ admin.innerHTML=`<h3>WeShop4U Creations — Supabase Admin</h3><p class="w4uc-test-note">Changes are saved to Supabase and shown to all visitors.</p><p id="w4ucAdminStatus" class="w4uc-test-note">Sign in above to manage creations.</p><button type="button" class="w4uc-small-button" id="w4ucReload">Refresh creations</button><div class="w4uc-fields"><label>Creation name<input id="w4ucName" maxlength="90" placeholder="Custom T-Shirt"></label><label>Category<select id="w4ucCategory"><option>T-Shirt</option><option>Handkerchief</option><option>Keepsake</option><option>Other small product</option></select></label><label>Description<input id="w4ucDesc" maxlength="240" placeholder="Optional description"></label><label>Display order<input id="w4ucSort" type="number" value="1" min="0"></label></div><p><button type="button" class="w4uc-save" id="w4ucAdd">Add Creation</button></p><div id="w4ucAdminList"></div>`;
  dashboard.append(admin);
  const cropDialog=document.createElement('div');cropDialog.id='w4ucCropDialog';cropDialog.hidden=true;
  cropDialog.innerHTML=`<div class="crop-panel" role="dialog" aria-modal="true" aria-label="Crop product image"><h3>Adjust product image</h3><p style="font-size:13px">Drag to reposition. Choose <b>Fit entire image</b> to avoid cutting off the design.</p><canvas width="720" height="720" aria-label="Square image crop preview"></canvas><label>Zoom <span id="w4ucCropZoomLabel">100%</span><input type="range" min="100" max="300" value="100" step="5" id="w4ucCropZoom"></label><div class="crop-actions"><button type="button" data-crop-mode="contain">Fit entire image</button><button type="button" data-crop-mode="cover">Fill square / crop</button><button type="button" data-crop-reset>Reset</button></div><div class="crop-actions"><button type="button" data-crop-cancel>Cancel</button><button type="button" data-crop-apply>Apply crop</button></div></div>`;
@@ -10273,7 +10315,7 @@ function setup(){
  sync();admin.hidden=!isAdmin();if(isAdmin())loadAdmin();
 }
 function compress(file){return new Promise((resolve,reject)=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{const scale=Math.min(1,900/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>b?resolve(b):reject(Error('Image compression failed')),'image/webp',.72)};img.onerror=()=>{URL.revokeObjectURL(u);reject()};img.src=u})}
-function render(){const root=$('w4uCreations');if(!root)return;const shown=products.filter(p=>p.active&&p.images.length).sort((a,b)=>a.sort-b.sort);root.innerHTML=`<div class="w4uc-head"><div><h2>Our Creations ✨</h2><div class="w4uc-sub">Designed with love, customized for you</div></div><span class="w4uc-sub">Scroll →</span></div>${shown.length?`<div class="w4uc-track">${shown.map(p=>{let n=p.images.length,i=Math.min(imageIndexes[p.id]||0,n-1),im=p.images[i];imageIndexes[p.id]=i;return `<article class="w4uc-card"><div class="w4uc-image"><img src="${esc(im.src)}" alt="${esc(p.name)} — image ${i+1}" loading="lazy"><button class="w4uc-zoom" data-w4uc-action="zoom" data-id="${esc(p.id)}" aria-label="Enlarge image">⤢</button>${im.size?`<span class="w4uc-size">${esc(im.size)}</span>`:''}${im.reel?`<button class="w4uc-play" data-w4uc-action="reel" data-id="${esc(p.id)}">▶ Watch Video ↗</button>`:''}</div><div class="w4uc-nav"><button data-w4uc-action="prev" data-id="${esc(p.id)}" ${n<2?'disabled':''} aria-label="Previous image">‹</button><span class="w4uc-counter">${i+1} / ${n}</span><button data-w4uc-action="next" data-id="${esc(p.id)}" ${n<2?'disabled':''} aria-label="Next image">›</button></div><div class="w4uc-name">${esc(p.name)}</div><button class="w4uc-cta" data-w4uc-action="order" data-id="${esc(p.id)}">Customize &amp; Order</button></article>`}).join('')}</div>`:`<p class="w4uc-empty">Our creations are coming soon.</p>`}`;
+function render(){const root=$('w4uCreations');if(!root)return;const shown=products.filter(p=>p.active&&p.images.length).sort((a,b)=>a.sort-b.sort);root.classList.toggle("w4uc-single",shown.length===1);root.innerHTML=`<div class="w4uc-head"><div><h2>WeShop4U Creations ✨</h2><div class="w4uc-sub">Made with love, personalized for you.</div></div>${shown.length>1?'<span class="w4uc-sub">Swipe →</span>':''}</div>${shown.length?`<div class="w4uc-track">${shown.map(p=>{let n=p.images.length,i=Math.min(imageIndexes[p.id]||0,n-1),im=p.images[i];imageIndexes[p.id]=i;return `<article class="w4uc-card"><div class="w4uc-image"><img src="${esc(im.src)}" alt="${esc(p.name)} — image ${i+1}" loading="lazy"><button class="w4uc-zoom" data-w4uc-action="zoom" data-id="${esc(p.id)}" aria-label="Enlarge product image" title="View larger image">⤢</button></div><div class="w4uc-details">${im.size?`<span class="w4uc-size">Size: ${esc(im.size)}</span>`:''}${im.reel?`<button class="w4uc-play" data-w4uc-action="reel" data-id="${esc(p.id)}" aria-label="Watch Instagram Reel in a new tab">▶ Watch Reel ↗</button>`:''}</div><div class="w4uc-nav" ${n<2?'hidden':''}><button data-w4uc-action="prev" data-id="${esc(p.id)}" ${n<2?'disabled':''} aria-label="Previous image">‹</button><span class="w4uc-counter">${i+1} / ${n}</span><button data-w4uc-action="next" data-id="${esc(p.id)}" ${n<2?'disabled':''} aria-label="Next image">›</button></div><div class="w4uc-name">${esc(p.name)}</div><button class="w4uc-cta" data-w4uc-action="order" data-id="${esc(p.id)}">Customize &amp; Order</button></article>`}).join('')}</div>`:`<p class="w4uc-empty">Our creations are coming soon.</p>`}`;
  // On mobile, gallery is inserted immediately before mobile Happy Clients (within mobile landing).
  const mobile=$('happyClientsMobileSection'),home=$('happyClientsSection');if(mobile&&home){if(matchMedia('(max-width:575px)').matches){mobile.before(root)}else{home.before(root)}}
 }
