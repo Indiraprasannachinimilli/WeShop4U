@@ -2571,6 +2571,23 @@ body.ss-inside:not(.ss-admin-mode) #w4uCreations,body.ss-admin-mode #w4uCreation
  #w4uCreations .w4uc-title-row .w4uc-reel-inline {font-size:11px!important;padding:5px 7px!important;}
 }
 </style>
+
+<style id="w4uc-actual-small-card-final-fix">
+/* Compact regardless of the number of creations: do not scale one card to fill the row. */
+#w4uCreations {height:auto!important;min-height:0!important;padding:8px 9px!important;margin-top:5px!important;margin-bottom:6px!important;}
+#w4uCreations .w4uc-head {margin:0 0 6px!important;padding:0!important;}
+#w4uCreations .w4uc-track {display:flex!important;justify-content:flex-start!important;align-items:flex-start!important;flex-wrap:nowrap!important;gap:8px!important;padding:0 0 2px!important;margin:0!important;height:auto!important;min-height:0!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x proximity!important;}
+#w4uCreations .w4uc-card {flex:0 0 142px!important;width:142px!important;min-width:0!important;max-width:142px!important;height:auto!important;min-height:0!important;padding:5px!important;margin:0!important;align-self:flex-start!important;box-sizing:border-box!important;}
+#w4uCreations .w4uc-image {width:100%!important;height:124px!important;min-height:0!important;max-height:124px!important;aspect-ratio:auto!important;overflow:hidden!important;}
+#w4uCreations .w4uc-image img {width:100%!important;height:100%!important;object-fit:contain!important;}
+#w4uCreations .w4uc-title-row {margin:4px 0!important;gap:3px!important;}
+#w4uCreations .w4uc-title-row .w4uc-name {font-size:10px!important;line-height:1.2!important;}
+#w4uCreations .w4uc-title-row .w4uc-reel-inline {font-size:9px!important;padding:3px 4px!important;line-height:1.2!important;}
+#w4uCreations .w4uc-cta {min-height:0!important;height:auto!important;padding:6px 2px!important;margin-top:3px!important;font-size:10px!important;line-height:1.2!important;}
+#w4uCreations .w4uc-nav[hidden] {display:none!important;}
+@media (max-width:350px) {#w4uCreations .w4uc-card {flex-basis:calc((100% - 8px)/2)!important;width:calc((100% - 8px)/2)!important;max-width:calc((100% - 8px)/2)!important;} #w4uCreations .w4uc-image{height:110px!important;max-height:110px!important;}}
+@media (min-width:700px) {#w4uCreations .w4uc-card{flex-basis:170px!important;width:170px!important;max-width:170px!important;}#w4uCreations .w4uc-image{height:150px!important;max-height:150px!important;}}
+</style>
 </head>
 
 
