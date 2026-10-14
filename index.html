@@ -2668,6 +2668,17 @@ body.ss-inside:not(.ss-admin-mode) #w4uCreations,body.ss-admin-mode #w4uCreation
 #w4uCreationFormHint.w4uc-order-preview{position:relative;display:block!important;margin:0 0 18px!important;max-width:100%}
 #w4uCreationFormHint[hidden]{display:none!important}
 .w4uc-single-home-nav{display:flex;justify-content:center;margin:20px auto 8px}
+</style><style id="w4uc-compact-order-preview">
+#w4uCreationFormHint.w4uc-order-preview{padding:9px 11px!important;margin:10px 0!important;max-width:100%!important;border-radius:10px!important}
+#w4uCreationFormHint.w4uc-order-preview h3{font-size:14px!important;margin:0 0 6px!important}
+#w4uCreationFormHint .w4uc-order-selected{display:flex!important;align-items:center!important;gap:9px!important}
+#w4uCreationFormHint .w4uc-order-selected img{width:58px!important;height:58px!important;max-width:58px!important;object-fit:contain!important;flex-shrink:0!important}
+#w4uCreationFormHint .w4uc-order-selected strong{font-size:12px!important}
+#w4uCreationFormHint .w4uc-order-selected p{font-size:11px!important;margin:2px 0!important}
+#w4uCreationFormHint .w4uc-test-note{display:none!important}
+#w4uCreationFormHint .w4uc-order-size{font-size:12px!important;margin-top:6px!important}
+#w4uCreationFormHint .w4uc-order-size select{min-height:34px!important;padding:4px 8px!important}
+#w4uCreationFormHint .w4uc-picker-photos{max-height:220px!important;overflow:auto!important}
 </style></head>
 
 
@@ -10113,6 +10124,7 @@ document.addEventListener('DOMContentLoaded',function(){
     document.querySelectorAll('.ss-success-nav').forEach(el=>el.remove());
     const form=document.getElementById('weshopForm');
     if(!form)return;
+    if(form.querySelector('.w4uc-single-home-nav'))return;
     const nav=document.createElement('div');
     nav.className='ss-success-nav w4uc-single-home-nav';
     const btn=document.createElement('button');
@@ -10430,7 +10442,7 @@ function autoSelectCreationTile(){
  const type=sel.type||creationType(sel);
  const tiles=[...document.querySelectorAll('#itemTiles .tile')];
  const tile=tiles.find(t=>creationCategoryMatch(t.querySelector('.tile-label')?.textContent,type));
- if(tile){const input=tile.querySelector('input[type="checkbox"]');if(input&&!input.checked){tile.click();}}
+ if(tile && document.querySelector('input[name="event"]:checked')){const input=tile.querySelector('input[type="checkbox"]');if(input&&!input.checked){input.checked=true;input.dispatchEvent(new Event('change',{bubbles:true}));}}
  showFormHint();
 }
 function showFormHint(){
@@ -10442,10 +10454,10 @@ function showFormHint(){
  // Keep the panel OUTSIDE itemTiles: that area is replaced whenever the event changes.
  const tiles=document.getElementById('itemTiles');
  const eventGrid=document.getElementById('eventTiles');
- if(eventGrid){eventGrid.insertAdjacentElement('beforebegin',hint);}else form.prepend(hint);
+ if(eventGrid){eventGrid.insertAdjacentElement('afterend',hint);}else form.prepend(hint);
  const photo=sel.photoUrl||(sel.photoPath?imageUrl(sel.photoPath):'');
  const sizeValue=document.getElementById('w4ucRequestedSize')?.value||'';
- hint.innerHTML=`<h3>Your Selected Design</h3><div class="w4uc-order-selected">${photo?`<img src="${esc(photo)}" alt="Selected design">`:''}<div><strong>${esc(sel.name)}</strong><p>Photo ${Number(sel.imageIndex)||1} · ${type==='tshirt'?'Custom T-Shirt':type==='handkerchief'?'Customized Handkerchief':'Customized product'}</p><button type="button" id="w4ucChangeDesign" class="w4uc-small-button">Change Design</button></div></div><div id="w4ucPicker" hidden><div class="w4uc-picker-heading"><b>Choose another ${type==='tshirt'?'T-Shirt':type==='handkerchief'?'Handkerchief':'product'} design</b><button type="button" id="w4ucPickerClose">✕</button></div><div id="w4ucPickerPhotos" class="w4uc-picker-photos"></div></div>${type==='tshirt'?`<label class="w4uc-order-size">Your T-Shirt size <select id="w4ucRequestedSize"><option value="">Select size</option>${['XS','S','M','L','XL','XXL','3XL','Other'].map(v=>`<option value="${v}" ${sizeValue===v?'selected':''}>${v}</option>`).join('')}</select></label>`:''}<p class="w4uc-test-note">Your selected design will be attached to the order details. Complete the remaining fields below.</p>`;
+ hint.innerHTML=`<h3>Selected Design</h3><div class="w4uc-order-selected">${photo?`<img src="${esc(photo)}" alt="Selected design">`:''}<div><strong>${esc(sel.name)}</strong><p>Photo ${Number(sel.imageIndex)||1} · ${type==='tshirt'?'Custom T-Shirt':type==='handkerchief'?'Customized Handkerchief':'Customized product'}</p><button type="button" id="w4ucChangeDesign" class="w4uc-small-button">Change Design</button></div></div><div id="w4ucPicker" hidden><div class="w4uc-picker-heading"><b>Choose another ${type==='tshirt'?'T-Shirt':type==='handkerchief'?'Handkerchief':'product'} design</b><button type="button" id="w4ucPickerClose">✕</button></div><div id="w4ucPickerPhotos" class="w4uc-picker-photos"></div></div>${type==='tshirt'?`<label class="w4uc-order-size">Your T-Shirt size <select id="w4ucRequestedSize"><option value="">Select size</option>${['XS','S','M','L','XL','XXL','3XL','Other'].map(v=>`<option value="${v}" ${sizeValue===v?'selected':''}>${v}</option>`).join('')}</select></label>`:''}<p class="w4uc-test-note">Your selected design will be attached to the order details. Complete the remaining fields below.</p>`;
  hint.hidden=false;
  const picker=document.getElementById('w4ucPicker');
  document.getElementById('w4ucChangeDesign').onclick=()=>{if(!picker.hidden){picker.hidden=true;return;}const matches=products.filter(p=>p.active&&p.images?.length&&creationType(p)===type);document.getElementById('w4ucPickerPhotos').innerHTML=matches.length?matches.map(p=>p.images.map((im,i)=>`<button type="button" data-w4uc-pick-product="${esc(p.id)}" data-w4uc-pick-index="${i}" class="w4uc-picker-photo ${sel.productId===p.id&&sel.photoId===im.id?'active':''}"><img src="${esc(im.src)}" alt="${esc(p.name)} design ${i+1}"><span>${esc(p.name)} · ${i+1}/${p.images.length}</span></button>`).join('')).join(''):'<p>No other designs available.</p>';picker.hidden=false;};
