@@ -10433,7 +10433,17 @@ function order(p){
  sessionStorage.setItem('w4u_creation_selection',JSON.stringify(selected));
  const btn=document.querySelector('[data-order-mode="new"]');
  if(btn)btn.click();else if(typeof selectCustomerOrderMode==='function')selectCustomerOrderMode('new');
- setTimeout(showFormHint,0);
+ // Orders initiated from Our Creations are product-led, not necessarily event-led.
+ // Choose the existing Other event by default, while allowing customers to change it.
+ setTimeout(()=>{
+   const eventTile=document.querySelector('#eventTiles .tile[data-key="otherEvent"]');
+   if(eventTile && !document.querySelector('input[name="event"]:checked')) {
+     eventTile.click();
+     requestAnimationFrame(()=>{const heading=document.querySelector('#eventTiles');if(heading)heading.scrollIntoView({block:'start'});});
+   }
+   autoSelectCreationTile();
+   showFormHint();
+ },0);
 }
 window.w4ucAutoSelect=autoSelectCreationTile;
 window.w4ucShowSelection=showFormHint;
