@@ -2664,6 +2664,10 @@ body.ss-inside:not(.ss-admin-mode) #w4uCreations,body.ss-admin-mode #w4uCreation
 .w4uc-picker-photo.active{border:2px solid #916237}
 .w4uc-picker-photo img{display:block;width:100%;height:86px;object-fit:contain}
 .w4uc-picker-photo span{display:block;font-size:11px;margin-top:5px}
+</style><style id="w4uc-stable-order-patch">
+#w4uCreationFormHint.w4uc-order-preview{position:relative;display:block!important;margin:0 0 18px!important;max-width:100%}
+#w4uCreationFormHint[hidden]{display:none!important}
+.w4uc-single-home-nav{display:flex;justify-content:center;margin:20px auto 8px}
 </style></head>
 
 
@@ -4585,7 +4589,6 @@ function renderEventTiles(){
     `).join('');
 
 
-  if(sessionStorage.getItem('w4u_creation_selection')) setTimeout(()=>{if(typeof window.w4ucAutoSelect==='function')window.w4ucAutoSelect();},80);
   el.querySelectorAll('.tile')
     .forEach(tile => {
 
@@ -4995,7 +4998,9 @@ function renderItemTiles(eventKey){
     });
 
   syncOtherRequirementsPanel();
-
+  if(sessionStorage.getItem('w4u_creation_selection')){
+    setTimeout(()=>{if(typeof window.w4ucAutoSelect==='function')window.w4ucAutoSelect();},0);
+  }
 }
 
 
@@ -9273,6 +9278,7 @@ function selectCustomerOrderMode(mode){
     const newBackWrap=document.getElementById('customerNewOrderBackWrap');
     if(newBackWrap) newBackWrap.hidden=false;
     if(form) form.hidden=false;
+    if(sessionStorage.getItem('w4u_creation_selection')) setTimeout(()=>{if(typeof window.w4ucShowSelection==='function')window.w4ucShowSelection();},0);
     return;
   }
 
@@ -10102,65 +10108,18 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
 (function(){
-  function addHomeButton(container){
-    if(!container || container.querySelector('.ss-home-action')) return;
+  // Exactly one Home action, placed at the end of the order form.
+  document.addEventListener('DOMContentLoaded',function(){
+    document.querySelectorAll('.ss-success-nav').forEach(el=>el.remove());
+    const form=document.getElementById('weshopForm');
+    if(!form)return;
     const nav=document.createElement('div');
-    nav.className='ss-success-nav';
+    nav.className='ss-success-nav w4uc-single-home-nav';
     const btn=document.createElement('button');
-    btn.type='button';
-    btn.className='ss-home-action';
-    btn.textContent='← Go to Home';
+    btn.type='button';btn.className='ss-home-action';btn.textContent='← Go to Home';
     btn.addEventListener('click',goToHomePage);
-    nav.appendChild(btn);
-    container.appendChild(nav);
-  }
-
-  function enhanceVisibleOrderScreens(){
-    const selectors=[
-      '#orderSuccess',
-      '#submissionSuccess',
-      '#successMessage',
-      '#customerOrderView',
-      '#customerOrderDetails',
-      '#editOrderSuccess',
-      '.order-success',
-      '.submission-success',
-      '.customer-order-result',
-      '.customer-order-view'
-    ];
-    selectors.forEach(function(sel){
-      document.querySelectorAll(sel).forEach(function(el){
-        const style=window.getComputedStyle(el);
-        if(style.display!=='none' && style.visibility!=='hidden'){
-          addHomeButton(el);
-        }
-      });
-    });
-
-    // Fallback: visible dialogs/sections containing clear completion text.
-    document.querySelectorAll('section,div,article').forEach(function(el){
-      if(el.querySelector('.ss-home-action')) return;
-      const txt=(el.textContent||'').toLowerCase();
-      const visible=el.offsetParent!==null;
-      if(!visible) return;
-
-      if(
-        txt.includes('order submitted successfully') ||
-        txt.includes('order created successfully') ||
-        txt.includes('order updated successfully') ||
-        txt.includes('order details')
-      ){
-        addHomeButton(el);
-      }
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded',enhanceVisibleOrderScreens);
-
-  const observer=new MutationObserver(function(){
-    enhanceVisibleOrderScreens();
+    nav.appendChild(btn);form.appendChild(nav);
   });
-  observer.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['style','class']});
 })();
 
 </script>
@@ -10462,9 +10421,10 @@ function order(p){
  sessionStorage.setItem('w4u_creation_selection',JSON.stringify(selected));
  const btn=document.querySelector('[data-order-mode="new"]');
  if(btn)btn.click();else if(typeof selectCustomerOrderMode==='function')selectCustomerOrderMode('new');
- setTimeout(()=>{showFormHint();autoSelectCreationTile();},150);
+ setTimeout(showFormHint,0);
 }
 window.w4ucAutoSelect=autoSelectCreationTile;
+window.w4ucShowSelection=showFormHint;
 function autoSelectCreationTile(){
  let sel;try{sel=JSON.parse(sessionStorage.getItem('w4u_creation_selection')||'null')}catch{}if(!sel)return;
  const type=sel.type||creationType(sel);
@@ -10481,7 +10441,8 @@ function showFormHint(){
  if(!hint){hint=document.createElement('section');hint.id='w4uCreationFormHint';hint.className='w4uc-form-hint w4uc-order-preview';}
  // Keep the panel OUTSIDE itemTiles: that area is replaced whenever the event changes.
  const tiles=document.getElementById('itemTiles');
- if(tiles&&tiles.parentNode){tiles.insertAdjacentElement('afterend',hint);}else form.prepend(hint);
+ const eventGrid=document.getElementById('eventTiles');
+ if(eventGrid){eventGrid.insertAdjacentElement('beforebegin',hint);}else form.prepend(hint);
  const photo=sel.photoUrl||(sel.photoPath?imageUrl(sel.photoPath):'');
  const sizeValue=document.getElementById('w4ucRequestedSize')?.value||'';
  hint.innerHTML=`<h3>Your Selected Design</h3><div class="w4uc-order-selected">${photo?`<img src="${esc(photo)}" alt="Selected design">`:''}<div><strong>${esc(sel.name)}</strong><p>Photo ${Number(sel.imageIndex)||1} · ${type==='tshirt'?'Custom T-Shirt':type==='handkerchief'?'Customized Handkerchief':'Customized product'}</p><button type="button" id="w4ucChangeDesign" class="w4uc-small-button">Change Design</button></div></div><div id="w4ucPicker" hidden><div class="w4uc-picker-heading"><b>Choose another ${type==='tshirt'?'T-Shirt':type==='handkerchief'?'Handkerchief':'product'} design</b><button type="button" id="w4ucPickerClose">✕</button></div><div id="w4ucPickerPhotos" class="w4uc-picker-photos"></div></div>${type==='tshirt'?`<label class="w4uc-order-size">Your T-Shirt size <select id="w4ucRequestedSize"><option value="">Select size</option>${['XS','S','M','L','XL','XXL','3XL','Other'].map(v=>`<option value="${v}" ${sizeValue===v?'selected':''}>${v}</option>`).join('')}</select></label>`:''}<p class="w4uc-test-note">Your selected design will be attached to the order details. Complete the remaining fields below.</p>`;
