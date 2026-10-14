@@ -2670,6 +2670,12 @@ body.ss-inside:not(.ss-admin-mode) #w4uCreations,body.ss-admin-mode #w4uCreation
 .w4uc-design-thumb.active{border:2px solid #95612f;background:#fff8e9}
 .w4uc-design-thumb img{display:block;width:100%;height:88px;object-fit:contain}
 .w4uc-design-thumb span{display:block;font-size:11px;line-height:1.4;margin-top:5px}
+</style><style id="w4uc-order-clean-layout">
+#w4uCreationFormHint.w4uc-inline-design{grid-column:1/-1;min-width:0;margin:4px 0 12px;padding:12px;border-radius:12px;background:#fffaf0;border:1px solid #ddc18b}
+#w4uCreationFormHint.w4uc-inline-design .w4uc-selected-design{margin-bottom:8px}
+#w4uCreationFormHint.w4uc-inline-design .w4uc-selected-design img{width:90px;height:86px;object-fit:contain}
+#w4ucOrderHomeFooter{display:flex;justify-content:center;margin:24px auto 12px;width:100%}
+#w4ucOrderHomeFooter button{padding:10px 20px;min-height:44px}
 </style></head>
 
 
@@ -4964,7 +4970,7 @@ function renderItemTiles(eventKey){
           value="${label}"
         >
 
-        ${photoTag(ADMIN_EVENT_ITEM_IMAGE.get(`${eventKey}:${key}`) || ITEM_IMAGES[key] || ITEM_IMAGES[icon] || EVENT_IMAGES[eventKey], label)}
+        ${photoTag(ADMIN_EVENT_ITEM_IMAGE.get(`${eventKey}:${key}`) || ADMIN_EVENT_ITEM_IMAGE.get(`${eventKey}:${key.split('__')[0]}`) || ITEM_IMAGES[key] || ITEM_IMAGES[key.split('__')[0]] || ITEM_IMAGES[icon] || EVENT_IMAGES[eventKey], label)}
 
         <div
           class="tile-picture"
@@ -5489,7 +5495,7 @@ function getFormData(){
   try {
     const chosen=JSON.parse(sessionStorage.getItem('w4u_creation_selection')||'null');
     if(chosen && document.getElementById('w4uCreationFormHint')?.hidden===false){
-      const type=document.querySelector('#w4uCreationFormHint [data-w4uc-type].active')?.dataset.w4ucType||'other';
+      const type=document.getElementById('w4uCreationFormHint')?.dataset.w4ucType||'other';
       const requested=type==='tshirt'?(document.getElementById('w4ucRequestedSize')?.value||'').trim():'';
       creationNotes='\n[Our Creations] Product: '+chosen.name+'; Product ID: '+chosen.productId+'; Photo ID: '+(chosen.photoId||'')+'; Photo path: '+(chosen.photoPath||'')+'; Photo number: '+chosen.imageIndex+'; Product type: '+type+(type==='tshirt'?'; Requested T-Shirt size: '+(requested||'Not specified'):'');
     }
@@ -10118,7 +10124,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 (function(){
   function addHomeButton(container){
-    if(!container || container.querySelector('.ss-home-action')) return;
+    if(!container || container.querySelector('.ss-home-action') || container.closest('.ss-success-nav')) return;
     const nav=document.createElement('div');
     nav.className='ss-success-nav';
     const btn=document.createElement('button');
@@ -10152,28 +10158,26 @@ document.addEventListener('DOMContentLoaded',function(){
       });
     });
 
-    // Fallback: visible dialogs/sections containing clear completion text.
-    document.querySelectorAll('section,div,article').forEach(function(el){
-      if(el.querySelector('.ss-home-action')) return;
-      const txt=(el.textContent||'').toLowerCase();
-      const visible=el.offsetParent!==null;
-      if(!visible) return;
+    // Do not scan arbitrary parent sections by text: this previously inserted
+    // duplicate Home buttons inside the ordinary order form.
 
-      if(
-        txt.includes('order submitted successfully') ||
-        txt.includes('order created successfully') ||
-        txt.includes('order updated successfully') ||
-        txt.includes('order details')
-      ){
-        addHomeButton(el);
-      }
-    });
   }
 
-  document.addEventListener('DOMContentLoaded',enhanceVisibleOrderScreens);
+  function tidyHomeButtons(){
+    const form=document.getElementById('weshopForm');
+    if(!form)return;
+    const candidates=[...form.querySelectorAll('button,a')].filter(el=>/^(?:←\s*)?go to home$/i.test((el.textContent||'').trim()));
+    candidates.forEach(el=>{const wrap=el.closest('.ss-success-nav');if(wrap&&form.contains(wrap))wrap.remove();else el.remove();});
+    let footer=document.getElementById('w4ucOrderHomeFooter');
+    if(!footer){footer=document.createElement('div');footer.id='w4ucOrderHomeFooter';footer.className='w4uc-order-home-footer';form.appendChild(footer);}
+    if(!footer.querySelector('button')){const btn=document.createElement('button');btn.type='button';btn.textContent='← Go to Home';btn.className='w4uc-small-button';btn.addEventListener('click',goToHomePage);footer.appendChild(btn);}
+  }
+  document.addEventListener('DOMContentLoaded',function(){enhanceVisibleOrderScreens();tidyHomeButtons();});
+
 
   const observer=new MutationObserver(function(){
     enhanceVisibleOrderScreens();
+    tidyHomeButtons();
   });
   observer.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['style','class']});
 })();
@@ -10474,38 +10478,27 @@ function showFormHint(){
  const form=$('weshopForm');if(!form)return;
  let sel;try{sel=JSON.parse(sessionStorage.getItem('w4u_creation_selection')||'null')}catch{}
  if(!sel)return;
- const productType=()=>/handkerchief/i.test(sel.category||sel.name)?'handkerchief':/t[\s-]?shirt/i.test(sel.category||sel.name)?'tshirt':'other';
+ let type=/handkerchief/i.test(sel.category||sel.name)?'handkerchief':/t[\s-]?shirt/i.test(sel.category||sel.name)?'tshirt':'other';
  let hint=$('w4uCreationFormHint');
- if(!hint){hint=document.createElement('section');hint.id='w4uCreationFormHint';hint.className='w4uc-form-hint w4uc-order-selection';const items=$('itemTiles');if(items)items.after(hint);else form.prepend(hint);}
- hint.innerHTML=`<h3>Your customized product</h3>
- <div class="w4uc-product-choices" role="group" aria-label="Product type">
- <button type="button" data-w4uc-type="tshirt">👕 Custom T-Shirts</button>
- <button type="button" data-w4uc-type="handkerchief">🧵 Customized Handkerchiefs</button>
- <button type="button" data-w4uc-type="other">🎁 Other</button></div>
- <div class="w4uc-selected-design"><img id="w4ucSelectedImg" alt="Selected creation" hidden><div><strong id="w4ucSelectedTitle"></strong><div id="w4ucSelectedCounter" class="w4uc-muted"></div><button type="button" class="w4uc-small-button" id="w4ucChangeDesign">Change Design</button></div></div>
+ if(!hint){hint=document.createElement('section');hint.id='w4uCreationFormHint';hint.className='w4uc-form-hint w4uc-order-selection w4uc-inline-design';}
+ hint.innerHTML=`<div class="w4uc-selected-design"><img id="w4ucSelectedImg" alt="Selected creation" hidden><div><strong id="w4ucSelectedTitle"></strong><div id="w4ucSelectedCounter" class="w4uc-muted"></div><button type="button" class="w4uc-small-button" id="w4ucChangeDesign">Change Design</button></div></div>
  <div id="w4ucDesignPicker" hidden><div class="w4uc-picker-head"><strong>Choose a design</strong><button type="button" id="w4ucClosePicker" aria-label="Close design picker">✕</button></div><div id="w4ucDesignThumbs" class="w4uc-design-thumbs"></div></div>
- <div id="w4ucTshirtFields"><label for="w4ucRequestedSize">Your T-Shirt size</label><select id="w4ucRequestedSize"><option value="">Choose size</option>${['XS','S','M','L','XL','XXL','3XL','Other'].map(x=>`<option value="${x}">${x}</option>`).join('')}</select></div>
- <p class="w4uc-muted">Your selected design will be included with your order. Continue filling in the existing order details below.</p>`;
- hint.hidden=false;
- let type=productType(),picker=$('w4ucDesignPicker');
+ <div id="w4ucTshirtFields"><label for="w4ucRequestedSize">Your T-Shirt size</label><select id="w4ucRequestedSize"><option value="">Choose size</option>${['XS','S','M','L','XL','XXL','3XL','Other'].map(x=>`<option value="${x}">${x}</option>`).join('')}</select></div>`;
+ hint.hidden=false;hint.dataset.w4ucType=type;
+ const picker=$('w4ucDesignPicker');
  const allProducts=()=>products.filter(p=>p.active&&p.images.length);
  const matches=p=>type==='tshirt'?/t[\s-]?shirt/i.test(p.category||p.name):type==='handkerchief'?/handkerchief/i.test(p.category||p.name):true;
+ function findTile(){return [...document.querySelectorAll('#itemTiles .tile')].find(tile=>{const name=(tile.querySelector('.tile-label')?.textContent||'');return type==='tshirt'?/t[\s-]?shirt/i.test(name)&&!/handkerchief/i.test(name):type==='handkerchief'?/handkerchief/i.test(name)&&!/t[\s-]?shirt/i.test(name):false;});}
+ function place(){const tile=findTile(),tiles=$('itemTiles');if(tile){tile.after(hint);hint.hidden=false;const checkbox=tile.querySelector('input[type="checkbox"]');if(checkbox&&!checkbox.checked){checkbox.checked=true;tile.classList.add('selected');}}else if(tiles){tiles.after(hint);hint.hidden=false;}}
  function draw(){
-  hint.querySelectorAll('[data-w4uc-type]').forEach(btn=>{const active=btn.dataset.w4ucType===type;btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',String(active));});
-  $('w4ucTshirtFields').hidden=type!=='tshirt';
-  const img=$('w4ucSelectedImg'),url=sel.photoUrl||(sel.photoPath?imageUrl(sel.photoPath):'');
-  img.hidden=!url;if(url)img.src=url;
+  hint.dataset.w4ucType=type;$('w4ucTshirtFields').hidden=type!=='tshirt';
+  const img=$('w4ucSelectedImg'),url=sel.photoUrl||(sel.photoPath?imageUrl(sel.photoPath):'');img.hidden=!url;if(url)img.src=url;
   $('w4ucSelectedTitle').textContent=sel.name||'Selected design';
   $('w4ucSelectedCounter').textContent=`Photo ${sel.imageIndex||1} · Selected from Our Creations`;
   const available=allProducts().filter(matches);
   $('w4ucDesignThumbs').innerHTML=available.length?available.map(p=>p.images.map((im,i)=>`<button type="button" class="w4uc-design-thumb ${p.id===sel.productId&&(im.id===sel.photoId||(!sel.photoId&&i+1===sel.imageIndex))?'active':''}" data-product="${esc(p.id)}" data-photo="${i}"><img src="${esc(im.src)}" alt="${esc(p.name)} photo ${i+1}"><span>${esc(p.name)} · ${i+1}/${p.images.length}</span></button>`).join('')).join(''):'<p>No designs uploaded for this product yet.</p>';
+  place();
  }
- hint.querySelectorAll('[data-w4uc-type]').forEach(btn=>btn.onclick=()=>{
-   type=btn.dataset.w4ucType;
-   const found=allProducts().filter(matches).find(p=>p.id===sel.productId);
-   if(!found){const p=allProducts().find(matches);if(p){const im=p.images[0];sel={productId:p.id,photoId:im.id,photoPath:im.path,photoUrl:im.src,name:p.name,category:p.category,size:im.size,imageIndex:1};sessionStorage.setItem('w4u_creation_selection',JSON.stringify(sel));}}
-   draw();picker.hidden=false;
- });
  $('w4ucChangeDesign').onclick=()=>{draw();picker.hidden=!picker.hidden;};
  $('w4ucClosePicker').onclick=()=>picker.hidden=true;
  $('w4ucDesignThumbs').onclick=e=>{const btn=e.target.closest('[data-product]');if(!btn)return;const p=allProducts().find(p=>p.id===btn.dataset.product),i=Number(btn.dataset.photo),im=p?.images[i];if(!im)return;sel={productId:p.id,photoId:im.id,photoPath:im.path,photoUrl:im.src,name:p.name,category:p.category,size:im.size,imageIndex:i+1};sessionStorage.setItem('w4u_creation_selection',JSON.stringify(sel));draw();picker.hidden=true;};
