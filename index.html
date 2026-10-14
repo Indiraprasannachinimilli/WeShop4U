@@ -2646,30 +2646,24 @@ body.ss-inside:not(.ss-admin-mode) #w4uCreations,body.ss-admin-mode #w4uCreation
 #w4uCreations .w4uc-image .w4uc-nav button{width:24px!important;height:24px!important;font-size:17px!important}
 #w4uCreations .w4uc-image .w4uc-counter{font-size:9px!important;padding:2px 6px!important}
 @media(min-width:700px){#w4uCreations .w4uc-title-row{min-height:39px!important;height:39px!important}}
-</style><style id="w4uc-order-product-selection">
-#w4uCreationFormHint.w4uc-order-selection{margin:12px 0 16px;padding:13px;border:1px solid #d7b77a;border-radius:12px;background:#fffaf0;max-width:100%;box-sizing:border-box}
-#w4uCreationFormHint h3{font-size:17px;margin:0 0 10px;color:#693d19}
-.w4uc-selected-design{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.w4uc-selected-design img{width:86px;height:76px;object-fit:contain;background:#fff;border:1px solid #eadcc5;border-radius:8px;flex:none}
-.w4uc-selected-design>div{min-width:0;flex:1;font-size:13px}
-.w4uc-selected-design .w4uc-muted{margin:4px 0 8px;font-size:11px}
-.w4uc-order-selection label{display:block;font-weight:650;font-size:13px;margin:7px 0}
-.w4uc-order-selection select{width:100%;max-width:360px;min-height:40px;border:1px solid #d6b982;border-radius:7px;background:#fff;padding:7px}
-.w4uc-order-selection [hidden]{display:none!important}
-.w4uc-order-selection p.w4uc-muted{font-size:12px;margin:9px 0 0}
-</style><style id="w4uc-design-picker-styles">
-.w4uc-product-choices{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.w4uc-product-choices button{background:white;border:1px solid #d8b984;border-radius:10px;padding:10px 12px;color:#5c4028;cursor:pointer;font-size:13px}
-.w4uc-product-choices button.active{background:#6f452a;color:white;border-color:#6f452a}
-#w4ucDesignPicker{margin:12px 0;border:1px solid #e4d7be;border-radius:12px;padding:10px;background:#fff}
-#w4ucDesignPicker[hidden]{display:none}
-.w4uc-picker-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
-.w4uc-picker-head button{background:transparent;border:0;font-size:19px;cursor:pointer}
-.w4uc-design-thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:9px;max-height:290px;overflow:auto}
-.w4uc-design-thumb{border:1px solid #e3d7c2;border-radius:8px;background:white;padding:5px;cursor:pointer;text-align:left;color:#453627}
-.w4uc-design-thumb.active{border:2px solid #95612f;background:#fff8e9}
-.w4uc-design-thumb img{display:block;width:100%;height:88px;object-fit:contain}
-.w4uc-design-thumb span{display:block;font-size:11px;line-height:1.4;margin-top:5px}
+</style><style id="w4uc-order-preview-style">
+#w4uCreationFormHint.w4uc-order-preview{display:block!important;margin:16px 0;padding:15px;border:1px solid #ddc6a1;border-radius:12px;background:#fffaf1;box-sizing:border-box}
+#w4uCreationFormHint[hidden]{display:none!important}
+.w4uc-order-preview h3{font-size:17px;margin:0 0 12px;color:#6b4123}
+.w4uc-order-selected{display:flex;align-items:center;gap:13px}
+.w4uc-order-selected img{width:100px;height:95px;object-fit:contain;background:white;border-radius:9px;border:1px solid #e8ddcb;flex-shrink:0}
+.w4uc-order-selected p{font-size:12px;margin:6px 0;color:#6c6256}
+.w4uc-order-size{display:block;font-weight:600;margin-top:13px}
+.w4uc-order-size select{display:block;width:100%;max-width:340px;margin-top:6px;padding:10px;border:1px solid #d6b991;border-radius:8px;background:white}
+#w4ucPicker[hidden]{display:none!important}
+#w4ucPicker{background:#fff;border:1px solid #e7d6ba;border-radius:10px;padding:10px;margin-top:12px}
+.w4uc-picker-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.w4uc-picker-heading button{background:none;border:0;font-size:19px;cursor:pointer}
+.w4uc-picker-photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:9px;max-height:320px;overflow:auto}
+.w4uc-picker-photo{border:1px solid #e4d8c4;background:#fff;border-radius:8px;padding:5px;cursor:pointer;text-align:left}
+.w4uc-picker-photo.active{border:2px solid #916237}
+.w4uc-picker-photo img{display:block;width:100%;height:86px;object-fit:contain}
+.w4uc-picker-photo span{display:block;font-size:11px;margin-top:5px}
 </style></head>
 
 
@@ -4591,6 +4585,7 @@ function renderEventTiles(){
     `).join('');
 
 
+  if(sessionStorage.getItem('w4u_creation_selection')) setTimeout(()=>{if(typeof window.w4ucAutoSelect==='function')window.w4ucAutoSelect();},80);
   el.querySelectorAll('.tile')
     .forEach(tile => {
 
@@ -4938,20 +4933,11 @@ function renderItemTiles(eventKey){
     return av-bv || String(a[1]).localeCompare(String(b[1]));
   });
 
-  // Split an existing combined T-Shirts + Handkerchiefs checklist item for customers.
-  // The underlying admin checklist configuration remains unchanged.
-  const expandedList=list.flatMap(entry=>{
-    const [key,label,icon]=entry;
-    if(/t[\s-]?shirts?/i.test(label)&&/handkerchief/i.test(label)){
-      return [[key+'__tshirt','Customized T-Shirts',icon],[key+'__handkerchief','Customized Handkerchiefs',icon]];
-    }
-    return [entry];
-  });
   const el =
     document.getElementById('itemTiles');
 
   el.innerHTML =
-    expandedList.map(([key,label,icon]) => `
+    list.map(([key,label,icon]) => `
 
       <label
         class="tile"
@@ -5489,9 +5475,8 @@ function getFormData(){
   try {
     const chosen=JSON.parse(sessionStorage.getItem('w4u_creation_selection')||'null');
     if(chosen && document.getElementById('w4uCreationFormHint')?.hidden===false){
-      const type=document.querySelector('#w4uCreationFormHint [data-w4uc-type].active')?.dataset.w4ucType||'other';
-      const requested=type==='tshirt'?(document.getElementById('w4ucRequestedSize')?.value||'').trim():'';
-      creationNotes='\n[Our Creations] Product: '+chosen.name+'; Product ID: '+chosen.productId+'; Photo ID: '+(chosen.photoId||'')+'; Photo path: '+(chosen.photoPath||'')+'; Photo number: '+chosen.imageIndex+'; Product type: '+type+(type==='tshirt'?'; Requested T-Shirt size: '+(requested||'Not specified'):'');
+      const requested=(document.getElementById('w4ucRequestedSize')?.value||'').trim();
+      creationNotes='\n[Our Creations] Product: '+chosen.name+'; Product ID: '+chosen.productId+'; Photo ID: '+(chosen.photoId||'')+'; Photo path: '+(chosen.photoPath||'')+'; Photo: '+chosen.imageIndex+'; Product type: '+(chosen.type||'other')+((chosen.type==='tshirt')?'; Requested T-Shirt size: '+(requested||'Not specified'):'');
     }
   } catch(error) { console.warn('Creation selection not available',error); }
 
@@ -10118,7 +10103,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 (function(){
   function addHomeButton(container){
-    if(!container || container.querySelector('.ss-home-action') || container.closest('.ss-success-nav')) return;
+    if(!container || container.querySelector('.ss-home-action')) return;
     const nav=document.createElement('div');
     nav.className='ss-success-nav';
     const btn=document.createElement('button');
@@ -10152,9 +10137,22 @@ document.addEventListener('DOMContentLoaded',function(){
       });
     });
 
-    // Do not scan arbitrary parent sections by text: this previously inserted
-    // duplicate Home buttons inside the ordinary order form.
+    // Fallback: visible dialogs/sections containing clear completion text.
+    document.querySelectorAll('section,div,article').forEach(function(el){
+      if(el.querySelector('.ss-home-action')) return;
+      const txt=(el.textContent||'').toLowerCase();
+      const visible=el.offsetParent!==null;
+      if(!visible) return;
 
+      if(
+        txt.includes('order submitted successfully') ||
+        txt.includes('order created successfully') ||
+        txt.includes('order updated successfully') ||
+        txt.includes('order details')
+      ){
+        addHomeButton(el);
+      }
+    });
   }
 
   document.addEventListener('DOMContentLoaded',enhanceVisibleOrderScreens);
@@ -10456,47 +10454,42 @@ function renderAdmin(){let root=$('w4ucAdminList');if(!root)return;root.innerHTM
 function showView(){const p=products.find(x=>x.id===view?.id),el=$('w4uCreationViewer');if(!p?.images.length)return;view.index=(view.index+p.images.length)%p.images.length;let im=p.images[view.index];$('w4ucBig').src=im.src;$('w4ucBigInfo').textContent=`${p.name}${im.size?' · Size '+im.size:''} · ${view.index+1}/${p.images.length}`;el.hidden=false}
 function moveView(d){if(view){view.index+=d;showView()}}
 function closeView(){$('w4uCreationViewer').hidden=true;view=null}
-function order(p){let im=p.images[imageIndexes[p.id]||0];selected={productId:p.id,photoId:im?.id||'',photoPath:im?.path||'',photoUrl:im?.src||'',name:p.name,category:p.category||'',size:im?.size||'',imageIndex:(imageIndexes[p.id]||0)+1};sessionStorage.setItem('w4u_creation_selection',JSON.stringify(selected));let btn=document.querySelector('[data-order-mode="new"]');if(btn)btn.click();else if(typeof selectCustomerOrderMode==='function')selectCustomerOrderMode('new');setTimeout(showFormHint,100)}
+function creationType(p){const v=((p?.category||'')+' '+(p?.name||'')).toLowerCase();return /handkerchief/.test(v)?'handkerchief':/t[\s-]?shirts?/.test(v)?'tshirt':'other';}
+function creationCategoryMatch(label,type){const t=String(label||'').toLowerCase();return type==='tshirt'?/t[\s-]?shirts?/.test(t):type==='handkerchief'?/handkerchief/.test(t):false;}
+function order(p){
+ const i=imageIndexes[p.id]||0,im=p.images[i];
+ selected={productId:p.id,photoId:im?.id||'',photoPath:im?.path||'',photoUrl:im?.src||'',name:p.name,category:p.category||'',size:im?.size||'',imageIndex:i+1,type:creationType(p)};
+ sessionStorage.setItem('w4u_creation_selection',JSON.stringify(selected));
+ const btn=document.querySelector('[data-order-mode="new"]');
+ if(btn)btn.click();else if(typeof selectCustomerOrderMode==='function')selectCustomerOrderMode('new');
+ setTimeout(()=>{showFormHint();autoSelectCreationTile();},150);
+}
+window.w4ucAutoSelect=autoSelectCreationTile;
+function autoSelectCreationTile(){
+ let sel;try{sel=JSON.parse(sessionStorage.getItem('w4u_creation_selection')||'null')}catch{}if(!sel)return;
+ const type=sel.type||creationType(sel);
+ const tiles=[...document.querySelectorAll('#itemTiles .tile')];
+ const tile=tiles.find(t=>creationCategoryMatch(t.querySelector('.tile-label')?.textContent,type));
+ if(tile){const input=tile.querySelector('input[type="checkbox"]');if(input&&!input.checked){tile.click();}}
+ showFormHint();
+}
 function showFormHint(){
- const form=$('weshopForm');if(!form)return;
- let sel;try{sel=JSON.parse(sessionStorage.getItem('w4u_creation_selection')||'null')}catch{}
- if(!sel)return;
- const productType=()=>/handkerchief/i.test(sel.category||sel.name)?'handkerchief':/t[\s-]?shirt/i.test(sel.category||sel.name)?'tshirt':'other';
- let hint=$('w4uCreationFormHint');
- if(!hint){hint=document.createElement('section');hint.id='w4uCreationFormHint';hint.className='w4uc-form-hint w4uc-order-selection';const items=$('itemTiles');if(items)items.after(hint);else form.prepend(hint);}
- hint.innerHTML=`<h3>Your customized product</h3>
- <div class="w4uc-product-choices" role="group" aria-label="Product type">
- <button type="button" data-w4uc-type="tshirt">👕 Custom T-Shirts</button>
- <button type="button" data-w4uc-type="handkerchief">🧵 Customized Handkerchiefs</button>
- <button type="button" data-w4uc-type="other">🎁 Other</button></div>
- <div class="w4uc-selected-design"><img id="w4ucSelectedImg" alt="Selected creation" hidden><div><strong id="w4ucSelectedTitle"></strong><div id="w4ucSelectedCounter" class="w4uc-muted"></div><button type="button" class="w4uc-small-button" id="w4ucChangeDesign">Change Design</button></div></div>
- <div id="w4ucDesignPicker" hidden><div class="w4uc-picker-head"><strong>Choose a design</strong><button type="button" id="w4ucClosePicker" aria-label="Close design picker">✕</button></div><div id="w4ucDesignThumbs" class="w4uc-design-thumbs"></div></div>
- <div id="w4ucTshirtFields"><label for="w4ucRequestedSize">Your T-Shirt size</label><select id="w4ucRequestedSize"><option value="">Choose size</option>${['XS','S','M','L','XL','XXL','3XL','Other'].map(x=>`<option value="${x}">${x}</option>`).join('')}</select></div>
- <p class="w4uc-muted">Your selected design will be included with your order. Continue filling in the existing order details below.</p>`;
+ const form=document.getElementById('weshopForm');if(!form)return;
+ let sel;try{sel=JSON.parse(sessionStorage.getItem('w4u_creation_selection')||'null')}catch{}if(!sel)return;
+ const type=sel.type||creationType(sel);
+ let hint=document.getElementById('w4uCreationFormHint');
+ if(!hint){hint=document.createElement('section');hint.id='w4uCreationFormHint';hint.className='w4uc-form-hint w4uc-order-preview';}
+ // Keep the panel OUTSIDE itemTiles: that area is replaced whenever the event changes.
+ const tiles=document.getElementById('itemTiles');
+ if(tiles&&tiles.parentNode){tiles.insertAdjacentElement('afterend',hint);}else form.prepend(hint);
+ const photo=sel.photoUrl||(sel.photoPath?imageUrl(sel.photoPath):'');
+ const sizeValue=document.getElementById('w4ucRequestedSize')?.value||'';
+ hint.innerHTML=`<h3>Your Selected Design</h3><div class="w4uc-order-selected">${photo?`<img src="${esc(photo)}" alt="Selected design">`:''}<div><strong>${esc(sel.name)}</strong><p>Photo ${Number(sel.imageIndex)||1} · ${type==='tshirt'?'Custom T-Shirt':type==='handkerchief'?'Customized Handkerchief':'Customized product'}</p><button type="button" id="w4ucChangeDesign" class="w4uc-small-button">Change Design</button></div></div><div id="w4ucPicker" hidden><div class="w4uc-picker-heading"><b>Choose another ${type==='tshirt'?'T-Shirt':type==='handkerchief'?'Handkerchief':'product'} design</b><button type="button" id="w4ucPickerClose">✕</button></div><div id="w4ucPickerPhotos" class="w4uc-picker-photos"></div></div>${type==='tshirt'?`<label class="w4uc-order-size">Your T-Shirt size <select id="w4ucRequestedSize"><option value="">Select size</option>${['XS','S','M','L','XL','XXL','3XL','Other'].map(v=>`<option value="${v}" ${sizeValue===v?'selected':''}>${v}</option>`).join('')}</select></label>`:''}<p class="w4uc-test-note">Your selected design will be attached to the order details. Complete the remaining fields below.</p>`;
  hint.hidden=false;
- let type=productType(),picker=$('w4ucDesignPicker');
- const allProducts=()=>products.filter(p=>p.active&&p.images.length);
- const matches=p=>type==='tshirt'?/t[\s-]?shirt/i.test(p.category||p.name):type==='handkerchief'?/handkerchief/i.test(p.category||p.name):true;
- function draw(){
-  hint.querySelectorAll('[data-w4uc-type]').forEach(btn=>{const active=btn.dataset.w4ucType===type;btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',String(active));});
-  $('w4ucTshirtFields').hidden=type!=='tshirt';
-  const img=$('w4ucSelectedImg'),url=sel.photoUrl||(sel.photoPath?imageUrl(sel.photoPath):'');
-  img.hidden=!url;if(url)img.src=url;
-  $('w4ucSelectedTitle').textContent=sel.name||'Selected design';
-  $('w4ucSelectedCounter').textContent=`Photo ${sel.imageIndex||1} · Selected from Our Creations`;
-  const available=allProducts().filter(matches);
-  $('w4ucDesignThumbs').innerHTML=available.length?available.map(p=>p.images.map((im,i)=>`<button type="button" class="w4uc-design-thumb ${p.id===sel.productId&&(im.id===sel.photoId||(!sel.photoId&&i+1===sel.imageIndex))?'active':''}" data-product="${esc(p.id)}" data-photo="${i}"><img src="${esc(im.src)}" alt="${esc(p.name)} photo ${i+1}"><span>${esc(p.name)} · ${i+1}/${p.images.length}</span></button>`).join('')).join(''):'<p>No designs uploaded for this product yet.</p>';
- }
- hint.querySelectorAll('[data-w4uc-type]').forEach(btn=>btn.onclick=()=>{
-   type=btn.dataset.w4ucType;
-   const found=allProducts().filter(matches).find(p=>p.id===sel.productId);
-   if(!found){const p=allProducts().find(matches);if(p){const im=p.images[0];sel={productId:p.id,photoId:im.id,photoPath:im.path,photoUrl:im.src,name:p.name,category:p.category,size:im.size,imageIndex:1};sessionStorage.setItem('w4u_creation_selection',JSON.stringify(sel));}}
-   draw();picker.hidden=false;
- });
- $('w4ucChangeDesign').onclick=()=>{draw();picker.hidden=!picker.hidden;};
- $('w4ucClosePicker').onclick=()=>picker.hidden=true;
- $('w4ucDesignThumbs').onclick=e=>{const btn=e.target.closest('[data-product]');if(!btn)return;const p=allProducts().find(p=>p.id===btn.dataset.product),i=Number(btn.dataset.photo),im=p?.images[i];if(!im)return;sel={productId:p.id,photoId:im.id,photoPath:im.path,photoUrl:im.src,name:p.name,category:p.category,size:im.size,imageIndex:i+1};sessionStorage.setItem('w4u_creation_selection',JSON.stringify(sel));draw();picker.hidden=true;};
- draw();
+ const picker=document.getElementById('w4ucPicker');
+ document.getElementById('w4ucChangeDesign').onclick=()=>{if(!picker.hidden){picker.hidden=true;return;}const matches=products.filter(p=>p.active&&p.images?.length&&creationType(p)===type);document.getElementById('w4ucPickerPhotos').innerHTML=matches.length?matches.map(p=>p.images.map((im,i)=>`<button type="button" data-w4uc-pick-product="${esc(p.id)}" data-w4uc-pick-index="${i}" class="w4uc-picker-photo ${sel.productId===p.id&&sel.photoId===im.id?'active':''}"><img src="${esc(im.src)}" alt="${esc(p.name)} design ${i+1}"><span>${esc(p.name)} · ${i+1}/${p.images.length}</span></button>`).join('')).join(''):'<p>No other designs available.</p>';picker.hidden=false;};
+ document.getElementById('w4ucPickerClose').onclick=()=>picker.hidden=true;
+ document.getElementById('w4ucPickerPhotos').onclick=e=>{const b=e.target.closest('[data-w4uc-pick-product]');if(!b)return;const p=products.find(p=>p.id===b.dataset.w4ucPickProduct);const i=Number(b.dataset.w4ucPickIndex),im=p?.images?.[i];if(!im)return;selected={productId:p.id,photoId:im.id,photoPath:im.path,photoUrl:im.src,name:p.name,category:p.category||'',size:im.size||'',imageIndex:i+1,type};sessionStorage.setItem('w4u_creation_selection',JSON.stringify(selected));showFormHint();};
 }
 
 window.addEventListener('DOMContentLoaded',setup);window.addEventListener('resize',()=>{if($('w4uCreations'))render()});
