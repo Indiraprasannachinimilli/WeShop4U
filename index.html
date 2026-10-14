@@ -2480,6 +2480,20 @@ body.ss-inside:not(.ss-admin-mode) #w4uCreations,body.ss-admin-mode #w4uCreation
 .w4uc-admin [data-w4uc-preview]{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
 .w4uc-admin [data-w4uc-upload-status]{display:inline-block;font-size:13px;line-height:1.5}
 </style>
+
+<style id="w4uc-crop-feature-style">
+#w4ucCropDialog[hidden]{display:none!important}
+#w4ucCropDialog{position:fixed;inset:0;z-index:20000;background:#000b;display:flex;align-items:center;justify-content:center;padding:14px}
+#w4ucCropDialog .crop-panel{width:min(94vw,460px);max-height:95dvh;overflow:auto;background:#fffdf8;color:#442c20;border-radius:14px;padding:16px;box-sizing:border-box}
+#w4ucCropDialog canvas{display:block;width:min(100%,360px);height:auto;aspect-ratio:1;touch-action:none;cursor:grab;margin:10px auto;border:1px solid #d9bb83;background:#f7f3ed}
+#w4ucCropDialog .crop-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+#w4ucCropDialog button{border:1px solid #c79d4c;border-radius:7px;padding:9px 12px;background:#fff7e7;color:#73340e;font-weight:700}
+#w4ucCropDialog button[data-crop-apply]{background:#a86c0a;color:#fff}
+#w4ucCropDialog input[type=range]{width:100%}
+.w4uc-pending-card img{width:100%;aspect-ratio:1;object-fit:contain;height:auto!important}
+.w4uc-pending-card .w4uc-crop-edit{display:block;width:100%;margin:8px 0}
+@media(max-width:575px){#w4uCreations .w4uc-card{flex:0 0 calc((100% - 12px)/2);box-sizing:border-box;padding:6px}#w4uCreations .w4uc-image{height:auto;aspect-ratio:1}#w4uCreations .w4uc-cta{font-size:11px;padding:8px 3px;line-height:1.25}#w4uCreations .w4uc-name{font-size:12px}#w4uCreations .w4uc-play{font-size:9px;padding:5px 6px;max-width:90%}#w4uCreations .w4uc-nav{margin:3px 0}#w4uCreations .w4uc-head h2{font-size:19px}}
+</style>
 </head>
 
 
@@ -10177,6 +10191,49 @@ function setup(){
  const admin=document.createElement('section');admin.id='w4uCreationAdmin';admin.className='w4uc-admin';admin.hidden=true;
  admin.innerHTML=`<h3>Our Creations — Supabase Admin</h3><p class="w4uc-test-note">Changes are saved to Supabase and shown to all visitors.</p><p id="w4ucAdminStatus" class="w4uc-test-note">Sign in above to manage creations.</p><button type="button" class="w4uc-small-button" id="w4ucReload">Refresh creations</button><div class="w4uc-fields"><label>Creation name<input id="w4ucName" maxlength="90" placeholder="Custom T-Shirt"></label><label>Category<select id="w4ucCategory"><option>T-Shirt</option><option>Handkerchief</option><option>Keepsake</option><option>Other small product</option></select></label><label>Description<input id="w4ucDesc" maxlength="240" placeholder="Optional description"></label><label>Display order<input id="w4ucSort" type="number" value="1" min="0"></label></div><p><button type="button" class="w4uc-save" id="w4ucAdd">Add Creation</button></p><div id="w4ucAdminList"></div>`;
  dashboard.append(admin);
+ const cropDialog=document.createElement('div');cropDialog.id='w4ucCropDialog';cropDialog.hidden=true;
+ cropDialog.innerHTML=`<div class="crop-panel" role="dialog" aria-modal="true" aria-label="Crop product image"><h3>Adjust product image</h3><p style="font-size:13px">Drag to reposition. Choose <b>Fit entire image</b> to avoid cutting off the design.</p><canvas width="720" height="720" aria-label="Square image crop preview"></canvas><label>Zoom <span id="w4ucCropZoomLabel">100%</span><input type="range" min="100" max="300" value="100" step="5" id="w4ucCropZoom"></label><div class="crop-actions"><button type="button" data-crop-mode="contain">Fit entire image</button><button type="button" data-crop-mode="cover">Fill square / crop</button><button type="button" data-crop-reset>Reset</button></div><div class="crop-actions"><button type="button" data-crop-cancel>Cancel</button><button type="button" data-crop-apply>Apply crop</button></div></div>`;
+ document.body.append(cropDialog);
+ let cropSession=null;
+ function drawCrop(){
+  if(!cropSession)return;
+  const {img,mode,zoom,dx,dy}=cropSession,c=cropDialog.querySelector('canvas'),ctx=c.getContext('2d'),base=mode==='contain'?Math.min(c.width/img.width,c.height/img.height):Math.max(c.width/img.width,c.height/img.height),w=img.width*base*zoom,h=img.height*base*zoom;
+  ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#f7f3ed';ctx.fillRect(0,0,c.width,c.height);
+  ctx.drawImage(img,(c.width-w)/2+dx,(c.height-h)/2+dy,w,h);
+ }
+ function openCrop(id,i){
+  const item=pendingUploads.get(id)?.items[i];if(!item)return;
+  const img=new Image();img.onload=()=>{
+   cropSession={id,i,img,mode:item.crop?.mode||'contain',zoom:item.crop?.zoom||1,dx:item.crop?.dx||0,dy:item.crop?.dy||0};
+   const slider=cropDialog.querySelector('#w4ucCropZoom');slider.value=Math.round(cropSession.zoom*100);
+   cropDialog.querySelector('#w4ucCropZoomLabel').textContent=slider.value+'%';
+   cropDialog.hidden=false;drawCrop();
+  };img.onerror=()=>alert('Could not open this image. Please select a JPG, PNG, or WebP file.');img.src=item.originalUrl||item.url;
+ }
+ cropDialog.querySelector('#w4ucCropZoom').addEventListener('input',e=>{if(!cropSession)return;cropSession.zoom=Number(e.target.value)/100;cropDialog.querySelector('#w4ucCropZoomLabel').textContent=e.target.value+'%';drawCrop()});
+ cropDialog.addEventListener('click',e=>{
+  if(e.target.closest('[data-crop-mode]')){cropSession.mode=e.target.closest('[data-crop-mode]').dataset.cropMode;cropSession.dx=0;cropSession.dy=0;drawCrop();}
+  if(e.target.closest('[data-crop-reset]')){cropSession.mode='contain';cropSession.zoom=1;cropSession.dx=0;cropSession.dy=0;cropDialog.querySelector('#w4ucCropZoom').value=100;cropDialog.querySelector('#w4ucCropZoomLabel').textContent='100%';drawCrop();}
+  if(e.target.closest('[data-crop-cancel]')){cropDialog.hidden=true;cropSession=null;}
+  if(e.target.closest('[data-crop-apply]')){
+   const item=pendingUploads.get(cropSession.id)?.items[cropSession.i];if(!item)return;
+   const c=cropDialog.querySelector('canvas');
+   c.toBlob(blob=>{
+    if(!blob){alert('Unable to prepare image.');return;}
+    if(item.url!==item.originalUrl)URL.revokeObjectURL(item.url);
+    item.file=new File([blob],item.file.name.replace(/\\.[^.]+$/,'')+'.webp',{type:'image/webp'});
+    item.url=URL.createObjectURL(blob);
+    item.crop={mode:cropSession.mode,zoom:cropSession.zoom,dx:cropSession.dx,dy:cropSession.dy};
+    const id=cropSession.id;cropDialog.hidden=true;cropSession=null;pendingPreview(id);
+   },'image/webp',0.85);
+  }
+ });
+ const cropCanvas=cropDialog.querySelector('canvas');let dragging=false,lastX=0,lastY=0;
+ cropCanvas.addEventListener('pointerdown',e=>{if(!cropSession)return;dragging=true;lastX=e.clientX;lastY=e.clientY;cropCanvas.setPointerCapture(e.pointerId)});
+ cropCanvas.addEventListener('pointermove',e=>{if(!dragging||!cropSession)return;const ratio=cropCanvas.width/cropCanvas.getBoundingClientRect().width;cropSession.dx+=(e.clientX-lastX)*ratio;cropSession.dy+=(e.clientY-lastY)*ratio;lastX=e.clientX;lastY=e.clientY;drawCrop()});
+ cropCanvas.addEventListener('pointerup',()=>dragging=false);
+ cropCanvas.addEventListener('pointercancel',()=>dragging=false);
+ document.addEventListener('click',e=>{const b=e.target.closest('[data-w4uc-crop]');if(b)openCrop(b.dataset.w4ucCrop,Number(b.dataset.i))});
  const viewer=document.createElement('div');viewer.id='w4uCreationViewer';viewer.className='w4uc-viewer';viewer.hidden=true;viewer.setAttribute('role','dialog');viewer.setAttribute('aria-modal','true');viewer.innerHTML='<div class="w4uc-viewer-content"><button type="button" id="w4ucClose" aria-label="Close" style="position:absolute;right:0;top:-44px">×</button><img id="w4ucBig" alt="Enlarged creation"><div class="w4uc-viewer-controls"><button id="w4ucPrev" aria-label="Previous image">‹</button><span id="w4ucBigInfo"></span><button id="w4ucNext" aria-label="Next image">›</button></div></div>';
  document.body.append(viewer);
  $('w4ucClose').onclick=closeView;$('w4ucPrev').onclick=()=>moveView(-1);$('w4ucNext').onclick=()=>moveView(1);
@@ -10191,12 +10248,12 @@ function setup(){
  function pendingPreview(id){
   const pending=pendingUploads.get(id),preview=document.querySelector('[data-w4uc-preview="'+id+'"]');
   if(!preview)return;
-  preview.innerHTML=pending?pending.items.map((item,i)=>`<div class="w4uc-thumb w4uc-pending-card"><img src="${item.url}" alt="Preview ${i+1}"><small>${esc(item.file.name)}</small><label>Size for this image<input data-w4uc-pending-field="size" data-id="${esc(id)}" data-i="${i}" placeholder="S / M / L / XL / XXL" value="${esc(item.size)}"></label><label>Instagram Reel URL (optional)<input type="url" data-w4uc-pending-field="reel" data-id="${esc(id)}" data-i="${i}" placeholder="https://www.instagram.com/reel/..." value="${esc(item.reel)}"></label><button type="button" class="w4uc-small-button" data-w4uc-remove-pending="${esc(id)}" data-i="${i}">Remove</button></div>`).join(''):'';
+  preview.innerHTML=pending?pending.items.map((item,i)=>`<div class="w4uc-thumb w4uc-pending-card"><img src="${item.url}" alt="Preview ${i+1}"><small>${esc(item.file.name)}</small><button type="button" class="w4uc-small-button w4uc-crop-edit" data-w4uc-crop="${esc(id)}" data-i="${i}">✂ Crop / Fit Image</button><label>Size for this image<input data-w4uc-pending-field="size" data-id="${esc(id)}" data-i="${i}" placeholder="S / M / L / XL / XXL" value="${esc(item.size)}"></label><label>Instagram Reel URL (optional)<input type="url" data-w4uc-pending-field="reel" data-id="${esc(id)}" data-i="${i}" placeholder="https://www.instagram.com/reel/..." value="${esc(item.reel)}"></label><button type="button" class="w4uc-small-button" data-w4uc-remove-pending="${esc(id)}" data-i="${i}">Remove</button></div>`).join(''):'';
   const save=document.querySelector('[data-w4uc-save-images="'+id+'"]');if(save){save.disabled=!pending?.items.length;save.textContent=pending?.items.length?`Save ${pending.items.length} Image${pending.items.length===1?'':'s'}`:'Save Images (select images first)';}
  }
  document.addEventListener('input',e=>{const el=e.target;if(!el.matches('[data-w4uc-pending-field]'))return;const pending=pendingUploads.get(el.dataset.id),item=pending?.items[Number(el.dataset.i)];if(item)item[el.dataset.w4ucPendingField]=el.value;});
- document.addEventListener('click',e=>{const btn=e.target.closest('[data-w4uc-remove-pending]');if(!btn)return;const id=btn.dataset.w4ucRemovePending,pending=pendingUploads.get(id);if(!pending)return;const item=pending.items.splice(Number(btn.dataset.i),1)[0];if(item)URL.revokeObjectURL(item.url);if(!pending.items.length)pendingUploads.delete(id);pendingPreview(id);});
- document.addEventListener('change',e=>{const el=e.target;if(!el.matches('[data-w4uc-upload]'))return;const id=el.dataset.id,files=[...el.files];const previous=pendingUploads.get(id);if(previous)previous.items.forEach(item=>URL.revokeObjectURL(item.url));pendingUploads.set(id,{items:files.map(file=>({file,url:URL.createObjectURL(file),size:'',reel:''}))});pendingPreview(id);el.value='';const status=document.querySelector('[data-w4uc-upload-status="'+id+'"]');if(status)status.textContent=files.length?`${files.length} image(s) ready. Enter size and Instagram link for each image, then click Save Images.`:'';});
+ document.addEventListener('click',e=>{const btn=e.target.closest('[data-w4uc-remove-pending]');if(!btn)return;const id=btn.dataset.w4ucRemovePending,pending=pendingUploads.get(id);if(!pending)return;const item=pending.items.splice(Number(btn.dataset.i),1)[0];if(item){URL.revokeObjectURL(item.url);if(item.originalUrl&&item.originalUrl!==item.url)URL.revokeObjectURL(item.originalUrl);}if(!pending.items.length)pendingUploads.delete(id);pendingPreview(id);});
+ document.addEventListener('change',e=>{const el=e.target;if(!el.matches('[data-w4uc-upload]'))return;const id=el.dataset.id,files=[...el.files];const previous=pendingUploads.get(id);if(previous)previous.items.forEach(item=>{URL.revokeObjectURL(item.url);if(item.originalUrl&&item.originalUrl!==item.url)URL.revokeObjectURL(item.originalUrl)});pendingUploads.set(id,{items:files.map(file=>{const url=URL.createObjectURL(file);return {file,url,originalUrl:url,size:'',reel:''}})});pendingPreview(id);el.value='';const status=document.querySelector('[data-w4uc-upload-status="'+id+'"]');if(status)status.textContent=files.length?`${files.length} image(s) ready. Enter size and Instagram link for each image, then click Save Images.`:'';});
  document.addEventListener('click',async e=>{const btn=e.target.closest('[data-w4uc-save-images]');if(!btn)return;const id=btn.dataset.w4ucSaveImages,p=products.find(x=>x.id===id),pending=pendingUploads.get(id);if(!p||!pending?.items.length)return;
   btn.disabled=true;const status=document.querySelector('[data-w4uc-upload-status="'+id+'"]');let uploaded=0;
   try{
@@ -10204,7 +10261,7 @@ function setup(){
    const sb=await adminClient();const originalCount=p.images.length;
    while(pending.items.length){const item=pending.items[0];if(status)status.textContent=`Uploading ${uploaded+1}: ${item.file.name}`;const blob=await compress(item.file),path=p.id+'/'+crypto.randomUUID()+'.webp';const {error}=await sb.storage.from(BUCKET).upload(path,blob,{contentType:'image/webp',upsert:false});if(error)throw error;
     try{await writePhoto(p,{id:crypto.randomUUID(),path,size:item.size.trim(),reel:item.reel.trim(),sort:originalCount+uploaded});}catch(err){await sb.storage.from(BUCKET).remove([path]);throw err;}
-    URL.revokeObjectURL(item.url);pending.items.shift();uploaded++;
+    URL.revokeObjectURL(item.url);if(item.originalUrl&&item.originalUrl!==item.url)URL.revokeObjectURL(item.originalUrl);pending.items.shift();uploaded++;
    }
    pendingUploads.delete(id);await loadAdmin();const updated=document.querySelector('[data-w4uc-upload-status="'+id+'"]');if(updated)updated.textContent=`${uploaded} image(s) saved with their sizes and Instagram links.`;
   }catch(err){if(status)status.textContent=`Upload stopped after ${uploaded} saved image(s): ${err.message||err}. Remaining previews are kept; retry Save Images.`;alert('Image upload failed: '+(err.message||err));pendingPreview(id);}
