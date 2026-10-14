@@ -4814,6 +4814,18 @@ function getOtherRequirementsData(){
 }
 
 function validateOtherRequirements(){
+  // An Our Creations product is already a specified requirement.
+  // Do not force an unrelated manual "Other / Special Requirements" entry
+  // when the customer arrived through Customize & Order.
+  let creationSelection=null;
+  try { creationSelection=JSON.parse(sessionStorage.getItem('w4u_creation_selection')||'null'); } catch(e) {}
+  const selectedCreationIsActive=!!(creationSelection?.productId && document.getElementById('w4uCreationFormHint') && !document.getElementById('w4uCreationFormHint').hidden);
+  const selectedEventKey=String(document.querySelector('#eventTiles .tile.selected')?.dataset?.key||'');
+  const otherChecklistChecked=[...document.querySelectorAll('#itemTiles .tile')].some(tile=>{
+    const input=tile.querySelector('input[name="items"]');
+    return input?.checked && isOtherRequirementItem(tile.dataset.key,tile.querySelector('.tile-label')?.textContent||input.value);
+  });
+  if(selectedCreationIsActive && selectedEventKey==='otherEvent' && !otherChecklistChecked) return true;
   if(!isOtherRequirementSelected()) return true;
   ensureOtherRequirementRow();
   const rows=[...document.querySelectorAll('#otherRequirementsList .other-requirement-row')];
