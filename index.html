@@ -8814,6 +8814,20 @@ th{width:34%;color:#5a0730;background:#fffaf0}
 </main>
 </div>
 
+
+<style id="w4uc-single-line-handkerchief-title">
+/* Only the long Handkerchief title gets the compact one-line treatment. */
+@media(max-width:575px){
+ #w4uCreations .w4uc-title-row .w4uc-name.w4uc-long-handkerchief{font-size:clamp(8px,2.35vw,10px)!important;white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important;letter-spacing:-.35px!important;flex:1 1 auto!important;}
+ #w4uCreations .w4uc-title-row:has(.w4uc-long-handkerchief) .w4uc-reel-inline{font-size:8px!important;padding:4px 3px!important;max-width:none!important;flex-shrink:0!important;}
+}
+</style>
+<script id="w4uc-mark-long-handkerchief-title">
+(function(){
+ function mark(){document.querySelectorAll('#w4uCreations .w4uc-name').forEach(function(el){el.classList.toggle('w4uc-long-handkerchief',/^customized\s+handkerchiefs?$/i.test(el.textContent.trim()));});}
+ document.addEventListener('DOMContentLoaded',function(){mark();var root=document.getElementById('w4uCreations');if(root){var obs=new MutationObserver(mark);obs.observe(root,{childList:true,subtree:true});}});
+})();
+</script>
 </body>
 </html>`;
 }
