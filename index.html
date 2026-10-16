@@ -9347,6 +9347,12 @@ function selectCustomerOrderMode(mode){
   if(options) options.hidden=true;
 
   if(mode==='new'){
+    // Direct New Order starts without a creation; creation CTA sets this flag
+    // before opening the same form so its freshly chosen design is retained.
+    if(!window.w4ucOpeningCreationOrder){
+      sessionStorage.removeItem('w4u_creation_selection');
+      document.getElementById('w4uCreationFormHint')?.remove();
+    }
     // Thank-you/View Order replace the form HTML. If that happened, restore the
     // original document before opening a genuinely fresh New Order.
     if(!document.getElementById('weshopForm') || !document.getElementById('submitRequest')){
