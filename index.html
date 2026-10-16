@@ -4687,7 +4687,9 @@ function renderEventTiles(){
         checklist.hidden = false;
 
 
+        const openingCreationOrder=!!window.w4ucOpeningCreationOrder;
         requestAnimationFrame(() => {
+          if(openingCreationOrder) return;
           checklist.scrollIntoView({
             behavior:'smooth',
             block:'start'
@@ -10511,6 +10513,7 @@ function closeView(){$('w4uCreationViewer').hidden=true;view=null}
 function creationType(p){const v=((p?.category||'')+' '+(p?.name||'')).toLowerCase();return /handkerchief/.test(v)?'handkerchief':/t[\s-]?shirts?/.test(v)?'tshirt':'other';}
 function creationCategoryMatch(label,type){const t=String(label||'').toLowerCase();return type==='tshirt'?/t[\s-]?shirts?/.test(t):type==='handkerchief'?/handkerchief/.test(t):false;}
 function order(p){
+ window.w4ucOpeningCreationOrder=true;
  const i=imageIndexes[p.id]||0,im=p.images[i];
  selected={productId:p.id,photoId:im?.id||'',photoPath:im?.path||'',photoUrl:im?.src||'',name:p.name,category:p.category||'',size:im?.size||'',imageIndex:i+1,type:creationType(p)};
  sessionStorage.setItem('w4u_creation_selection',JSON.stringify(selected));
@@ -10528,7 +10531,9 @@ function order(p){
    showFormHint();
    // Only creation orders start at the top; leave ordinary New Order alone.
    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+     // The landing shell has now hidden and the selected design has rendered.
      window.scrollTo({top:0,left:0,behavior:'instant'});
+     window.w4ucOpeningCreationOrder=false;
    }));
  },0);
 }
