@@ -10553,10 +10553,10 @@ function showFormHint(){
  const type=sel.type||creationType(sel);
  let hint=document.getElementById('w4uCreationFormHint');
  if(!hint){hint=document.createElement('section');hint.id='w4uCreationFormHint';hint.className='w4uc-form-hint w4uc-order-preview';}
- // Keep the panel OUTSIDE itemTiles: that area is replaced whenever the event changes.
- const tiles=document.getElementById('itemTiles');
- const eventGrid=document.getElementById('eventTiles');
- if(eventGrid){eventGrid.insertAdjacentElement('afterend',hint);}else form.prepend(hint);
+ // Put the selected design FIRST in the opening step, above event selection.
+ // Keep it outside dynamic tiles, which are replaced when the event changes.
+ const openingPanel=form.querySelector('.panel[data-step="0"]');
+ (openingPanel||form).prepend(hint);
  const photo=sel.photoUrl||(sel.photoPath?imageUrl(sel.photoPath):'');
  const sizeValue=document.getElementById('w4ucRequestedSize')?.value||'';
  hint.innerHTML=`<h3>Selected Design</h3><div class="w4uc-order-selected">${photo?`<img src="${esc(photo)}" alt="Selected design">`:''}<div><strong>${esc(sel.name)}</strong><p>Photo ${Number(sel.imageIndex)||1} · ${type==='tshirt'?'Custom T-Shirt':type==='handkerchief'?'Customized Handkerchief':'Customized product'}</p><button type="button" id="w4ucChangeDesign" class="w4uc-small-button">Change Design</button></div></div><div id="w4ucPicker" hidden><div class="w4uc-picker-heading"><b>Choose another ${type==='tshirt'?'T-Shirt':type==='handkerchief'?'Handkerchief':'product'} design</b><button type="button" id="w4ucPickerClose">✕</button></div><div id="w4ucPickerPhotos" class="w4uc-picker-photos"></div></div>${type==='tshirt'?`<label class="w4uc-order-size">Your T-Shirt size <select id="w4ucRequestedSize"><option value="">Select size</option>${['XS','S','M','L','XL','XXL','3XL','Other'].map(v=>`<option value="${v}" ${sizeValue===v?'selected':''}>${v}</option>`).join('')}</select></label>`:''}<p class="w4uc-test-note">Your selected design will be attached to the order details. Complete the remaining fields below.</p>`;
