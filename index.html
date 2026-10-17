@@ -2459,6 +2459,269 @@ body:not(.ss-inside) #happyClientsMobileSection.w4u-mobile-happy-clean{position:
 }
 </style>
 
+<style>
+/* Our Creations: self-contained styles */
+/* WeShop4U test-branch Our Creations module */
+#w4uCreations{max-width:1040px;margin:12px auto;padding:14px;background:#fffdf8;border:1px solid #e5c98b;border-radius:12px;font-family:Mukta,Arial,sans-serif;color:#292630}
+#w4uCreations[hidden],#w4uCreationAdmin[hidden],#w4uCreationViewer[hidden],#w4uCreationFormHint[hidden]{display:none!important}
+.w4uc-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.w4uc-head h2{font:700 22px Fraunces,Georgia,serif;color:#842d0d;margin:0}.w4uc-sub{font-size:12px;color:#6e6358}.w4uc-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding:2px 1px 10px;scrollbar-width:thin}.w4uc-card{flex:0 0 218px;scroll-snap-align:start;border:1px solid #ead7af;border-radius:10px;background:white;padding:8px;min-width:0}.w4uc-image{height:180px;position:relative;background:#faf3e7;border-radius:8px;overflow:hidden}.w4uc-image img{width:100%;height:100%;object-fit:cover;display:block}.w4uc-size{position:absolute;top:8px;right:8px;background:#842d0d;color:white;padding:3px 8px;border-radius:5px;font-weight:800;font-size:12px}.w4uc-play{position:absolute;bottom:8px;left:8px;background:#fff;color:#842d0d;padding:5px 9px;border-radius:20px;font-weight:800;font-size:11px;text-decoration:none;box-shadow:0 2px 8px #0003}.w4uc-zoom{position:absolute;top:8px;left:8px;background:#fffdf8dd;border:0;border-radius:5px;padding:5px 8px;cursor:pointer}.w4uc-nav{display:flex;align-items:center;justify-content:space-between;margin:6px 0}.w4uc-nav button{border:1px solid #dfc48c;background:#fffaf0;border-radius:6px;color:#842d0d;font-size:21px;width:32px;height:30px;cursor:pointer}.w4uc-nav button:disabled{opacity:.3;cursor:default}.w4uc-counter{font-size:11px;color:#6b625a}.w4uc-name{font-size:14px;font-weight:800;min-height:22px}.w4uc-cta,.w4uc-save{display:block;width:100%;border:0;border-radius:6px;background:#a86c0a;color:#fff;padding:9px;font-weight:800;cursor:pointer}.w4uc-muted{font-size:12px;color:#6b625a}.w4uc-admin-link{font-size:12px;color:#842d0d}.w4uc-empty{font-size:13px;color:#786957;padding:12px}.w4uc-viewer{position:fixed;inset:0;background:#15100de8;z-index:12000;display:flex;align-items:center;justify-content:center;padding:20px}.w4uc-viewer-content{max-width:min(90vw,760px);width:100%;position:relative;text-align:center;color:white}.w4uc-viewer img{max-width:100%;max-height:75vh;object-fit:contain}.w4uc-viewer button{cursor:pointer;border:0;background:#fff;color:#842d0d;border-radius:8px;padding:7px 12px;font-size:20px}.w4uc-viewer-controls{display:flex;align-items:center;justify-content:center;gap:15px;margin-top:10px}.w4uc-admin{margin:18px 0;padding:16px;border:1px solid #dfbd73;border-radius:10px;background:#fffdf8}.w4uc-admin h3{color:#842d0d}.w4uc-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.w4uc-fields label{font-size:12px;font-weight:700}.w4uc-fields input,.w4uc-fields select,.w4uc-fields textarea{width:100%;min-height:34px;padding:6px;border:1px solid #c9d3dc;border-radius:5px}.w4uc-admin-row{padding:10px 0;border-bottom:1px solid #ead7af}.w4uc-thumb-row{display:flex;gap:8px;flex-wrap:wrap}.w4uc-thumb{width:110px;border:1px solid #e5c98b;border-radius:6px;padding:5px}.w4uc-thumb img{width:100%;height:70px;object-fit:cover}.w4uc-thumb input{width:100%;font-size:12px}.w4uc-thumb button,.w4uc-admin button{cursor:pointer}.w4uc-form-hint{margin:10px 0;padding:12px;border:1px solid #dfbd73;border-radius:8px;background:#fff7e8;font-size:13px}.w4uc-form-hint select{padding:6px;margin-left:8px}.w4uc-small-button{border:1px solid #d4a44c;background:#fff7e8;color:#842d0d;border-radius:6px;padding:5px 9px;cursor:pointer}.w4uc-test-note{font-size:11px;color:#806a4d;margin-top:8px}@media(max-width:575px){#w4uCreations{margin:10px 8px;padding:10px}.w4uc-card{flex-basis:168px}.w4uc-image{height:146px}.w4uc-head h2{font-size:19px}.w4uc-fields{grid-template-columns:1fr}}
+body.ss-inside:not(.ss-admin-mode) #w4uCreations,body.ss-admin-mode #w4uCreations{display:none!important}
+
+</style>
+<!-- Our Creations Supabase setup SQL is provided separately; database migration must be run once. -->
+
+<style id="w4uc-upload-ux-fix">
+.w4uc-admin .w4uc-pending-card{width:min(100%,280px);min-width:210px;padding:12px;background:#fff;border:2px solid #d6b16a;box-sizing:border-box}
+.w4uc-admin .w4uc-pending-card img{height:155px;object-fit:contain;background:#f6f2eb}
+.w4uc-admin .w4uc-pending-card label{display:block;margin-top:10px;font-weight:700;font-size:13px}
+.w4uc-admin .w4uc-pending-card input{display:block;width:100%;min-height:38px;padding:8px;margin-top:4px;box-sizing:border-box}
+.w4uc-admin [data-w4uc-save-images]{display:block!important;margin:12px 0;max-width:290px}
+.w4uc-admin [data-w4uc-save-images]:disabled{opacity:.55;cursor:not-allowed}
+.w4uc-admin [data-w4uc-preview]{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
+.w4uc-admin [data-w4uc-upload-status]{display:inline-block;font-size:13px;line-height:1.5}
+</style>
+
+<style id="w4uc-crop-feature-style">
+#w4ucCropDialog[hidden]{display:none!important}
+#w4ucCropDialog{position:fixed;inset:0;z-index:20000;background:#000b;display:flex;align-items:center;justify-content:center;padding:14px}
+#w4ucCropDialog .crop-panel{width:min(94vw,460px);max-height:95dvh;overflow:auto;background:#fffdf8;color:#442c20;border-radius:14px;padding:16px;box-sizing:border-box}
+#w4ucCropDialog canvas{display:block;width:min(100%,360px);height:auto;aspect-ratio:1;touch-action:none;cursor:grab;margin:10px auto;border:1px solid #d9bb83;background:#f7f3ed}
+#w4ucCropDialog .crop-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+#w4ucCropDialog button{border:1px solid #c79d4c;border-radius:7px;padding:9px 12px;background:#fff7e7;color:#73340e;font-weight:700}
+#w4ucCropDialog button[data-crop-apply]{background:#a86c0a;color:#fff}
+#w4ucCropDialog input[type=range]{width:100%}
+.w4uc-pending-card img{width:100%;aspect-ratio:1;object-fit:contain;height:auto!important}
+.w4uc-pending-card .w4uc-crop-edit{display:block;width:100%;margin:8px 0}
+@media(max-width:575px){#w4uCreations .w4uc-card{flex:0 0 calc((100% - 12px)/2);box-sizing:border-box;padding:6px}#w4uCreations .w4uc-image{height:auto;aspect-ratio:1}#w4uCreations .w4uc-cta{font-size:11px;padding:8px 3px;line-height:1.25}#w4uCreations .w4uc-name{font-size:12px}#w4uCreations .w4uc-play{font-size:9px;padding:5px 6px;max-width:90%}#w4uCreations .w4uc-nav{margin:3px 0}#w4uCreations .w4uc-head h2{font-size:19px}}
+</style>
+<style id="w4uc-mobile-layout-correction">
+/* Keep single products anchored left; never center a lone carousel item. */
+@media (max-width: 900px) {
+ #w4uCreations {margin:8px 8px 10px!important;padding:10px!important;max-width:none!important;box-sizing:border-box!important}
+ #w4uCreations .w4uc-head {margin-bottom:8px!important;align-items:flex-start!important}
+ #w4uCreations .w4uc-head h2 {font-size:19px!important;line-height:1.2!important}
+ #w4uCreations .w4uc-sub {font-size:11px!important}
+ #w4uCreations .w4uc-track {display:flex!important;flex-wrap:nowrap!important;justify-content:flex-start!important;align-items:flex-start!important;gap:9px!important;overflow-x:auto!important;scroll-snap-type:x mandatory!important;padding:2px 0 5px!important;width:100%!important;min-height:0!important}
+ #w4uCreations .w4uc-card {flex:0 0 clamp(148px,44%,185px)!important;width:clamp(148px,44%,185px)!important;max-width:185px!important;box-sizing:border-box!important;padding:6px!important;margin:0!important;align-self:flex-start!important}
+ #w4uCreations .w4uc-image {height:145px!important;aspect-ratio:auto!important;overflow:hidden!important}
+ #w4uCreations .w4uc-image img {width:100%!important;height:100%!important;object-fit:contain!important}
+ #w4uCreations .w4uc-name {font-size:12px!important;min-height:0!important;line-height:1.25!important;margin:4px 0!important}
+ #w4uCreations .w4uc-cta {font-size:10px!important;padding:7px 3px!important;line-height:1.2!important}
+ #w4uCreations .w4uc-nav {margin:3px 0!important}
+ #w4uCreations .w4uc-nav[hidden] {display:none!important}
+ #w4uCreations .w4uc-play {font-size:9px!important;padding:4px 6px!important}
+ #w4uCreations .w4uc-size {font-size:10px!important;padding:2px 5px!important}
+ #w4uCreations .w4uc-zoom {padding:3px 5px!important;font-size:12px!important}
+}
+@media(max-width:370px){#w4uCreations .w4uc-card{flex-basis:145px!important;width:145px!important}#w4uCreations .w4uc-image{height:130px!important}}
+</style>
+<style id="w4uc-extra-compact-mobile-20261014">
+/* Compact product strip: reduce height and preserve horizontally scrollable cards. */
+@media (max-width:900px) {
+ #w4uCreations {padding:8px!important;margin:6px 8px 8px!important;border-radius:12px!important;min-height:0!important}
+ #w4uCreations .w4uc-head {margin-bottom:6px!important;gap:5px!important}
+ #w4uCreations .w4uc-head h2 {font-size:18px!important;line-height:1.15!important}
+ #w4uCreations .w4uc-sub {font-size:10px!important;line-height:1.25!important}
+ #w4uCreations .w4uc-track {gap:8px!important;padding:0 0 3px!important;min-height:0!important;align-items:flex-start!important}
+ #w4uCreations .w4uc-card {flex:0 0 132px!important;width:132px!important;max-width:132px!important;padding:5px!important;border-radius:9px!important;min-height:0!important}
+ #w4uCreations .w4uc-image {height:112px!important;aspect-ratio:auto!important;border-radius:6px!important}
+ #w4uCreations .w4uc-image img {object-fit:contain!important}
+ #w4uCreations .w4uc-name {font-size:11px!important;line-height:1.2!important;margin:4px 0!important;min-height:0!important}
+ #w4uCreations .w4uc-cta {font-size:9px!important;padding:6px 2px!important;line-height:1.15!important;min-height:28px!important;border-radius:5px!important}
+ #w4uCreations .w4uc-play {font-size:8px!important;padding:4px 5px!important;bottom:4px!important;left:4px!important}
+ #w4uCreations .w4uc-size {font-size:9px!important;padding:2px 4px!important;top:4px!important;right:4px!important}
+ #w4uCreations .w4uc-zoom {font-size:10px!important;padding:2px 4px!important;top:4px!important;left:4px!important}
+ #w4uCreations .w4uc-nav {margin:2px 0!important}
+ #w4uCreations .w4uc-nav button {height:23px!important;width:25px!important;font-size:16px!important}
+}
+</style>
+
+<style id="w4uc-reel-below-image-fix">
+/* Reel action belongs below the image, never over the product photo. */
+#w4uCreations .w4uc-reel-below{position:static!important;display:block!important;width:100%!important;max-width:none!important;box-sizing:border-box!important;margin:5px 0 6px!important;padding:7px 5px!important;background:#fff7e9!important;color:#842d0d!important;border:1px solid #e4cba0!important;border-radius:6px!important;box-shadow:none!important;font-size:11px!important;line-height:1.3!important;text-align:center!important;cursor:pointer!important}
+#w4uCreations .w4uc-card{display:flex;flex-direction:column}
+#w4uCreations .w4uc-cta{margin-top:auto}
+@media(max-width:575px){#w4uCreations .w4uc-reel-below{font-size:10px!important;padding:6px 2px!important;margin:4px 0!important}}
+</style>
+
+<style id="w4uc-final-dynamic-height-fix">
+/* The outer gallery must shrink-wrap its carousel rather than reserving a tall panel. */
+#w4uCreations {height:auto!important;min-height:0!important;max-height:none!important;box-sizing:border-box!important;display:block;}
+#w4uCreations .w4uc-track {height:auto!important;min-height:0!important;max-height:none!important;align-items:stretch!important;overflow-y:hidden!important;display:flex!important;scroll-snap-type:x proximity;}
+#w4uCreations .w4uc-card {height:auto!important;min-height:0!important;max-height:none!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;align-self:stretch!important;}
+#w4uCreations .w4uc-title-row {display:flex!important;align-items:center!important;justify-content:space-between!important;gap:4px!important;margin:5px 0 4px!important;min-width:0!important;}
+#w4uCreations .w4uc-title-row .w4uc-name {flex:1 1 auto!important;min-width:0!important;margin:0!important;line-height:1.15!important;font-weight:700!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#w4uCreations .w4uc-title-row .w4uc-reel-inline {position:static!important;inset:auto!important;transform:none!important;display:inline-flex!important;flex:0 0 auto!important;width:auto!important;max-width:48%!important;margin:0!important;align-items:center!important;justify-content:center!important;white-space:nowrap!important;box-shadow:none!important;background:#fff7eb!important;border:1px solid #dfc28c!important;color:#813b15!important;border-radius:6px!important;font-weight:700!important;}
+#w4uCreations .w4uc-cta {margin-top:auto!important;}
+@media(max-width:575px){
+ #w4uCreations {padding:8px!important;margin:6px 8px 8px!important;}
+ #w4uCreations .w4uc-head {margin-bottom:6px!important;}
+ #w4uCreations .w4uc-track {gap:8px!important;padding:0 0 3px!important;}
+ #w4uCreations .w4uc-card {flex:0 0 calc((100% - 8px)/2)!important;width:calc((100% - 8px)/2)!important;max-width:calc((100% - 8px)/2)!important;padding:5px!important;}
+ #w4uCreations .w4uc-image {height:auto!important;aspect-ratio:1/1!important;flex:none!important;}
+ #w4uCreations .w4uc-image img {width:100%!important;height:100%!important;object-fit:contain!important;}
+ #w4uCreations .w4uc-title-row .w4uc-name {font-size:10px!important;}
+ #w4uCreations .w4uc-title-row .w4uc-reel-inline {font-size:9px!important;padding:4px 5px!important;line-height:1.1!important;}
+ #w4uCreations .w4uc-cta {font-size:10px!important;padding:7px 2px!important;min-height:28px!important;}
+ #w4uCreations .w4uc-nav[hidden] {display:none!important;}
+}
+@media(min-width:576px){
+ #w4uCreations .w4uc-card {flex:0 0 calc((100% - 36px)/4)!important;max-width:calc((100% - 36px)/4)!important;}
+ #w4uCreations .w4uc-image {height:auto!important;aspect-ratio:1/1!important;}
+ #w4uCreations .w4uc-title-row .w4uc-reel-inline {font-size:11px!important;padding:5px 7px!important;}
+}
+</style>
+
+<style id="w4uc-actual-small-card-final-fix">
+/* Compact regardless of the number of creations: do not scale one card to fill the row. */
+#w4uCreations {height:auto!important;min-height:0!important;padding:8px 9px!important;margin-top:5px!important;margin-bottom:6px!important;}
+#w4uCreations .w4uc-head {margin:0 0 6px!important;padding:0!important;}
+#w4uCreations .w4uc-track {display:flex!important;justify-content:flex-start!important;align-items:flex-start!important;flex-wrap:nowrap!important;gap:8px!important;padding:0 0 2px!important;margin:0!important;height:auto!important;min-height:0!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x proximity!important;}
+#w4uCreations .w4uc-card {flex:0 0 142px!important;width:142px!important;min-width:0!important;max-width:142px!important;height:auto!important;min-height:0!important;padding:5px!important;margin:0!important;align-self:flex-start!important;box-sizing:border-box!important;}
+#w4uCreations .w4uc-image {width:100%!important;height:124px!important;min-height:0!important;max-height:124px!important;aspect-ratio:auto!important;overflow:hidden!important;}
+#w4uCreations .w4uc-image img {width:100%!important;height:100%!important;object-fit:contain!important;}
+#w4uCreations .w4uc-title-row {margin:4px 0!important;gap:3px!important;}
+#w4uCreations .w4uc-title-row .w4uc-name {font-size:10px!important;line-height:1.2!important;}
+#w4uCreations .w4uc-title-row .w4uc-reel-inline {font-size:9px!important;padding:3px 4px!important;line-height:1.2!important;}
+#w4uCreations .w4uc-cta {min-height:0!important;height:auto!important;padding:6px 2px!important;margin-top:3px!important;font-size:10px!important;line-height:1.2!important;}
+#w4uCreations .w4uc-nav[hidden] {display:none!important;}
+@media (max-width:350px) {#w4uCreations .w4uc-card {flex-basis:calc((100% - 8px)/2)!important;width:calc((100% - 8px)/2)!important;max-width:calc((100% - 8px)/2)!important;} #w4uCreations .w4uc-image{height:110px!important;max-height:110px!important;}}
+@media (min-width:700px) {#w4uCreations .w4uc-card{flex-basis:170px!important;width:170px!important;max-width:170px!important;}#w4uCreations .w4uc-image{height:150px!important;max-height:150px!important;}}
+</style>
+
+<style id="w4uc-consistent-gallery-and-admin-v2">
+/* All cards are the same size regardless of their original image dimensions. */
+#w4uCreations .w4uc-track{align-items:stretch!important;scrollbar-width:none!important;gap:9px!important}
+#w4uCreations .w4uc-track::-webkit-scrollbar{display:none}
+#w4uCreations .w4uc-card{display:flex!important;flex-direction:column!important;align-self:stretch!important;box-sizing:border-box!important;flex:0 0 142px!important;width:142px!important;min-width:142px!important;max-width:142px!important;padding:5px!important}
+#w4uCreations .w4uc-image{height:124px!important;min-height:124px!important;max-height:124px!important;aspect-ratio:auto!important;flex:0 0 124px!important;background:#f7f3ed!important}
+#w4uCreations .w4uc-image img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important}
+#w4uCreations .w4uc-title-row{height:30px!important;min-height:30px!important;max-height:30px!important;display:flex!important;align-items:center!important;overflow:hidden!important}
+#w4uCreations .w4uc-title-row .w4uc-name{display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;white-space:normal!important;overflow:hidden!important;line-height:1.1!important;font-size:10px!important}
+#w4uCreations .w4uc-cta{margin-top:auto!important;height:30px!important;min-height:30px!important;max-height:30px!important;padding:4px 2px!important;font-size:10px!important}
+#w4uCreations .w4uc-nav:not([hidden]){height:24px!important;min-height:24px!important;margin:2px 0!important}
+#w4uCreations .w4uc-nav[hidden]{display:none!important}
+#w4uCreations{height:auto!important;min-height:0!important;padding:8px!important}
+#w4uCreations .w4uc-head{margin-bottom:7px!important}
+@media(min-width:700px){#w4uCreations .w4uc-card{flex-basis:170px!important;width:170px!important;min-width:170px!important;max-width:170px!important}#w4uCreations .w4uc-image{height:150px!important;min-height:150px!important;max-height:150px!important;flex-basis:150px!important}}
+#w4uCreationAdmin .w4uc-creation-details{border:1px solid #dec38f;border-radius:10px;margin:12px 0;padding:0;background:white;overflow:hidden}
+#w4uCreationAdmin .w4uc-creation-details>summary{cursor:pointer;padding:14px 12px;background:#fff4df;color:#6c320e;list-style:revert;font-size:14px}
+#w4uCreationAdmin .w4uc-admin-expand{display:block;font-size:11px;font-weight:400;color:#765d43;margin-top:3px}
+#w4uCreationAdmin .w4uc-admin-content{padding:12px}
+#w4uCreationAdmin .w4uc-workflow{font-size:12px;line-height:1.6;background:#f5faf7;border-left:3px solid #46866d;padding:10px;border-radius:4px}
+#w4uCreationAdmin .w4uc-move-label{display:block;font-size:12px;margin:8px 0}
+#w4uCreationAdmin .w4uc-move-label select{width:100%;padding:7px;border-radius:5px;border:1px solid #b9a27b;background:white}
+@media(max-width:575px){#w4uCreationAdmin .w4uc-fields{grid-template-columns:1fr!important}#w4uCreationAdmin .w4uc-admin-content{padding:8px}}
+</style>
+<style id="w4uc-photo-order-ui">
+.w4uc-order-actions{display:flex;gap:6px;margin:8px 0}
+.w4uc-order-actions button{font-size:12px;padding:8px;border:1px solid #c9a66c;border-radius:7px;background:#fff9ed;color:#753a15;flex:1}
+.w4uc-order-actions button:disabled{opacity:.35}
+.w4uc-pending-card small{display:block;overflow-wrap:anywhere}
+.w4uc-admin .w4uc-thumb>strong{display:block;margin-bottom:6px;font-size:13px}
+</style><style id="w4uc-compact-order-button-final">
+#w4uCreations .w4uc-card .w4uc-cta{width:100%!important;box-sizing:border-box!important;height:32px!important;min-height:32px!important;max-height:32px!important;margin-top:auto!important;padding:4px 5px!important;font-size:10px!important;font-weight:700!important;line-height:1.1!important;border-radius:5px!important;white-space:nowrap!important}
+#w4uCreations .w4uc-title-row{margin-bottom:3px!important}
+#w4uCreations .w4uc-track{padding-bottom:3px!important}
+</style><style id="w4uc-landscape-two-up-20261014">
+/* Mobile: exactly two visible cards; all images share a 4:3 landscape viewport. */
+@media(max-width:699px){
+ #w4uCreations .w4uc-track{display:flex!important;gap:8px!important;align-items:stretch!important;overflow-x:auto!important;scroll-snap-type:x mandatory!important}
+ #w4uCreations .w4uc-card{flex:0 0 calc((100% - 8px)/2)!important;width:calc((100% - 8px)/2)!important;min-width:0!important;max-width:none!important;scroll-snap-align:start!important}
+ #w4uCreations .w4uc-image{height:auto!important;min-height:0!important;max-height:none!important;aspect-ratio:4/3!important;flex:0 0 auto!important}
+ #w4uCreations .w4uc-image img{width:100%!important;height:100%!important;object-fit:contain!important}
+}
+/* Photo navigation is an overlay, never a separate vertical row. */
+#w4uCreations .w4uc-image{position:relative!important}
+#w4uCreations .w4uc-image .w4uc-nav:not([hidden]){position:absolute!important;left:4px!important;right:4px!important;bottom:5px!important;z-index:2!important;display:flex!important;justify-content:space-between!important;align-items:center!important;height:25px!important;min-height:0!important;margin:0!important;pointer-events:none!important}
+#w4uCreations .w4uc-image .w4uc-nav button{pointer-events:auto!important;width:27px!important;height:27px!important;border-radius:50%!important;background:#fffdf5ed!important;border:1px solid #d9b875!important;color:#842d0d!important;font-size:20px!important;line-height:1!important;padding:0!important;box-shadow:0 1px 4px #0002!important}
+#w4uCreations .w4uc-image .w4uc-counter{background:#fffdf5ed!important;padding:3px 7px!important;border-radius:14px!important;font-size:10px!important;color:#563923!important}
+#w4uCreations .w4uc-image .w4uc-nav[hidden]{display:none!important}
+#w4uCreations .w4uc-title-row{margin-top:5px!important}
+</style><style id="w4uc-final-title-and-nav-refinement">
+#w4uCreations .w4uc-title-row{display:flex!important;align-items:center!important;gap:5px!important;min-height:35px!important;height:35px!important;box-sizing:border-box!important;margin-top:4px!important;margin-bottom:4px!important}
+#w4uCreations .w4uc-title-row .w4uc-name{display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;white-space:normal!important;overflow:hidden!important;min-width:0!important;max-height:30px!important;line-height:1.25!important;margin:0!important}
+#w4uCreations .w4uc-title-row .w4uc-reel-inline{flex-shrink:0!important;align-self:center!important}
+#w4uCreations .w4uc-image .w4uc-nav:not([hidden]){height:23px!important;bottom:4px!important}
+#w4uCreations .w4uc-image .w4uc-nav button{width:24px!important;height:24px!important;font-size:17px!important}
+#w4uCreations .w4uc-image .w4uc-counter{font-size:9px!important;padding:2px 6px!important}
+@media(min-width:700px){#w4uCreations .w4uc-title-row{min-height:39px!important;height:39px!important}}
+</style><style id="w4uc-order-preview-style">
+#w4uCreationFormHint.w4uc-order-preview{display:block!important;margin:16px 0;padding:15px;border:1px solid #ddc6a1;border-radius:12px;background:#fffaf1;box-sizing:border-box}
+#w4uCreationFormHint[hidden]{display:none!important}
+.w4uc-order-preview h3{font-size:17px;margin:0 0 12px;color:#6b4123}
+.w4uc-order-selected{display:flex;align-items:center;gap:13px}
+.w4uc-order-selected img{width:100px;height:95px;object-fit:contain;background:white;border-radius:9px;border:1px solid #e8ddcb;flex-shrink:0}
+.w4uc-order-selected p{font-size:12px;margin:6px 0;color:#6c6256}
+.w4uc-order-size{display:block;font-weight:600;margin-top:13px}
+.w4uc-order-size select{display:block;width:100%;max-width:340px;margin-top:6px;padding:10px;border:1px solid #d6b991;border-radius:8px;background:white}
+#w4ucPicker[hidden]{display:none!important}
+#w4ucPicker{background:#fff;border:1px solid #e7d6ba;border-radius:10px;padding:10px;margin-top:12px}
+.w4uc-picker-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.w4uc-picker-heading button{background:none;border:0;font-size:19px;cursor:pointer}
+.w4uc-picker-photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:9px;max-height:320px;overflow:auto}
+.w4uc-picker-photo{border:1px solid #e4d8c4;background:#fff;border-radius:8px;padding:5px;cursor:pointer;text-align:left}
+.w4uc-picker-photo.active{border:2px solid #916237}
+.w4uc-picker-photo img{display:block;width:100%;height:86px;object-fit:contain}
+.w4uc-picker-photo span{display:block;font-size:11px;margin-top:5px}
+</style><style id="w4uc-stable-order-patch">
+#w4uCreationFormHint.w4uc-order-preview{position:relative;display:block!important;margin:0 0 18px!important;max-width:100%}
+#w4uCreationFormHint[hidden]{display:none!important}
+.w4uc-single-home-nav{display:flex;justify-content:center;margin:20px auto 8px}
+</style><style id="w4uc-compact-order-preview">
+#w4uCreationFormHint.w4uc-order-preview{padding:9px 11px!important;margin:10px 0!important;max-width:100%!important;border-radius:10px!important}
+#w4uCreationFormHint.w4uc-order-preview h3{font-size:14px!important;margin:0 0 6px!important}
+#w4uCreationFormHint .w4uc-order-selected{display:flex!important;align-items:center!important;gap:9px!important}
+#w4uCreationFormHint .w4uc-order-selected img{width:58px!important;height:58px!important;max-width:58px!important;object-fit:contain!important;flex-shrink:0!important}
+#w4uCreationFormHint .w4uc-order-selected strong{font-size:12px!important}
+#w4uCreationFormHint .w4uc-order-selected p{font-size:11px!important;margin:2px 0!important}
+#w4uCreationFormHint .w4uc-test-note{display:none!important}
+#w4uCreationFormHint .w4uc-order-size{font-size:12px!important;margin-top:6px!important}
+#w4uCreationFormHint .w4uc-order-size select{min-height:34px!important;padding:4px 8px!important}
+#w4uCreationFormHint .w4uc-picker-photos{max-height:220px!important;overflow:auto!important}
+</style><style id="w4uc-gallery-controls-refined-20261014">
+/* Visual refinements only: no changes to gallery data or order handling. */
+#w4uCreations .w4uc-image .w4uc-nav:not([hidden]){height:30px!important;bottom:5px!important;left:6px!important;right:6px!important}
+#w4uCreations .w4uc-image .w4uc-nav button{width:31px!important;height:31px!important;min-width:31px!important;min-height:31px!important;font-size:17px!important;line-height:1!important;border-radius:50%!important;display:flex!important;align-items:center!important;justify-content:center!important}
+#w4uCreations .w4uc-image .w4uc-counter{font-size:10px!important;font-weight:600!important;line-height:1.1!important;padding:3px 7px!important;border-radius:14px!important}
+#w4uCreations .w4uc-image .w4uc-size{font-size:10px!important;font-weight:700!important;line-height:1.2!important;padding:4px 6px!important;top:7px!important;right:7px!important;border-radius:7px!important;white-space:nowrap!important;max-width:55%!important;overflow:hidden!important;text-overflow:ellipsis!important}
+@media(max-width:699px){
+ #w4uCreations .w4uc-image .w4uc-nav button{width:30px!important;height:30px!important;min-width:30px!important;min-height:30px!important;font-size:16px!important}
+ #w4uCreations .w4uc-image .w4uc-counter{font-size:10px!important;padding:3px 6px!important}
+ #w4uCreations .w4uc-image .w4uc-size{font-size:9px!important;padding:4px 6px!important;top:6px!important;right:6px!important}
+}
+</style>
+
+<style id="w4uc-minimal-image-navigation">
+/* Minimal image controls: no circles, pills, or backgrounds. */
+#w4uCreations .w4uc-image .w4uc-nav:not([hidden]){bottom:0px!important;left:7px!important;right:7px!important;height:28px!important;z-index:5!important}
+#w4uCreations .w4uc-image .w4uc-nav button{width:30px!important;height:30px!important;min-width:30px!important;min-height:30px!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#fff!important;font-size:26px!important;font-weight:700!important;line-height:1!important;text-shadow:0 1px 4px #000,0 0 3px #000!important;outline-offset:1px!important;cursor:pointer!important}
+#w4uCreations .w4uc-image .w4uc-nav button:focus-visible{outline:2px solid #fff!important}
+#w4uCreations .w4uc-image .w4uc-counter{background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:0!important;margin:0!important;color:#fff!important;font-size:11px!important;font-weight:700!important;line-height:1!important;text-shadow:0 1px 4px #000,0 0 3px #000!important}
+</style>
+
+<style id="w4uc-compact-centered-navigation-final">
+/* Compact ‹1/2› cluster, lowered near the bottom edge of each photo. */
+#w4uCreations .w4uc-image .w4uc-nav:not([hidden]){
+  position:absolute!important;left:50%!important;right:auto!important;bottom:0px!important;
+  transform:translateX(-50%)!important;width:max-content!important;max-width:95%!important;
+  height:18px!important;display:flex!important;justify-content:center!important;align-items:center!important;
+  gap:0!important;margin:0!important;padding:0!important;z-index:6!important;pointer-events:none!important;
+}
+#w4uCreations .w4uc-image .w4uc-nav button{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:24px!important;min-width:24px!important;height:18px!important;min-height:18px!important;
+  font-size:22px!important;font-weight:600!important;line-height:1!important;
+  background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+  color:#fff!important;padding:0!important;margin:0!important;pointer-events:auto!important;
+}
+#w4uCreations .w4uc-image .w4uc-counter{
+  font-size:11px!important;font-weight:700!important;line-height:1!important;white-space:nowrap!important;
+  padding:0!important;margin:0!important;border:0!important;background:transparent!important;box-shadow:none!important;
+  color:#fff!important;text-shadow:0 1px 4px #000,0 0 3px #000!important;
+}
+#w4uCreations .w4uc-image .w4uc-nav[hidden]{display:none!important}
+</style>
 </head>
 
 
@@ -4424,7 +4687,9 @@ function renderEventTiles(){
         checklist.hidden = false;
 
 
+        const openingCreationOrder=!!window.w4ucOpeningCreationOrder;
         requestAnimationFrame(() => {
+          if(openingCreationOrder) return;
           checklist.scrollIntoView({
             behavior:'smooth',
             block:'start'
@@ -4594,6 +4859,18 @@ function getOtherRequirementsData(){
 }
 
 function validateOtherRequirements(){
+  // An Our Creations product is already a specified requirement.
+  // Do not force an unrelated manual "Other / Special Requirements" entry
+  // when the customer arrived through Customize & Order.
+  let creationSelection=null;
+  try { creationSelection=JSON.parse(sessionStorage.getItem('w4u_creation_selection')||'null'); } catch(e) {}
+  const selectedCreationIsActive=!!(creationSelection?.productId && document.getElementById('w4uCreationFormHint') && !document.getElementById('w4uCreationFormHint').hidden);
+  const selectedEventKey=String(document.querySelector('#eventTiles .tile.selected')?.dataset?.key||'');
+  const otherChecklistChecked=[...document.querySelectorAll('#itemTiles .tile')].some(tile=>{
+    const input=tile.querySelector('input[name="items"]');
+    return input?.checked && isOtherRequirementItem(tile.dataset.key,tile.querySelector('.tile-label')?.textContent||input.value);
+  });
+  if(selectedCreationIsActive && selectedEventKey==='otherEvent' && !otherChecklistChecked) return true;
   if(!isOtherRequirementSelected()) return true;
   ensureOtherRequirementRow();
   const rows=[...document.querySelectorAll('#otherRequirementsList .other-requirement-row')];
@@ -4789,7 +5066,9 @@ function renderItemTiles(eventKey){
     });
 
   syncOtherRequirementsPanel();
-
+  if(sessionStorage.getItem('w4u_creation_selection')){
+    setTimeout(()=>{if(typeof window.w4ucAutoSelect==='function')window.w4ucAutoSelect();},0);
+  }
 }
 
 
@@ -5265,6 +5544,14 @@ function getFormData(){
     form.notes.value.trim(),
     otherRequirements
   );
+  let creationNotes='';
+  try {
+    const chosen=JSON.parse(sessionStorage.getItem('w4u_creation_selection')||'null');
+    if(chosen && document.getElementById('w4uCreationFormHint')?.hidden===false){
+      const requested=(document.getElementById('w4ucRequestedSize')?.value||'').trim();
+      creationNotes='\n[Our Creations] Product: '+chosen.name+'; Product ID: '+chosen.productId+'; Photo ID: '+(chosen.photoId||'')+'; Photo path: '+(chosen.photoPath||'')+'; Photo: '+chosen.imageIndex+'; Product type: '+(chosen.type||'other')+((chosen.type==='tshirt')?'; Requested T-Shirt size: '+(requested||'Not specified'):'');
+    }
+  } catch(error) { console.warn('Creation selection not available',error); }
 
 
   return {
@@ -5308,7 +5595,7 @@ function getFormData(){
     items,
 
     notes:
-      combinedNotes,
+      combinedNotes+creationNotes,
 
     otherRequirements,
 
@@ -8528,6 +8815,36 @@ th{width:34%;color:#5a0730;background:#fffaf0}
 <div class="note">Use Print → Save as PDF if you want a PDF copy.</div>
 </main>
 </div>
+
+
+<style id="w4uc-handkerchief-readable-title-final">
+/* Handkerchief: readable title on its own line, reel directly below on right. */
+@media (max-width:699px) {
+ #w4uCreations .w4uc-title-row:has(.w4uc-name[title="Customized Handkerchief"]),
+ #w4uCreations .w4uc-title-row:has(.w4uc-name[title="Customized Handkerchiefs"]) {
+   display:flex!important;flex-direction:column!important;align-items:stretch!important;
+   justify-content:flex-start!important;gap:3px!important;height:auto!important;
+   min-height:0!important;max-height:none!important;
+ }
+ #w4uCreations .w4uc-title-row .w4uc-name[title="Customized Handkerchief"],
+ #w4uCreations .w4uc-title-row .w4uc-name[title="Customized Handkerchiefs"] {
+   font-size:12px!important;line-height:1.25!important;font-weight:700!important;
+   letter-spacing:normal!important;white-space:normal!important;display:block!important;
+   overflow:visible!important;text-overflow:clip!important;-webkit-line-clamp:unset!important;
+   flex:none!important;width:100%!important;
+ }
+ #w4uCreations .w4uc-title-row:has(.w4uc-name[title="Customized Handkerchief"]) .w4uc-reel-inline,
+ #w4uCreations .w4uc-title-row:has(.w4uc-name[title="Customized Handkerchiefs"]) .w4uc-reel-inline {
+   align-self:flex-end!important;font-size:11px!important;padding:4px 7px!important;
+   margin:0!important;flex:none!important;
+ }
+}
+</style>
+<style id="w4uc-readable-titles-reel-inline">
+#w4uCreations .w4uc-card .w4uc-title-row{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:5px!important;margin:7px 0!important;height:auto!important;min-height:32px!important}
+#w4uCreations .w4uc-card .w4uc-title-row .w4uc-name{font-size:12px!important;font-weight:800!important;line-height:1.3!important;letter-spacing:normal!important;white-space:normal!important;overflow-wrap:normal!important;word-break:normal!important;overflow:visible!important;text-overflow:clip!important;flex:1 1 auto!important;min-width:0!important;width:auto!important;min-height:0!important;max-height:none!important}
+#w4uCreations .w4uc-card .w4uc-title-row .w4uc-reel-inline{position:static!important;align-self:center!important;flex:none!important;white-space:nowrap!important;font-size:10px!important;padding:5px 6px!important;margin:0!important;line-height:1.2!important}
+</style>
 </body>
 </html>`;
 }
@@ -9035,6 +9352,12 @@ function selectCustomerOrderMode(mode){
   if(options) options.hidden=true;
 
   if(mode==='new'){
+    // Direct New Order starts without a creation; creation CTA sets this flag
+    // before opening the same form so its freshly chosen design is retained.
+    if(!window.w4ucOpeningCreationOrder){
+      sessionStorage.removeItem('w4u_creation_selection');
+      document.getElementById('w4uCreationFormHint')?.remove();
+    }
     // Thank-you/View Order replace the form HTML. If that happened, restore the
     // original document before opening a genuinely fresh New Order.
     if(!document.getElementById('weshopForm') || !document.getElementById('submitRequest')){
@@ -9058,6 +9381,7 @@ function selectCustomerOrderMode(mode){
     const newBackWrap=document.getElementById('customerNewOrderBackWrap');
     if(newBackWrap) newBackWrap.hidden=false;
     if(form) form.hidden=false;
+    if(sessionStorage.getItem('w4u_creation_selection')) setTimeout(()=>{if(typeof window.w4ucShowSelection==='function')window.w4ucShowSelection();},0);
     return;
   }
 
@@ -9887,65 +10211,19 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
 (function(){
-  function addHomeButton(container){
-    if(!container || container.querySelector('.ss-home-action')) return;
+  // Exactly one Home action, placed at the end of the order form.
+  document.addEventListener('DOMContentLoaded',function(){
+    document.querySelectorAll('.ss-success-nav').forEach(el=>el.remove());
+    const form=document.getElementById('weshopForm');
+    if(!form)return;
+    if(form.querySelector('.w4uc-single-home-nav'))return;
     const nav=document.createElement('div');
-    nav.className='ss-success-nav';
+    nav.className='ss-success-nav w4uc-single-home-nav';
     const btn=document.createElement('button');
-    btn.type='button';
-    btn.className='ss-home-action';
-    btn.textContent='← Go to Home';
+    btn.type='button';btn.className='ss-home-action';btn.textContent='← Go to Home';
     btn.addEventListener('click',goToHomePage);
-    nav.appendChild(btn);
-    container.appendChild(nav);
-  }
-
-  function enhanceVisibleOrderScreens(){
-    const selectors=[
-      '#orderSuccess',
-      '#submissionSuccess',
-      '#successMessage',
-      '#customerOrderView',
-      '#customerOrderDetails',
-      '#editOrderSuccess',
-      '.order-success',
-      '.submission-success',
-      '.customer-order-result',
-      '.customer-order-view'
-    ];
-    selectors.forEach(function(sel){
-      document.querySelectorAll(sel).forEach(function(el){
-        const style=window.getComputedStyle(el);
-        if(style.display!=='none' && style.visibility!=='hidden'){
-          addHomeButton(el);
-        }
-      });
-    });
-
-    // Fallback: visible dialogs/sections containing clear completion text.
-    document.querySelectorAll('section,div,article').forEach(function(el){
-      if(el.querySelector('.ss-home-action')) return;
-      const txt=(el.textContent||'').toLowerCase();
-      const visible=el.offsetParent!==null;
-      if(!visible) return;
-
-      if(
-        txt.includes('order submitted successfully') ||
-        txt.includes('order created successfully') ||
-        txt.includes('order updated successfully') ||
-        txt.includes('order details')
-      ){
-        addHomeButton(el);
-      }
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded',enhanceVisibleOrderScreens);
-
-  const observer=new MutationObserver(function(){
-    enhanceVisibleOrderScreens();
+    nav.appendChild(btn);form.appendChild(nav);
   });
-  observer.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['style','class']});
 })();
 
 </script>
@@ -10120,5 +10398,250 @@ document.addEventListener('DOMContentLoaded',function(){
 })();
 </script>
 
+<script>
+/* Our Creations: self-contained script */
+/* Our Creations: Supabase-backed admin and public gallery. */
+(function(){'use strict';
+const BUCKET='weshop4u-creation-images';let products=[],imageIndexes={},view=null,selected=null;let adminReady=false;const pendingUploads=new Map();
+async function client(){await ensureSupabase();if(!weshopSupabase)throw Error('Supabase unavailable');return weshopSupabase;}
+async function adminClient(){const sb=await client();const {data:{user},error}=await sb.auth.getUser();if(error||!user)throw Error('Please sign in with the Supabase admin login first.');const {data, error:authError}=await sb.from('weshop4u_creation_admins').select('user_id').eq('user_id',user.id).maybeSingle();if(authError||!data)throw Error('Your account is not authorized to manage creations.');return sb;}
+function imageUrl(path){return `${WESHOP4U_SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path.split('/').map(encodeURIComponent).join('/')}`;}
+async function loadPublic(){try{const sb=await client();const {data,error}=await sb.from('weshop4u_creations').select('id,name,category,description,sort,active,weshop4u_creation_photos(id,path,size,reel,sort)').eq('active',true).order('sort');if(error)throw error;products=(data||[]).map(p=>({...p,images:(p.weshop4u_creation_photos||[]).sort((a,b)=>a.sort-b.sort).map(im=>({...im,src:imageUrl(im.path)}))}));render();}catch(e){console.warn('Our Creations unavailable',e);const root=$('w4uCreations');if(root)root.innerHTML='<p class="w4uc-empty">Our creations are coming soon.</p>';}}
+async function loadAdmin(){try{await adminClient();adminReady=true;const sb=await client();const {data,error}=await sb.from('weshop4u_creations').select('id,name,category,description,sort,active,weshop4u_creation_photos(id,path,size,reel,sort)').order('sort');if(error)throw error;products=(data||[]).map(p=>({...p,images:(p.weshop4u_creation_photos||[]).sort((a,b)=>a.sort-b.sort).map(im=>({...im,src:imageUrl(im.path)}))}));renderAdmin();for(const id of pendingUploads.keys())pendingPreview(id);render();$('w4ucAdminStatus').textContent='Connected to Supabase';}catch(e){adminReady=false;$('w4ucAdminStatus').textContent=e.message;}}
+async function writeProduct(p){const sb=await adminClient();const {error}=await sb.from('weshop4u_creations').upsert({id:p.id,name:p.name,category:p.category,description:p.description,sort:p.sort,active:p.active});if(error)throw error;}
+async function writePhoto(p,im){const sb=await adminClient();const {error}=await sb.from('weshop4u_creation_photos').upsert({id:im.id,creation_id:p.id,path:im.path,size:im.size,reel:im.reel,sort:im.sort});if(error)throw error;}
+async function mutate(action){try{await action();await loadAdmin()}catch(e){alert('Supabase: '+e.message);await loadAdmin()}}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const orderDrafts=new Map();
+function sync(){loadPublic()}
+function isAdmin(){return document.body.classList.contains('ss-admin-mode')}
+
+async function firstCreationSort(){
+ const sb=await adminClient();
+ const {data,error}=await sb.from('weshop4u_creations').select('sort').order('sort',{ascending:true}).limit(1);
+ if(error)throw error;
+ return data?.length?Math.min(0,Number(data[0].sort)||0)-1:0;
+}
+async function saveCreationOrder(){
+ const button=$('w4ucSaveOrder'),status=$('w4ucOrderStatus');
+ button.disabled=true;status.textContent='Saving order…';
+ try{
+  const sb=await adminClient();
+  const entries=Array.from(orderDrafts.entries());
+  for(const [id,sort] of entries){
+   if(!Number.isSafeInteger(sort))throw Error('Use whole numbers for display order.');
+   const {data,error}=await sb.from('weshop4u_creations').update({sort}).eq('id',id).select('id,sort').single();
+   if(error)throw error;
+   if(!data||data.sort!==sort)throw Error('Order was not saved. Please refresh and try again.');
+   orderDrafts.delete(id);
+  }
+  await loadAdmin();status.textContent='Order saved.';
+ }catch(e){status.textContent='Unable to save all changes: '+e.message+' You can retry Save order.';}
+ finally{button.disabled=false;}
+}
+const extraCategories=new Set();
+function refreshCreationCategories(){
+ const select=$('w4ucCategory'),list=$('w4ucCategoryOptions');if(!select||!list)return;
+ const current=select.value;
+ const names=['T-Shirt','Handkerchief','Keepsake','Other small product',...products.map(p=>p.category),...extraCategories].filter(Boolean);
+ const unique=Array.from(new Map(names.map(n=>[n.toLowerCase(),n])).values());
+ select.innerHTML=unique.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+ if(unique.includes(current))select.value=current;
+ list.innerHTML=unique.map(n=>`<option value="${esc(n)}"></option>`).join('');
+}
+function setup(){
+ const home=$('happyClientsSection'),mobile=$('happyClientsMobileSection'),dashboard=$('adminDashboard');
+ if(!home||!mobile||!dashboard)return;
+ const gallery=document.createElement('section');gallery.id='w4uCreations';gallery.setAttribute('aria-label','Our Creations');home.before(gallery);
+ const mg=document.createElement('section');mg.id='w4uCreationsMobile';mg.style.display='none';mobile.before(mg);
+ // Gallery is moved ahead of Happy Clients on desktop and mobile. Mobile uses the same element.
+ const admin=document.createElement('section');admin.id='w4uCreationAdmin';admin.className='w4uc-admin';admin.hidden=true;
+ admin.innerHTML=`<h3>Our Creations — Supabase Admin</h3><p class="w4uc-test-note">Changes are saved to Supabase and shown to all visitors.</p><p id="w4ucAdminStatus" class="w4uc-test-note">Sign in above to manage creations.</p><button type="button" class="w4uc-small-button" id="w4ucReload">Refresh creations</button><div class="w4uc-fields"><label>Creation name<input id="w4ucName" maxlength="90" placeholder="Custom T-Shirt"></label><label>Category<select id="w4ucCategory"><option>T-Shirt</option><option>Handkerchief</option><option>Keepsake</option><option>Other small product</option></select><button type="button" class="w4uc-small-button" id="w4ucAddCategory">+ Add category</button><datalist id="w4ucCategoryOptions"></datalist></label><label>Description<input id="w4ucDesc" maxlength="240" placeholder="Optional description"></label><p class="w4uc-muted">New creations appear first. Adjust their display order below after adding.</p></div><p><button type="button" class="w4uc-save" id="w4ucAdd">Add Creation</button></p><p><button type="button" class="w4uc-save" id="w4ucSaveOrder">Save order</button> <span id="w4ucOrderStatus" role="status" aria-live="polite"></span></p><p class="w4uc-muted">Smaller display-order numbers appear first. Change the numbers below, then tap Save order.</p><div id="w4ucAdminList"></div>`;
+ dashboard.append(admin);
+ const cropDialog=document.createElement('div');cropDialog.id='w4ucCropDialog';cropDialog.hidden=true;
+ cropDialog.innerHTML=`<div class="crop-panel" role="dialog" aria-modal="true" aria-label="Crop product image"><h3>Adjust product image</h3><p style="font-size:13px">Drag to reposition. Choose <b>Fit entire image</b> to avoid cutting off the design.</p><canvas width="720" height="720" aria-label="Square image crop preview"></canvas><label>Zoom <span id="w4ucCropZoomLabel">100%</span><input type="range" min="100" max="300" value="100" step="5" id="w4ucCropZoom"></label><div class="crop-actions"><button type="button" data-crop-mode="contain">Fit entire image</button><button type="button" data-crop-mode="cover">Fill square / crop</button><button type="button" data-crop-reset>Reset</button></div><div class="crop-actions"><button type="button" data-crop-cancel>Cancel</button><button type="button" data-crop-apply>Apply crop</button></div></div>`;
+ document.body.append(cropDialog);
+ let cropSession=null;
+ function drawCrop(){
+  if(!cropSession)return;
+  const {img,mode,zoom,dx,dy}=cropSession,c=cropDialog.querySelector('canvas'),ctx=c.getContext('2d'),base=mode==='contain'?Math.min(c.width/img.width,c.height/img.height):Math.max(c.width/img.width,c.height/img.height),w=img.width*base*zoom,h=img.height*base*zoom;
+  ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#f7f3ed';ctx.fillRect(0,0,c.width,c.height);
+  ctx.drawImage(img,(c.width-w)/2+dx,(c.height-h)/2+dy,w,h);
+ }
+ function openCrop(id,i){
+  const item=pendingUploads.get(id)?.items[i];if(!item)return;
+  const img=new Image();img.onload=()=>{
+   cropSession={id,i,img,mode:item.crop?.mode||'contain',zoom:item.crop?.zoom||1,dx:item.crop?.dx||0,dy:item.crop?.dy||0};
+   const slider=cropDialog.querySelector('#w4ucCropZoom');slider.value=Math.round(cropSession.zoom*100);
+   cropDialog.querySelector('#w4ucCropZoomLabel').textContent=slider.value+'%';
+   cropDialog.hidden=false;drawCrop();
+  };img.onerror=()=>alert('Could not open this image. Please select a JPG, PNG, or WebP file.');img.src=item.originalUrl||item.url;
+ }
+ cropDialog.querySelector('#w4ucCropZoom').addEventListener('input',e=>{if(!cropSession)return;cropSession.zoom=Number(e.target.value)/100;cropDialog.querySelector('#w4ucCropZoomLabel').textContent=e.target.value+'%';drawCrop()});
+ cropDialog.addEventListener('click',e=>{
+  if(e.target.closest('[data-crop-mode]')){cropSession.mode=e.target.closest('[data-crop-mode]').dataset.cropMode;cropSession.dx=0;cropSession.dy=0;drawCrop();}
+  if(e.target.closest('[data-crop-reset]')){cropSession.mode='contain';cropSession.zoom=1;cropSession.dx=0;cropSession.dy=0;cropDialog.querySelector('#w4ucCropZoom').value=100;cropDialog.querySelector('#w4ucCropZoomLabel').textContent='100%';drawCrop();}
+  if(e.target.closest('[data-crop-cancel]')){cropDialog.hidden=true;cropSession=null;}
+  if(e.target.closest('[data-crop-apply]')){
+   const item=pendingUploads.get(cropSession.id)?.items[cropSession.i];if(!item)return;
+   const c=cropDialog.querySelector('canvas');
+   c.toBlob(blob=>{
+    if(!blob){alert('Unable to prepare image.');return;}
+    if(item.url!==item.originalUrl)URL.revokeObjectURL(item.url);
+    item.file=new File([blob],item.file.name.replace(/\\.[^.]+$/,'')+'.webp',{type:'image/webp'});
+    item.url=URL.createObjectURL(blob);
+    item.crop={mode:cropSession.mode,zoom:cropSession.zoom,dx:cropSession.dx,dy:cropSession.dy};
+    const id=cropSession.id;cropDialog.hidden=true;cropSession=null;pendingPreview(id);
+   },'image/webp',0.85);
+  }
+ });
+ const cropCanvas=cropDialog.querySelector('canvas');let dragging=false,lastX=0,lastY=0;
+ cropCanvas.addEventListener('pointerdown',e=>{if(!cropSession)return;dragging=true;lastX=e.clientX;lastY=e.clientY;cropCanvas.setPointerCapture(e.pointerId)});
+ cropCanvas.addEventListener('pointermove',e=>{if(!dragging||!cropSession)return;const ratio=cropCanvas.width/cropCanvas.getBoundingClientRect().width;cropSession.dx+=(e.clientX-lastX)*ratio;cropSession.dy+=(e.clientY-lastY)*ratio;lastX=e.clientX;lastY=e.clientY;drawCrop()});
+ cropCanvas.addEventListener('pointerup',()=>dragging=false);
+ cropCanvas.addEventListener('pointercancel',()=>dragging=false);
+ document.addEventListener('click',e=>{const b=e.target.closest('[data-w4uc-crop]');if(b)openCrop(b.dataset.w4ucCrop,Number(b.dataset.i))});
+ const viewer=document.createElement('div');viewer.id='w4uCreationViewer';viewer.className='w4uc-viewer';viewer.hidden=true;viewer.setAttribute('role','dialog');viewer.setAttribute('aria-modal','true');viewer.innerHTML='<div class="w4uc-viewer-content"><button type="button" id="w4ucClose" aria-label="Close" style="position:absolute;right:0;top:-44px">×</button><img id="w4ucBig" alt="Enlarged creation"><div class="w4uc-viewer-controls"><button id="w4ucPrev" aria-label="Previous image">‹</button><span id="w4ucBigInfo"></span><button id="w4ucNext" aria-label="Next image">›</button></div></div>';
+ document.body.append(viewer);
+ $('w4ucClose').onclick=closeView;$('w4ucPrev').onclick=()=>moveView(-1);$('w4ucNext').onclick=()=>moveView(1);
+ viewer.addEventListener('click',e=>{if(e.target===viewer)closeView()});
+ document.addEventListener('keydown',e=>{if(viewer.hidden)return;if(e.key==='Escape')closeView();if(e.key==='ArrowLeft')moveView(-1);if(e.key==='ArrowRight')moveView(1)});
+ $('w4ucAdd').onclick=()=>mutate(async()=>{const name=$('w4ucName').value.trim();if(!name)throw Error('Enter a creation name');const p={id:crypto.randomUUID(),name,category:$('w4ucCategory').value,description:$('w4ucDesc').value.trim(),sort:await firstCreationSort(),active:true};await writeProduct(p);$('w4ucName').value='';});$('w4ucReload').onclick=loadAdmin;$('w4ucSaveOrder').onclick=saveCreationOrder;$('w4ucAddCategory').onclick=()=>{const value=prompt('Enter a new category name (for example, Devotional Art):');if(value===null)return;const name=value.trim();if(!name||name.length>90){alert('Enter a category name between 1 and 90 characters.');return;}extraCategories.add(name);refreshCreationCategories();const option=Array.from($('w4ucCategory').options).find(o=>o.value.toLowerCase()===name.toLowerCase());$('w4ucCategory').value=option?option.value:name;};
+
+ let previousAdminMode=isAdmin();const obs=new MutationObserver(()=>{const now=isAdmin();admin.hidden=!now;gallery.hidden=now;if(now&&!previousAdminMode)loadAdmin();previousAdminMode=now;});obs.observe(document.body,{attributes:true,attributeFilter:['class']});
+ document.addEventListener('keydown',e=>{
+   const image=e.target.closest('#w4uCreations img[data-w4uc-action="zoom"]');
+   if(image && (e.key==='Enter'||e.key===' ')){e.preventDefault();image.click();}
+ });
+ document.addEventListener('click',e=>{let b=e.target.closest('[data-w4uc-action]');if(!b)return;let p=products.find(x=>x.id===b.dataset.id);if(!p)return;let a=b.dataset.w4ucAction;if(a==='prev'||a==='next'){let n=p.images.length;imageIndexes[p.id]=((imageIndexes[p.id]||0)+(a==='next'?1:-1)+n)%n;render()}if(a==='zoom'){view={id:p.id,index:imageIndexes[p.id]||0};showView()}if(a==='order')order(p);if(a==='reel'){let im=p.images[imageIndexes[p.id]||0];if(im?.reel&&/^https:\/\/(www\.)?instagram\.com\/(reel|p|tv)\//i.test(im.reel))window.open(im.reel,'_blank','noopener,noreferrer');else alert('Instagram Reel link is not configured.')}});
+ document.addEventListener('click',e=>{const b=e.target.closest('[data-w4uc-admin]');if(!b)return;const p=products.find(x=>x.id===b.dataset.id);if(!p)return;const a=b.dataset.w4ucAdmin,i=Number(b.dataset.i);mutate(async()=>{const sb=await adminClient();if(a==='remove'){if(!confirm('Delete this creation and its photos?'))return;for(const im of p.images){await sb.storage.from(BUCKET).remove([im.path]);}const {error}=await sb.from('weshop4u_creations').delete().eq('id',p.id);if(error)throw error;}else if(a==='hide'){p.active=!p.active;await writeProduct(p);}else if(a==='delete-image'){const im=p.images[i];if(!im)return;const {error}=await sb.from('weshop4u_creation_photos').delete().eq('id',im.id);if(error)throw error;await sb.storage.from(BUCKET).remove([im.path]);}else if(a==='up'||a==='down'){const j=i+(a==='up'?-1:1);if(j<0||j>=p.images.length)return;[p.images[i],p.images[j]]=[p.images[j],p.images[i]];for(let k=0;k<p.images.length;k++){p.images[k].sort=k;await writePhoto(p,p.images[k]);}}});});
+ document.addEventListener('change',e=>{const el=e.target;if(!el.matches('[data-w4uc-move-photo]')||!el.value)return;const from=products.find(p=>p.id===el.dataset.id),to=products.find(p=>p.id===el.value),photo=from?.images[Number(el.dataset.i)];if(!from||!to||!photo)return;const targetId=to.id;if(!confirm(`Move this photo from "${from.name}" to "${to.name}"? The image will then appear within the destination creation's photo carousel.`)){el.value='';return;}mutate(async()=>{const sb=await adminClient();const {error}=await sb.from('weshop4u_creation_photos').update({creation_id:targetId,sort:to.images.length}).eq('id',photo.id);if(error)throw error;});});
+ document.addEventListener('change',e=>{const el=e.target;if(!el.matches('[data-w4uc-field]'))return;if(el.dataset.w4ucField==='sort'){const value=Number(el.value);if(el.value.trim()===''||!Number.isSafeInteger(value)){el.setCustomValidity('Enter a whole number');el.reportValidity();return;}el.setCustomValidity('');orderDrafts.set(el.dataset.id,value);$('w4ucOrderStatus').textContent='Order changed — tap Save order.';return;}const p=products.find(x=>x.id===el.dataset.id);if(!p)return;mutate(async()=>{const field=el.dataset.w4ucField;if(field==='category'){const category=el.value.trim();if(!category||category.length>90)throw Error('Enter a category between 1 and 90 characters.');p.category=category;}else if(field==='name'||field==='description')p[field]=el.value.trim();else if(field==='sort')p.sort=Number(el.value)||0;else if(field==='size'||field==='reel'){const im=p.images[Number(el.dataset.i)];if(!im)return;if(field==='reel'&&el.value.trim()&&!/^https:\/\/(www\.)?instagram\.com\/(reel|p|tv)\//i.test(el.value.trim()))throw Error('Enter a valid Instagram Reel URL');im[field]=el.value.trim();await writePhoto(p,im);return;}await writeProduct(p);});});
+ function pendingPreview(id){
+  const pending=pendingUploads.get(id),preview=document.querySelector('[data-w4uc-preview="'+id+'"]');
+  if(!preview)return;
+  preview.innerHTML=pending?pending.items.map((item,i)=>`<div class="w4uc-thumb w4uc-pending-card"><img src="${item.url}" alt="Preview ${i+1}"><small><b>Photo ${i+1}</b> · ${esc(item.file.name)}</small><div class="w4uc-order-actions"><button type="button" data-w4uc-pending-move="${esc(id)}" data-i="${i}" data-dir="-1" ${i===0?"disabled":""}>← Earlier</button><button type="button" data-w4uc-pending-move="${esc(id)}" data-i="${i}" data-dir="1" ${i===pending.items.length-1?"disabled":""}>Later →</button></div><button type="button" class="w4uc-small-button w4uc-crop-edit" data-w4uc-crop="${esc(id)}" data-i="${i}">✂ Crop / Fit Image</button><label>Size for this image<input data-w4uc-pending-field="size" data-id="${esc(id)}" data-i="${i}" placeholder="S / M / L / XL / XXL" value="${esc(item.size)}"></label><label>Instagram Reel URL (optional)<input type="url" data-w4uc-pending-field="reel" data-id="${esc(id)}" data-i="${i}" placeholder="https://www.instagram.com/reel/..." value="${esc(item.reel)}"></label><button type="button" class="w4uc-small-button" data-w4uc-remove-pending="${esc(id)}" data-i="${i}">Remove</button></div>`).join(''):'';
+  const save=document.querySelector('[data-w4uc-save-images="'+id+'"]');if(save){save.disabled=!pending?.items.length;save.textContent=pending?.items.length?`Save ${pending.items.length} Image${pending.items.length===1?'':'s'}`:'Save Images (select images first)';}
+ }
+ document.addEventListener('click',e=>{const b=e.target.closest('[data-w4uc-pending-move]');if(!b)return;const id=b.dataset.w4ucPendingMove,pending=pendingUploads.get(id),i=Number(b.dataset.i),j=i+Number(b.dataset.dir);if(!pending||j<0||j>=pending.items.length)return;[pending.items[i],pending.items[j]]=[pending.items[j],pending.items[i]];pendingPreview(id);});
+ document.addEventListener('input',e=>{const el=e.target;if(!el.matches('[data-w4uc-pending-field]'))return;const pending=pendingUploads.get(el.dataset.id),item=pending?.items[Number(el.dataset.i)];if(item)item[el.dataset.w4ucPendingField]=el.value;});
+ document.addEventListener('click',e=>{const btn=e.target.closest('[data-w4uc-remove-pending]');if(!btn)return;const id=btn.dataset.w4ucRemovePending,pending=pendingUploads.get(id);if(!pending)return;const item=pending.items.splice(Number(btn.dataset.i),1)[0];if(item){URL.revokeObjectURL(item.url);if(item.originalUrl&&item.originalUrl!==item.url)URL.revokeObjectURL(item.originalUrl);}if(!pending.items.length)pendingUploads.delete(id);pendingPreview(id);});
+ document.addEventListener('change',e=>{const el=e.target;if(!el.matches('[data-w4uc-upload]'))return;const id=el.dataset.id,files=[...el.files];const previous=pendingUploads.get(id);const added=files.map(file=>{const url=URL.createObjectURL(file);return {file,url,originalUrl:url,size:'',reel:''}});pendingUploads.set(id,{items:[...(previous?.items||[]),...added]});pendingPreview(id);el.value='';const status=document.querySelector('[data-w4uc-upload-status="'+id+'"]');if(status)status.textContent=pendingUploads.get(id)?.items.length?`${pendingUploads.get(id).items.length} images ready in the order shown. Use Earlier / Later to arrange them, then Save Images.`:'';});
+ document.addEventListener('click',async e=>{const btn=e.target.closest('[data-w4uc-save-images]');if(!btn)return;const id=btn.dataset.w4ucSaveImages,p=products.find(x=>x.id===id),pending=pendingUploads.get(id);if(!p||!pending?.items.length)return;
+  btn.disabled=true;const status=document.querySelector('[data-w4uc-upload-status="'+id+'"]');let uploaded=0;
+  try{
+   for(const item of pending.items){if(!item.file.type.startsWith('image/'))throw Error('Only image files are supported: '+item.file.name);if(item.file.size>10*1024*1024)throw Error('Image exceeds 10 MB: '+item.file.name);if(item.reel.trim()&&!/^https:\/\/(www\.)?instagram\.com\/(reel|p|tv)\//i.test(item.reel.trim()))throw Error('Invalid Instagram link for '+item.file.name);}
+   const sb=await adminClient();const originalCount=p.images.length;
+   while(pending.items.length){const item=pending.items[0];if(status)status.textContent=`Uploading ${uploaded+1}: ${item.file.name}`;const blob=await compress(item.file),path=p.id+'/'+crypto.randomUUID()+'.webp';const {error}=await sb.storage.from(BUCKET).upload(path,blob,{contentType:'image/webp',upsert:false});if(error)throw error;
+    try{await writePhoto(p,{id:crypto.randomUUID(),path,size:item.size.trim(),reel:item.reel.trim(),sort:originalCount+uploaded});}catch(err){await sb.storage.from(BUCKET).remove([path]);throw err;}
+    URL.revokeObjectURL(item.url);if(item.originalUrl&&item.originalUrl!==item.url)URL.revokeObjectURL(item.originalUrl);pending.items.shift();uploaded++;
+   }
+   pendingUploads.delete(id);await loadAdmin();const updated=document.querySelector('[data-w4uc-upload-status="'+id+'"]');if(updated)updated.textContent=`${uploaded} image(s) saved with their sizes and Instagram links.`;
+  }catch(err){if(status)status.textContent=`Upload stopped after ${uploaded} saved image(s): ${err.message||err}. Remaining previews are kept; retry Save Images.`;alert('Image upload failed: '+(err.message||err));pendingPreview(id);}
+  finally{const save=document.querySelector('[data-w4uc-save-images="'+id+'"]');if(save)save.disabled=false;}
+ });
+
+ // Refresh on admin navigation and after browser back/forward.
+ window.addEventListener('pageshow',()=>{admin.hidden=!isAdmin();render()});
+ sync();admin.hidden=!isAdmin();if(isAdmin())loadAdmin();
+}
+function compress(file){return new Promise((resolve,reject)=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{const scale=Math.min(1,900/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>b?resolve(b):reject(Error('Image compression failed')),'image/webp',.72)};img.onerror=()=>{URL.revokeObjectURL(u);reject()};img.src=u})}
+function creationDisplayName(p){
+ const name=String(p.name||'').trim();
+ if(/^(custom|customized|customised)\s+handkerchiefs?$/i.test(name))return 'Custom Handkerchiefs';
+ if(/^(custom|customized|customised)\s+t[ -]?shirts?$/i.test(name))return 'Custom T-Shirts';
+ return name;
+}
+function render(){const root=$('w4uCreations');if(!root)return;const shown=products.filter(p=>p.active&&p.images.length).sort((a,b)=>(a.sort-b.sort)||String(a.id).localeCompare(String(b.id)));root.innerHTML=`<div class="w4uc-head"><div><h2>WeShop4U Creations ✨</h2><div class="w4uc-sub">Designed with love, customized for you</div></div>${shown.length>1?'<span class="w4uc-sub">Swipe for more →</span>':''}</div>${shown.length?`<div class="w4uc-track">${shown.map(p=>{let n=p.images.length,i=Math.min(imageIndexes[p.id]||0,n-1),im=p.images[i];imageIndexes[p.id]=i;return `<article class="w4uc-card"><div class="w4uc-image"><img src="${esc(im.src)}" alt="${esc(p.name)} — image ${i+1}" loading="lazy" role="button" tabindex="0" data-w4uc-action="zoom" data-id="${esc(p.id)}" aria-label="Enlarge ${esc(p.name)} image ${i+1}" style="cursor:zoom-in"><div class="w4uc-nav" ${n<2?'hidden':''}><button data-w4uc-action="prev" data-id="${esc(p.id)}" aria-label="Previous image">‹</button><span class="w4uc-counter">${i+1}/${n}</span><button data-w4uc-action="next" data-id="${esc(p.id)}" aria-label="Next image">›</button></div></div><div class="w4uc-title-row"><div class="w4uc-name" title="${esc(creationDisplayName(p))}">${esc(creationDisplayName(p))}</div>${im.reel?`<button type="button" class="w4uc-play w4uc-reel-inline" data-w4uc-action="reel" data-id="${esc(p.id)}" aria-label="Watch Instagram Reel in a new tab">▶ Reel ↗</button>`:''}</div><button class="w4uc-cta" data-w4uc-action="order" data-id="${esc(p.id)}">Customize &amp; Order</button></article>`}).join('')}</div>`:`<p class="w4uc-empty">Our creations are coming soon.</p>`}`;
+ // On mobile, gallery is inserted immediately before mobile Happy Clients (within mobile landing).
+ const mobile=$('happyClientsMobileSection'),home=$('happyClientsSection');if(mobile&&home){if(matchMedia('(max-width:575px)').matches){mobile.before(root)}else{home.before(root)}}
+}
+function renderAdmin(){refreshCreationCategories();let root=$('w4ucAdminList');if(!root)return;root.innerHTML=products.map((p,pi)=>`<details class="w4uc-admin-row w4uc-creation-details" ${pi===0?"open":""}><summary><strong>${esc(p.name)}</strong> · ${p.images.length} image${p.images.length===1?"":"s"} <span class="w4uc-admin-expand">Tap to manage photos / upload more</span></summary><div class="w4uc-admin-content"><p class="w4uc-workflow">Step 1: Select multiple photos → Step 2: Arrange their order (first photo is the cover) → Step 3: Crop, enter size and Reel URL → Step 4: Save Images. Photos of the same product belong here, not in a new creation.</p><div class="w4uc-fields"><label>Name<input data-w4uc-field="name" data-id="${esc(p.id)}" value="${esc(p.name)}"></label><label>Display order<input type="number" data-w4uc-field="sort" data-id="${esc(p.id)}" step="1" value="${orderDrafts.has(p.id)?orderDrafts.get(p.id):(p.sort||0)}"></label><label>Category<input list="w4ucCategoryOptions" maxlength="90" data-w4uc-field="category" data-id="${esc(p.id)}" value="${esc(p.category)}" placeholder="Choose or type a category"></label><label>Description<input data-w4uc-field="description" data-id="${esc(p.id)}" value="${esc(p.description)}"></label><label>Select multiple images (you can add more before saving)<input type="file" accept="image/*" multiple data-w4uc-upload data-id="${esc(p.id)}"></label></div><div class="w4uc-thumb-row" data-w4uc-preview="${esc(p.id)}"></div><p><button type="button" class="w4uc-save" data-w4uc-save-images="${esc(p.id)}" disabled>Save Images (select images first)</button> <span data-w4uc-upload-status="${esc(p.id)}" aria-live="polite"></span></p><p><button class="w4uc-small-button" data-w4uc-admin="hide" data-id="${esc(p.id)}">${p.active?'Hide':'Show'}</button> <button class="w4uc-small-button" data-w4uc-admin="remove" data-id="${esc(p.id)}">Delete creation</button></p><div class="w4uc-thumb-row">${p.images.map((im,i)=>`<div class="w4uc-thumb"><strong>Photo ${i+1}${i===0?" · Cover":""}</strong><img src="${esc(im.src)}" alt="Image ${i+1}"><label>Size<input placeholder="L / 12×12″" data-w4uc-field="size" data-id="${esc(p.id)}" data-i="${i}" value="${esc(im.size)}"></label><label>Instagram Reel URL<input placeholder="https://instagram.com/reel/..." data-w4uc-field="reel" data-id="${esc(p.id)}" data-i="${i}" value="${esc(im.reel)}"></label><button data-w4uc-admin="up" data-id="${esc(p.id)}" data-i="${i}" aria-label="Move photo earlier">← Earlier</button><button data-w4uc-admin="down" data-id="${esc(p.id)}" data-i="${i}" aria-label="Move photo later">Later →</button><label class="w4uc-move-label">Move photo to another creation<select data-w4uc-move-photo data-id="${esc(p.id)}" data-i="${i}"><option value="">Keep in this creation</option>${products.filter(other=>other.id!==p.id).map(other=>`<option value="${esc(other.id)}">${esc(other.name)}</option>`).join('')}</select></label><button data-w4uc-admin="delete-image" data-id="${esc(p.id)}" data-i="${i}">Remove</button></div>`).join('')}</div></div></details>`).join('')||'<p class="w4uc-muted">No creations added yet. Add one above.</p>'}
+function showView(){const p=products.find(x=>x.id===view?.id),el=$('w4uCreationViewer');if(!p?.images.length)return;view.index=(view.index+p.images.length)%p.images.length;let im=p.images[view.index];$('w4ucBig').src=im.src;$('w4ucBigInfo').textContent=`${p.name}${im.size?' · Size '+im.size:''} · ${view.index+1}/${p.images.length}`;el.hidden=false}
+function moveView(d){if(view){view.index+=d;showView()}}
+function closeView(){$('w4uCreationViewer').hidden=true;view=null}
+function creationType(p){const v=((p?.category||'')+' '+(p?.name||'')).toLowerCase();return /handkerchief/.test(v)?'handkerchief':/t[\s-]?shirts?/.test(v)?'tshirt':'other';}
+function creationCategoryMatch(label,type){const t=String(label||'').toLowerCase();return type==='tshirt'?/t[\s-]?shirts?/.test(t):type==='handkerchief'?/handkerchief/.test(t):false;}
+function order(p){
+ window.w4ucOpeningCreationOrder=true;
+ const i=imageIndexes[p.id]||0,im=p.images[i];
+ selected={productId:p.id,photoId:im?.id||'',photoPath:im?.path||'',photoUrl:im?.src||'',name:p.name,category:p.category||'',size:im?.size||'',imageIndex:i+1,type:creationType(p)};
+ sessionStorage.setItem('w4u_creation_selection',JSON.stringify(selected));
+ const btn=document.querySelector('[data-order-mode="new"]');
+ if(btn)btn.click();else if(typeof selectCustomerOrderMode==='function')selectCustomerOrderMode('new');
+ // Orders initiated from Our Creations are product-led, not necessarily event-led.
+ // Choose the existing Other event by default, while allowing customers to change it.
+ setTimeout(()=>{
+   const eventTile=document.querySelector('#eventTiles .tile[data-key="otherEvent"]');
+   if(eventTile && !document.querySelector('input[name="event"]:checked')) {
+     eventTile.click();
+
+   }
+   autoSelectCreationTile();
+   showFormHint();
+   // Only creation orders start at the top; leave ordinary New Order alone.
+   requestAnimationFrame(()=>requestAnimationFrame(()=>{
+     // The landing shell has now hidden and the selected design has rendered.
+     window.scrollTo({top:0,left:0,behavior:'instant'});
+     window.w4ucOpeningCreationOrder=false;
+   }));
+ },0);
+}
+window.w4ucAutoSelect=autoSelectCreationTile;
+window.w4ucShowSelection=showFormHint;
+function autoSelectCreationTile(){
+ let sel;try{sel=JSON.parse(sessionStorage.getItem('w4u_creation_selection')||'null')}catch{}if(!sel)return;
+ const type=sel.type||creationType(sel);
+ const tiles=[...document.querySelectorAll('#itemTiles .tile')];
+ const tile=tiles.find(t=>creationCategoryMatch(t.querySelector('.tile-label')?.textContent,type));
+ if(tile && document.querySelector('input[name="event"]:checked')){const input=tile.querySelector('input[type="checkbox"]');if(input&&!input.checked){input.checked=true;input.dispatchEvent(new Event('change',{bubbles:true}));}}
+ showFormHint();
+}
+function showFormHint(){
+ const form=document.getElementById('weshopForm');if(!form)return;
+ let sel;try{sel=JSON.parse(sessionStorage.getItem('w4u_creation_selection')||'null')}catch{}if(!sel)return;
+ const type=sel.type||creationType(sel);
+ let hint=document.getElementById('w4uCreationFormHint');
+ if(!hint){hint=document.createElement('section');hint.id='w4uCreationFormHint';hint.className='w4uc-form-hint w4uc-order-preview';}
+ // Put the selected design FIRST in the opening step, above event selection.
+ // Keep it outside dynamic tiles, which are replaced when the event changes.
+ const openingPanel=form.querySelector('.panel[data-step="0"]');
+ (openingPanel||form).prepend(hint);
+ const photo=sel.photoUrl||(sel.photoPath?imageUrl(sel.photoPath):'');
+ const sizeValue=document.getElementById('w4ucRequestedSize')?.value||'';
+ hint.innerHTML=`<h3>Selected Design</h3><div class="w4uc-order-selected">${photo?`<img src="${esc(photo)}" alt="Selected design">`:''}<div><strong>${esc(sel.name)}</strong><p>Photo ${Number(sel.imageIndex)||1} · ${type==='tshirt'?'Custom T-Shirt':type==='handkerchief'?'Customized Handkerchief':'Customized product'}</p><button type="button" id="w4ucChangeDesign" class="w4uc-small-button">Change Design</button></div></div><div id="w4ucPicker" hidden><div class="w4uc-picker-heading"><b>Choose another ${type==='tshirt'?'T-Shirt':type==='handkerchief'?'Handkerchief':'product'} design</b><button type="button" id="w4ucPickerClose">✕</button></div><div id="w4ucPickerPhotos" class="w4uc-picker-photos"></div></div>${type==='tshirt'?`<label class="w4uc-order-size">Your T-Shirt size <select id="w4ucRequestedSize"><option value="">Select size</option>${['XS','S','M','L','XL','XXL','3XL','Other'].map(v=>`<option value="${v}" ${sizeValue===v?'selected':''}>${v}</option>`).join('')}</select></label>`:''}<p class="w4uc-test-note">Your selected design will be attached to the order details. Complete the remaining fields below.</p>`;
+ hint.hidden=false;
+ const picker=document.getElementById('w4ucPicker');
+ document.getElementById('w4ucChangeDesign').onclick=()=>{if(!picker.hidden){picker.hidden=true;return;}const matches=products.filter(p=>p.active&&p.images?.length&&creationType(p)===type);document.getElementById('w4ucPickerPhotos').innerHTML=matches.length?matches.map(p=>p.images.map((im,i)=>`<button type="button" data-w4uc-pick-product="${esc(p.id)}" data-w4uc-pick-index="${i}" class="w4uc-picker-photo ${sel.productId===p.id&&sel.photoId===im.id?'active':''}"><img src="${esc(im.src)}" alt="${esc(p.name)} design ${i+1}"><span>${esc(p.name)} · ${i+1}/${p.images.length}</span></button>`).join('')).join(''):'<p>No other designs available.</p>';picker.hidden=false;};
+ document.getElementById('w4ucPickerClose').onclick=()=>picker.hidden=true;
+ document.getElementById('w4ucPickerPhotos').onclick=e=>{const b=e.target.closest('[data-w4uc-pick-product]');if(!b)return;const p=products.find(p=>p.id===b.dataset.w4ucPickProduct);const i=Number(b.dataset.w4ucPickIndex),im=p?.images?.[i];if(!im)return;selected={productId:p.id,photoId:im.id,photoPath:im.path,photoUrl:im.src,name:p.name,category:p.category||'',size:im.size||'',imageIndex:i+1,type};sessionStorage.setItem('w4u_creation_selection',JSON.stringify(selected));showFormHint();};
+}
+
+window.addEventListener('DOMContentLoaded',setup);window.addEventListener('resize',()=>{if($('w4uCreations'))render()});
+})();
+
+</script>
+
+<style id="w4uc-handkerchief-single-line-safe">
+/* CSS-only: never modify gallery loading or rendering. */
+@media(max-width:575px){
+ #w4uCreations .w4uc-title-row .w4uc-name[title="Customized Handkerchief"],
+ #w4uCreations .w4uc-title-row .w4uc-name[title="Customized Handkerchiefs"]{
+  display:block!important;white-space:nowrap!important;overflow:visible!important;
+  text-overflow:clip!important;font-size:clamp(8px,2.1vw,9px)!important;
+  letter-spacing:-.3px!important;line-height:1.2!important;flex:1 1 auto!important;
+ }
+ #w4uCreations .w4uc-title-row:has(.w4uc-name[title="Customized Handkerchief"]) .w4uc-reel-inline,
+ #w4uCreations .w4uc-title-row:has(.w4uc-name[title="Customized Handkerchiefs"]) .w4uc-reel-inline{
+  font-size:8px!important;padding:3px 3px!important;flex-shrink:0!important;
+ }
+}
+</style>
+<style id="w4uc-readable-titles-reel-inline">
+#w4uCreations .w4uc-card .w4uc-title-row{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:5px!important;margin:7px 0!important;height:auto!important;min-height:32px!important}
+#w4uCreations .w4uc-card .w4uc-title-row .w4uc-name{font-size:12px!important;font-weight:800!important;line-height:1.3!important;letter-spacing:normal!important;white-space:normal!important;overflow-wrap:normal!important;word-break:normal!important;overflow:visible!important;text-overflow:clip!important;flex:1 1 auto!important;min-width:0!important;width:auto!important;min-height:0!important;max-height:none!important}
+#w4uCreations .w4uc-card .w4uc-title-row .w4uc-reel-inline{position:static!important;align-self:center!important;flex:none!important;white-space:nowrap!important;font-size:10px!important;padding:5px 6px!important;margin:0!important;line-height:1.2!important}
+</style>
 </body>
 </html>
