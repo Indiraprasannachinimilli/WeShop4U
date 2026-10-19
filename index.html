@@ -10728,5 +10728,25 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 
 </script>
+<style id="w4u-section-shortcut-style">#w4uSectionShortcuts{display:flex;gap:8px;max-width:1040px;margin:10px auto 8px;padding:0 12px;box-sizing:border-box}
+#w4uSectionShortcuts a{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid #dfc48c;border-radius:8px;background:#fffaf0;color:#842d0d;text-decoration:none;font-family:inherit;font-size:14px;font-weight:700;padding:10px 8px;min-height:42px;box-sizing:border-box}
+#w4uSectionShortcuts a:hover{background:#fff0d1}#w4uSectionShortcuts a:focus-visible{outline:3px solid #117469;outline-offset:3px}
+body.ss-inside #w4uSectionShortcuts,body.ss-admin-mode #w4uSectionShortcuts{display:none!important}
+#happyClientsSection,#happyClientsMobileSection{scroll-margin-top:18px}
+@media(max-width:575px){#w4uSectionShortcuts{margin:8px 8px 4px;padding:0;gap:8px}#w4uSectionShortcuts a{font-size:12px;padding:8px 5px;gap:5px;min-height:38px}}
+</style><script id="w4u-section-shortcut-script">/* Section shortcuts: both sections remain in the normal page flow. */
+(function(){'use strict';
+function setup(){
+ const nav=document.createElement('nav');nav.id='w4uSectionShortcuts';nav.setAttribute('aria-label','Explore WeShop4U');
+ nav.innerHTML='<a href="#w4uServices" data-w4u-jump="services"><span aria-hidden="true">🎤</span> Our Services <span aria-hidden="true">↓</span></a><a href="#happyClientsSection" data-w4u-jump="clients"><span aria-hidden="true">❤️</span> Happy Clients <span aria-hidden="true">↓</span></a>';
+ const happyId=()=>matchMedia('(max-width:575px)').matches?'happyClientsMobileSection':'happyClientsSection';
+ function place(){const creations=document.getElementById('w4uCreations');if(!creations?.parentNode)return;if(nav.nextElementSibling!==creations)creations.before(nav);nav.querySelector('[data-w4u-jump="clients"]').href='#'+happyId();}
+ nav.addEventListener('click',e=>{const link=e.target.closest('[data-w4u-jump]');if(!link)return;const target=document.getElementById(link.dataset.w4uJump==='services'?'w4uServices':happyId());if(!target||target.hidden)return;e.preventDefault();target.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});const heading=target.querySelector('h2');if(heading){heading.setAttribute('tabindex','-1');heading.focus({preventScroll:true});}});
+ let queued=false;const schedule=()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;place();});};
+ new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});window.addEventListener('resize',schedule);place();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
+})();
+</script>
 </body>
 </html>
