@@ -10667,6 +10667,17 @@ body.ss-admin-mode #w4uServices{display:none!important}
 #w4uServices .w4us-copy{display:flex;flex-direction:column;flex:1;margin-top:7px}#w4uServices .w4us-copy h3{font:800 12px/1.3 Arial,sans-serif;margin:0 0 6px;min-height:32px;overflow-wrap:normal}#w4uServices .w4us-copy p{font-size:11px;line-height:1.35;margin-bottom:8px}
 #w4uServices .w4us-actions{margin-top:auto;gap:5px}#w4uServices .w4us-actions .w4us-button{font-size:10px;padding:5px;min-height:32px;width:100%;box-sizing:border-box}
 @media(max-width:699px){#w4uServices .w4us-card{flex-basis:calc((100% - 8px)/2);width:calc((100% - 8px)/2)}}
+
+/* Fixed media viewport and natural card height prevent tall portrait photos stretching the row. */
+#w4uServices .w4us-list{align-items:flex-start!important;height:auto!important;min-height:0!important}
+#w4uServices .w4us-card{align-self:flex-start!important;height:auto!important;min-height:0!important}
+#w4uServices .w4us-media{height:120px!important;min-height:120px!important;max-height:120px!important;aspect-ratio:auto!important;flex:0 0 120px!important;overflow:hidden}
+#w4uServices .w4us-photo,#w4uServices .w4us-mic{position:absolute;inset:0;width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important}
+#w4uServices .w4us-photo img{width:100%!important;height:100%!important;max-height:100%!important;min-height:0!important;object-fit:contain!important;aspect-ratio:auto!important}
+#w4uServices .w4us-copy{flex:0 0 auto!important;height:auto!important;min-height:0!important}
+#w4uServices .w4us-copy h3{min-height:0!important;margin-bottom:6px!important}
+#w4uServices .w4us-actions{margin-top:8px!important}
+@media(min-width:700px){#w4uServices .w4us-media{height:150px!important;min-height:150px!important;max-height:150px!important;flex-basis:150px!important}}
 </style>
 <script id="w4us-script">/* WeShop4U Services: public gallery and authenticated admin editor. */
 (function(){'use strict';
@@ -10719,7 +10730,7 @@ function setup(){if($('w4uServices'))return;const dashboard=$('adminDashboard');
  admin.addEventListener('input',e=>{const el=e.target;if(!el.matches('[data-svc-field]')||busy)return;const d=draft(el.dataset.id),key=el.dataset.svcField;d[key]=key==='active'?el.checked:key==='sort'?(el.value.trim()===''?NaN:Number(el.value)):el.value;});
  admin.addEventListener('change',e=>{const el=e.target;if(!el.matches('[data-svc-files]')||busy)return;const files=[...el.files];if(files.some(f=>!['image/jpeg','image/png','image/webp'].includes(f.type)||f.size>20*1024*1024)){alert('Please select JPG, PNG or WebP images, each under 20 MB.');el.value='';return;}const d=draft(el.dataset.svcFiles);for(const f of files){const url=URL.createObjectURL(f);d.images.push({id:crypto.randomUUID(),file:f,url,originalURL:url});}el.value='';refreshImages(d.id);});
  document.addEventListener('click',e=>{const b=e.target.closest('[data-svc-action]');if(e.target.closest('[data-svc-retry]')){load();return;}if(!b)return;const id=b.dataset.id,a=b.dataset.svcAction;
- if(a==='prev'||a==='next'){const row=rows.find(r=>r.id===id),n=row?.images?.length;if(n){indexes.set(id,((indexes.get(id)||0)+(a==='next'?1:-1)+n)%n);publicRender();}return;}if(a==='zoom'){showView(id);return;}if(busy)return;
+ if(a==='prev'||a==='next'){const row=rows.find(r=>r.id===id),n=row?.images?.length;if(n){indexes.set(id,((indexes.get(id)||0)+(a==='next'?1:-1)+n)%n);const i=indexes.get(id),im=row.images[i],media=b.closest('.w4us-media'),photo=media.querySelector('.w4us-photo');photo.querySelector('img').src=imageURL(im.path,im.bucket);photo.setAttribute('aria-label',`Enlarge ${row.name} image ${i+1}`);media.querySelector('.w4us-nav span').textContent=`${i+1}/${n}`;}return;}if(a==='zoom'){showView(id);return;}if(busy)return;
  if(a==='save'){run(()=>saveService(id));return;}if(a==='delete'){run(()=>deleteService(id));return;}if(a==='discard'){release(drafts.get(id)?.images);drafts.delete(id);renderAdmin();return;}
  const d=draft(id),i=Number(b.dataset.i);if(!d)return;
  if(a==='crop'){openCrop(id,i).catch(err=>alert(err.message));return;}if(a==='remove-image'){const im=d.images.splice(i,1)[0];release([im]);}if(a==='earlier'||a==='later'){const j=i+(a==='earlier'?-1:1);if(j>=0&&j<d.images.length)[d.images[i],d.images[j]]=[d.images[j],d.images[i]];}refreshImages(id);
