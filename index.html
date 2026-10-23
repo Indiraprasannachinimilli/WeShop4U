@@ -2722,6 +2722,10 @@ body.ss-inside:not(.ss-admin-mode) #w4uCreations,body.ss-admin-mode #w4uCreation
 }
 #w4uCreations .w4uc-image .w4uc-nav[hidden]{display:none!important}
 </style>
+<style>
+#customerOrderImages>a{display:flex;flex-direction:column;gap:5px;font-size:12px;text-decoration:none}
+#customerOrderImages .admin-response-thumb{width:112px;height:112px}
+</style>
 </head>
 
 
@@ -8962,6 +8966,19 @@ function customerRequestRows(data){
   ];
 }
 
+// Display order references as photos; keep original metadata in saved notes.
+function orderDisplayNotes(notes){
+  return String(notes||'').replace(/^([ \t]*)Reference images?:\s*(.+)$/gmi,(_,indent,names)=>`${indent}Reference photos: ${names.split(/\s*\|\s*/).filter(Boolean).length} attached (shown above)`)
+    .replace(/; Product ID: [^;\n]*/g,'').replace(/; Photo ID: [^;\n]*/g,'').replace(/; Photo path: [^;\n]*/g,'');
+}
+function selectedOrderDesignHtml(data){
+  const match=String(data?.notes||'').match(/\[Our Creations\][^\n]*?; Photo path: ([^;\n]+)/);
+  const path=match?.[1]?.trim();
+  if(!path || path.split('/').some(x=>!x||x==='.'||x==='..') || /^https?:/i.test(path)) return '';
+  const url=WESHOP4U_SUPABASE_URL+'/storage/v1/object/public/weshop4u-creation-images/'+path.split('/').map(encodeURIComponent).join('/');
+  return `<div class="mt-3"><strong>Selected Design</strong><div class="admin-response-images mt-2"><a href="${escapeHtml(url)}" target="_blank" rel="noopener"><img class="admin-response-thumb" src="${escapeHtml(url)}" alt="Selected product design"></a></div></div>`;
+}
+
 async function renderCustomerLinkedRequest(data){
   const savedPincode=String(data?.pincode ?? data?.pin_code ?? data?.postal_code ?? data?.postcode ?? '').trim();
   const savedDistrict=data?.city ?? data?.district ?? data?.District ?? '';
@@ -8997,8 +9014,9 @@ async function renderCustomerLinkedRequest(data){
       <p class="text-muted">Request ID: <span class="request-id-pill">${escapeHtml(data.requestId)}</span></p>
       ${orderStatusHtml(data.status)}
       ${manageStatusHtml}
-      <table>${customerRequestRows(data).map(([k,v])=>`<tr><th>${escapeHtml(k)}</th><td>${escapeHtml(v||'—')}</td></tr>`).join('')}</table>
-      ${hasImages?`<div class="mt-3"><strong>Inspiration Images</strong><div class="admin-response-images mt-2 order-images-lazy" id="customerOrderImages"><span class="loading-soft">Loading images…</span></div></div>`:''}
+      ${selectedOrderDesignHtml(data)}
+      ${hasImages?`<div class="mt-3"><strong>Attached Reference Photos</strong><div class="admin-response-images mt-2 order-images-lazy" id="customerOrderImages" aria-live="polite"><span class="loading-soft">Loading photos…</span></div></div>`:''}
+      <table>${customerRequestRows({...data,notes:orderDisplayNotes(data.notes)}).map(([k,v])=>`<tr><th>${escapeHtml(k)}</th><td>${escapeHtml(v||'—')}</td></tr>`).join('')}</table>
       <div class="customer-request-actions">
         <button type="button" class="btn-wine-outline" id="customerDownloadLinked">Download Order</button>
         <button type="button" class="btn-wine-outline" id="customerBackToOptions">← Back to Home</button>
@@ -9088,17 +9106,19 @@ async function renderCustomerLinkedRequest(data){
           data._customerViewToken || ''
         );
         const urlByPath=new Map(results.map(item=>[item.path,item.url]));
-        const links=imageMeta.map(img=>{
+        const links=imageMeta.map((img,index)=>{
           const url=urlByPath.get(img.path);
-          return url?`<a href="${escapeHtml(url)}" target="_blank" rel="noopener"><img class="admin-response-thumb" loading="lazy" decoding="async" src="${escapeHtml(url)}" alt="${escapeHtml(img.name)}"></a>`:'';
+          return url?`<a href="${escapeHtml(url)}" target="_blank" rel="noopener"><img class="admin-response-thumb" loading="lazy" decoding="async" src="${escapeHtml(url)}" alt="Reference photo ${index+1}"><span>Photo ${index+1} · Open full size</span></a>`:'';
         });
         if(document.body.contains(box)){
-          box.innerHTML=links.filter(Boolean).join('')||'<span class="admin-response-no-images">Images unavailable</span>';
+          box.innerHTML=links.filter(Boolean).join('')||'<span class="admin-response-no-images">Photos could not load. </span><button type="button" class="btn-wine-outline" data-retry-order-photos>Retry photos</button>';
+          box.querySelector('[data-retry-order-photos]')?.addEventListener('click',loadCustomerOrderImages);
         }
       }catch(error){
         console.warn('Customer order images could not be loaded',error);
         if(document.body.contains(box)){
-          box.innerHTML='<span class="admin-response-no-images">Images unavailable</span>';
+          box.innerHTML='<span class="admin-response-no-images">Photos could not load. </span><button type="button" class="btn-wine-outline" data-retry-order-photos>Retry photos</button>';
+          box.querySelector('[data-retry-order-photos]')?.addEventListener('click',loadCustomerOrderImages);
         }
       }
     };
@@ -9673,7 +9693,7 @@ async function renderAdminResponses(){
       return !!path && String(path).startsWith(prefix);
     });
     if(!box||!images.length){
-      if(box) box.innerHTML='<span class="admin-response-no-images">No images</span>';
+      if(box) box.innerHTML=selectedOrderDesignHtml(r)||'<span class="admin-response-no-images">No images</span>';
       return;
     }
     box.dataset.imageRequest=requestId;
@@ -9684,7 +9704,7 @@ async function renderAdminResponses(){
     })).then(imageHtml=>{
       if(!document.body.contains(box)) return;
       if(String(box.dataset.imageRequest||'').trim().toUpperCase()!==requestId) return;
-      box.innerHTML=imageHtml.filter(Boolean).join('')||'<span class="admin-response-no-images">Unavailable</span>';
+      box.innerHTML=selectedOrderDesignHtml(r)+(imageHtml.filter(Boolean).join('')||'<span class="admin-response-no-images">Photos unavailable. Refresh to retry.</span>');
     });
   });
 
