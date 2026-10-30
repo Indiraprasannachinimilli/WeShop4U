@@ -56,6 +56,7 @@
  <div class="card no-print"><h2>Payment Summary</h2><div class="summary"><div class="metric"><small>Total Charged</small><strong id="chargedView">₹0.00</strong></div><div class="metric paid"><small>Total Paid</small><strong id="paidView">₹0.00</strong></div><div class="metric due"><small>Amount Due</small><strong id="dueView">₹0.00</strong></div></div><div class="grid two" style="margin-top:12px"><div><label>Total Amount Charged (from items)</label><input id="totalCharged" type="number" min="0" step="0.01" readonly></div><div><label>Finance / Delivery Notes</label><textarea id="financeNotes"></textarea></div></div><button class="btn no-print" id="saveFinance" style="margin-top:10px">Save Finance Details</button><div class="msg" id="saveMsg"></div></div>
 <div class="card no-print"><h2>Payments</h2><div class="grid no-print"><div><label>Amount</label><input id="payAmount" type="number" min="0.01" step="0.01"></div><div><label>Payment Type</label><select id="payType"><option value="advance">Advance</option><option value="payment">Payment</option><option value="balance">Balance</option><option value="refund">Refund</option></select></div><div><label>Method</label><select id="payMethod"><option value="UPI">UPI</option><option value="Cash">Cash</option><option value="Bank Transfer">Bank Transfer</option><option value="Card">Card</option><option value="Other">Other</option></select></div><div><label>Transaction Reference</label><input id="payRef"></div><div><label>Payment Date</label><input id="payDate" type="datetime-local"></div><div><label>Notes</label><input id="payNotes"></div></div><button class="btn no-print" id="addPayment" style="margin-top:10px">+ Add Payment</button><div class="msg" id="payMsg"></div><div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Date</th><th>Type</th><th>Method</th><th>Reference</th><th>Amount</th></tr></thead><tbody id="paymentsBody"></tbody></table></div></div>
 <div class="card" id="documentCard"><h2>Customer Bill / Invoice</h2><div class="row no-print doc-actions" style="margin-bottom:12px"><button class="btn alt" id="showBill" type="button">Customer Bill</button><button class="btn" id="showInvoice" type="button">Final Invoice</button><button class="btn alt" id="printReceipt" type="button">Print / Save PDF</button><button class="btn alt" id="shareWhatsApp" type="button">Share Invoice Image</button><button class="btn alt" id="downloadInvoiceImage" type="button">Download Image</button><button class="btn alt" id="copyBill" type="button">Copy Bill Details</button></div><div id="receipt"></div><div class="msg no-print" id="docMsg"></div></div></div>
+<div class="card no-print" id="manualReviewCard"><h2>✍️ Add / Edit Customer Review</h2><div class="msg">For genuine customer feedback shared with WeShop4U. Obtain permission before publishing a name, words or photos.</div><div class="grid two" style="margin-top:12px"><div><label>Customer name</label><input id="manualReviewName" maxlength="100" placeholder="Customer name"></div><div><label>Rating</label><select id="manualReviewRating"><option value="5">★★★★★ (5)</option><option value="4">★★★★☆ (4)</option><option value="3">★★★☆☆ (3)</option><option value="2">★★☆☆☆ (2)</option><option value="1">★☆☆☆☆ (1)</option></select></div><div><label>Product / Event (optional)</label><input id="manualReviewEvent" maxlength="120" placeholder="e.g. Custom T-shirt"></div><div><label>Order ID (optional, must be an existing order)</label><input id="manualReviewOrder" maxlength="60" placeholder="Leave blank if no order"></div></div><div style="margin-top:10px"><label>Review</label><textarea id="manualReviewText" maxlength="1000" placeholder="Customer's actual feedback"></textarea></div><div style="margin-top:10px"><label>Photos (up to 5, optional)</label><input id="manualReviewPhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple><div class="msg" id="manualReviewExisting"></div></div><label style="margin-top:10px"><input id="manualReviewConsent" type="checkbox" style="width:auto;min-height:0;margin-right:6px">Customer gave permission to publish this feedback and any photos</label><div class="row" style="margin-top:12px"><button class="btn alt" id="manualReviewSave" type="button">Save for Approval</button><button class="btn" id="manualReviewPublish" type="button">Save &amp; Publish</button><button class="btn alt hidden" id="manualReviewCancel" type="button">Cancel Editing</button></div><div class="msg" id="manualReviewMsg" role="status"></div></div>
 <div class="card no-print" id="reviewsCard">
 <div class="review-section-head"><h2 style="margin:0">Reviews Awaiting Approval</h2><span class="review-count" id="pendingReviewCount">0</span></div>
 <div class="msg" style="margin:0 0 10px">These reviews are not visible in Happy Clients until approved.</div>
@@ -593,8 +594,8 @@ function reviewMarkup(r,approved){
       <div class="review-date">${dateLabel}: ${dateValue?esc(new Date(dateValue).toLocaleString()):'—'}</div>
     </div>
     <div class="review-actions">${approved
-      ? `<button class="btn disable" data-disable="${r.id}">Disable</button><button class="btn danger" data-delete="${r.id}">Delete</button>`
-      : `<button class="btn" data-approve="${r.id}">Approve</button><button class="btn danger" data-delete="${r.id}">Delete</button>`}
+      ? `<button class="btn alt" data-edit="${r.id}">Edit</button><button class="btn disable" data-disable="${r.id}">Disable</button><button class="btn danger" data-delete="${r.id}">Delete</button>`
+      : `<button class="btn alt" data-edit="${r.id}">Edit</button><button class="btn" data-approve="${r.id}">Approve</button><button class="btn danger" data-delete="${r.id}">Delete</button>`}
     </div>
   </div>`;
 }
@@ -608,6 +609,7 @@ async function loadReviews(){
     box.innerHTML=rows.length?rows.map(r=>reviewMarkup(r,false)).join(''):'No reviews awaiting approval.';
     box.querySelectorAll('[data-approve]').forEach(b=>b.onclick=()=>approveReview(b.dataset.approve));
     box.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>deleteReview(b.dataset.delete));
+    box.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editManualReview(b.dataset.edit));
     $('reviewMsg').textContent='';
   }catch(e){$('reviewMsg').textContent='Reviews unavailable: '+(e?.message||String(e));}
 }
@@ -625,6 +627,7 @@ async function loadApprovedReviews(){
     box.innerHTML=rows.length?rows.map(r=>reviewMarkup(r,true)).join(''):'No approved reviews.';
     box.querySelectorAll('[data-disable]').forEach(b=>b.onclick=()=>disableReview(b.dataset.disable));
     box.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>deleteReview(b.dataset.delete));
+    box.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editManualReview(b.dataset.edit));
     $('approvedReviewMsg').textContent='';
   }catch(e){$('approvedReviewMsg').textContent='Approved reviews unavailable: '+(e?.message||String(e));}
 }
@@ -725,6 +728,51 @@ async function deleteReview(id){
   const {error}=await sb.from('customer_reviews').delete().eq('id',id);
   if(error)alert(error.message);else await refreshReviews();
 }
+
+let manualReviewEditingId=null,manualReviewPreviousPaths=[];
+function resetManualReview(){manualReviewEditingId=null;manualReviewPreviousPaths=[];['manualReviewName','manualReviewEvent','manualReviewOrder','manualReviewText','manualReviewPhotos'].forEach(id=>$(id).value='');$('manualReviewRating').value='5';$('manualReviewConsent').checked=false;$('manualReviewExisting').textContent='';$('manualReviewCancel').classList.add('hidden');$('manualReviewSave').textContent='Save for Approval';$('manualReviewPublish').textContent='Save & Publish';}
+$('manualReviewCancel').onclick=()=>{resetManualReview();$('manualReviewMsg').textContent='Editing cancelled.'};
+async function editManualReview(id){
+ const {data:r,error}=await sb.from('customer_reviews').select('*').eq('id',Number(id)).maybeSingle();
+ if(error||!r){alert('Could not load review: '+(error?.message||'Not found'));return;}
+ if(!r.admin_added){alert('Editing is available only for admin-added reviews. Customer-submitted reviews stay unchanged.');return;}
+ manualReviewEditingId=r.id;manualReviewPreviousPaths=[...(Array.isArray(r.image_paths)?r.image_paths:[]),r.image_path].filter(Boolean);
+ $('manualReviewName').value=r.customer_display_name||'';$('manualReviewEvent').value=r.event_type||'';$('manualReviewOrder').value=r.order_id||'';$('manualReviewRating').value=String(r.rating);$('manualReviewText').value=r.review_text||'';$('manualReviewConsent').checked=!!r.public_consent;$('manualReviewPhotos').value='';
+ $('manualReviewExisting').textContent=manualReviewPreviousPaths.length+' existing photo(s). Leave photo picker empty to keep them; selecting new photos replaces them.';
+ $('manualReviewCancel').classList.remove('hidden');$('manualReviewSave').textContent='Update & Unpublish';$('manualReviewPublish').textContent='Update & Publish';$('manualReviewMsg').textContent='Editing admin review #'+r.id;
+ $('manualReviewCard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function saveManualReview(publish){
+ const msg=$('manualReviewMsg'),name=$('manualReviewName').value.trim(),reviewText=$('manualReviewText').value.trim(),consent=$('manualReviewConsent').checked,orderId=$('manualReviewOrder').value.trim().toUpperCase(),files=[...$('manualReviewPhotos').files];
+ if(!name||reviewText.length<2||reviewText.length>1000){msg.textContent='Enter customer name and review (2–1000 characters).';return;}
+ if(!consent){msg.textContent='Please confirm customer permission before saving a review for public display.';return;}
+ if(files.length>5||files.some(f=>f.size>5*1024*1024||!['image/jpeg','image/png','image/webp'].includes(f.type))){msg.textContent='Choose up to 5 JPG, PNG or WEBP photos, each under 5 MB.';return;}
+ for(const id of ['manualReviewSave','manualReviewPublish'])$(id).disabled=true;
+ let newPaths=[];
+ try{
+   msg.textContent='Saving review…';
+   if(orderId){const {data,error}=await sb.from('customer_requests').select('request_id').eq('request_id',orderId).maybeSingle();if(error)throw error;if(!data)throw Error('Order ID does not exist. Leave it blank or use an existing order.');}
+   for(const f of files){const ext=f.type==='image/png'?'png':f.type==='image/webp'?'webp':'jpg';const path='admin-reviews/'+crypto.randomUUID()+'.'+ext;const {error}=await sb.storage.from('weshop4u-review-images').upload(path,f,{contentType:f.type});if(error)throw error;newPaths.push(path);}
+   const paths=files.length?newPaths:manualReviewPreviousPaths;
+   const payload={customer_display_name:name,rating:Number($('manualReviewRating').value),review_text:reviewText,event_type:$('manualReviewEvent').value.trim()||null,order_id:orderId||null,public_consent:consent,approved:publish,approved_at:publish?new Date().toISOString():null,image_path:paths[0]||null,image_paths:paths};
+   let result;
+   if(manualReviewEditingId){result=await sb.from('customer_reviews').update(payload).eq('id',manualReviewEditingId).eq('admin_added',true).select('id').single();}
+   else{result=await sb.from('customer_reviews').insert({...payload,admin_added:true}).select('id').single();}
+   if(result.error)throw result.error;
+   const savedId=result.data.id;
+   if(publish){try{await syncReviewPublicImages(savedId,'publish')}catch(e){console.warn(e);msg.textContent='Review saved but photo publication needs attention: '+e.message;}}
+   else if(manualReviewEditingId){try{await syncReviewPublicImages(savedId,'unpublish')}catch(e){console.warn(e)}}
+   if(files.length&&manualReviewPreviousPaths.length){
+     await sb.storage.from('weshop4u-review-images').remove(manualReviewPreviousPaths);
+     await sb.storage.from('weshop4u-public-review-images').remove(manualReviewPreviousPaths);
+   }
+   resetManualReview();await refreshReviews();if(!msg.textContent.includes('needs attention'))msg.textContent=publish?'Review published successfully.':'Review saved for approval.';
+ }catch(e){msg.textContent='Could not save review: '+(e?.message||String(e));if(newPaths.length)await sb.storage.from('weshop4u-review-images').remove(newPaths);}
+ finally{for(const id of ['manualReviewSave','manualReviewPublish'])$(id).disabled=false;}
+}
+$('manualReviewSave').onclick=()=>saveManualReview(false);
+$('manualReviewPublish').onclick=()=>saveManualReview(true);
+
 const q=new URLSearchParams(location.search).get('orderId');if(q){$('orderId').value=q;loadOrder()}
 </script><script>
 (function(){
