@@ -88,7 +88,7 @@ h2{font-size:1.05rem;margin:0 0 12px}.login{max-width:650px;margin:32px auto}.lo
 .expense-form{display:grid;grid-template-columns:150px 220px 140px 1fr 150px auto;gap:9px;align-items:end}
 table{width:100%;border-collapse:collapse;font-size:.86rem}th,td{padding:9px;border-bottom:1px solid #eee4d5;text-align:left}th{background:#fff9ec}
 .msg{font-size:.86rem;margin-top:8px}.good{color:var(--good)}.bad{color:var(--bad)}.muted{color:var(--muted)}
-.badge{display:inline-block;padding:3px 7px;border-radius:999px;background:#fff4d7;font-size:.72rem}
+.status-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}.status-tile{border:1px solid #d7cbb8;border-radius:10px;padding:12px;text-align:left;background:#fffaf0;color:#292d31}.status-tile.active{border:2px solid #7b2639;background:#fce9ee}.status-tile strong{display:block;font-size:1.4rem}.profit{color:#207a4b;font-weight:700}.loss{color:#b42318;font-weight:700}.neutral{color:#6b7280}.action-link{padding:5px 8px;font-size:.78rem;margin:2px}.badge{display:inline-block;padding:3px 7px;border-radius:999px;background:#fff4d7;font-size:.72rem}
 [hidden]{display:none!important}
 @media(max-width:1000px){.stats{grid-template-columns:repeat(3,1fr)}.expense-form{grid-template-columns:1fr 1fr 1fr}.charts{grid-template-columns:1fr}}
 @media(max-width:650px){.stats{grid-template-columns:1fr 1fr}.login-grid,.expense-form{grid-template-columns:1fr}.wrap{padding:10px}.chart-card{min-height:330px}}
@@ -112,7 +112,7 @@ table{width:100%;border-collapse:collapse;font-size:.86rem}th,td{padding:9px;bor
 &lt;div id=&quot;app&quot; hidden&gt;
   &lt;section class=&quot;card&quot;&gt;
     &lt;div class=&quot;toolbar&quot;&gt;
-      &lt;div class=&quot;field&quot;&gt;&lt;label&gt;Year&lt;/label&gt;&lt;select id=&quot;yearSelect&quot;&gt;&lt;/select&gt;&lt;/div&gt;
+      &lt;div class=&quot;field&quot;&gt;&lt;label&gt;Period&lt;/label&gt;&lt;select id=&quot;periodSelect&quot;&gt;&lt;option value=&quot;all&quot;&gt;All Time&lt;/option&gt;&lt;option value=&quot;year&quot;&gt;Selected Year&lt;/option&gt;&lt;option value=&quot;month&quot;&gt;Selected Month&lt;/option&gt;&lt;option value=&quot;custom&quot;&gt;Custom Range&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;&lt;div class=&quot;field&quot;&gt;&lt;label&gt;Year&lt;/label&gt;&lt;select id=&quot;yearSelect&quot;&gt;&lt;/select&gt;&lt;/div&gt;&lt;div class=&quot;field&quot; id=&quot;monthField&quot; hidden&gt;&lt;label&gt;Month&lt;/label&gt;&lt;select id=&quot;monthSelect&quot;&gt;&lt;option value=&quot;0&quot;&gt;January&lt;/option&gt;&lt;option value=&quot;1&quot;&gt;February&lt;/option&gt;&lt;option value=&quot;2&quot;&gt;March&lt;/option&gt;&lt;option value=&quot;3&quot;&gt;April&lt;/option&gt;&lt;option value=&quot;4&quot;&gt;May&lt;/option&gt;&lt;option value=&quot;5&quot;&gt;June&lt;/option&gt;&lt;option value=&quot;6&quot;&gt;July&lt;/option&gt;&lt;option value=&quot;7&quot;&gt;August&lt;/option&gt;&lt;option value=&quot;8&quot;&gt;September&lt;/option&gt;&lt;option value=&quot;9&quot;&gt;October&lt;/option&gt;&lt;option value=&quot;10&quot;&gt;November&lt;/option&gt;&lt;option value=&quot;11&quot;&gt;December&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;&lt;div class=&quot;field&quot; id=&quot;fromField&quot; hidden&gt;&lt;label&gt;From&lt;/label&gt;&lt;input type=&quot;date&quot; id=&quot;dateFrom&quot;&gt;&lt;/div&gt;&lt;div class=&quot;field&quot; id=&quot;toField&quot; hidden&gt;&lt;label&gt;To&lt;/label&gt;&lt;input type=&quot;date&quot; id=&quot;dateTo&quot;&gt;&lt;/div&gt;
       &lt;button id=&quot;refreshBtn&quot; class=&quot;secondary&quot;&gt;Refresh&lt;/button&gt;
       &lt;button id=&quot;logoutBtn&quot; class=&quot;secondary&quot;&gt;Logout&lt;/button&gt;
       &lt;span class=&quot;muted&quot; id=&quot;updatedAt&quot;&gt;&lt;/span&gt;
@@ -124,11 +124,13 @@ table{width:100%;border-collapse:collapse;font-size:.86rem}th,td{padding:9px;bor
     &lt;div class=&quot;card stat&quot;&gt;&lt;span&gt;Payments Received&lt;/span&gt;&lt;strong id=&quot;totalSales&quot;&gt;₹0&lt;/strong&gt;&lt;/div&gt;
     &lt;div class=&quot;card stat&quot;&gt;&lt;span&gt;Outstanding&lt;/span&gt;&lt;strong id=&quot;totalOutstanding&quot;&gt;₹0&lt;/strong&gt;&lt;/div&gt;
     &lt;div class=&quot;card stat&quot;&gt;&lt;span&gt;Total Expenses&lt;/span&gt;&lt;strong id=&quot;totalExpenses&quot;&gt;₹0&lt;/strong&gt;&lt;/div&gt;
-    &lt;div class=&quot;card stat&quot;&gt;&lt;span&gt;Net Profit / Loss&lt;/span&gt;&lt;strong id=&quot;netProfit&quot;&gt;₹0&lt;/strong&gt;&lt;/div&gt;
+    &lt;div class=&quot;card stat&quot;&gt;&lt;span id=&quot;netProfitLabel&quot;&gt;Cash Surplus / Deficit&lt;/span&gt;&lt;strong id=&quot;netProfit&quot;&gt;₹0&lt;/strong&gt;&lt;/div&gt;
     &lt;div class=&quot;card stat&quot;&gt;&lt;span&gt;Total Orders&lt;/span&gt;&lt;strong id=&quot;totalOrders&quot;&gt;0&lt;/strong&gt;&lt;/div&gt;
     &lt;div class=&quot;card stat&quot;&gt;&lt;span&gt;Customers&lt;/span&gt;&lt;strong id=&quot;totalCustomers&quot;&gt;0&lt;/strong&gt;&lt;/div&gt;
   &lt;/section&gt;
 
+  &lt;section class=&quot;card&quot; id=&quot;orderInsights&quot;&gt;&lt;h2&gt;📦 Order Status — tap to filter&lt;/h2&gt;&lt;div id=&quot;statusCards&quot; class=&quot;status-cards&quot;&gt;&lt;/div&gt;&lt;div class=&quot;toolbar&quot; style=&quot;margin:12px 0&quot;&gt;&lt;div class=&quot;field&quot;&gt;&lt;label&gt;Search order or customer&lt;/label&gt;&lt;input id=&quot;orderSearch&quot; placeholder=&quot;Order ID or customer name&quot;&gt;&lt;/div&gt;&lt;div class=&quot;field&quot;&gt;&lt;label&gt;Exact status&lt;/label&gt;&lt;select id=&quot;exactStatus&quot;&gt;&lt;option value=&quot;&quot;&gt;All statuses&lt;/option&gt;&lt;option value=&quot;submitted&quot;&gt;Submitted&lt;/option&gt;&lt;option value=&quot;confirmed&quot;&gt;Confirmed&lt;/option&gt;&lt;option value=&quot;out_for_shopping&quot;&gt;Out for Shopping&lt;/option&gt;&lt;option value=&quot;purchased&quot;&gt;Purchased&lt;/option&gt;&lt;option value=&quot;out_for_delivery&quot;&gt;Out for Delivery&lt;/option&gt;&lt;option value=&quot;delivered&quot;&gt;Delivered&lt;/option&gt;&lt;option value=&quot;closed&quot;&gt;Completed&lt;/option&gt;&lt;option value=&quot;completed&quot;&gt;Completed (alternate)&lt;/option&gt;&lt;option value=&quot;cancelled&quot;&gt;Cancelled&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;&lt;/div&gt;&lt;p class=&quot;muted&quot; id=&quot;orderSummaryNote&quot;&gt;&lt;/p&gt;&lt;div style=&quot;overflow:auto&quot;&gt;&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Order / Date&lt;/th&gt;&lt;th&gt;Customer&lt;/th&gt;&lt;th&gt;Status&lt;/th&gt;&lt;th&gt;Charged&lt;/th&gt;&lt;th&gt;Received&lt;/th&gt;&lt;th&gt;Expenses&lt;/th&gt;&lt;th&gt;Order Profit / Loss&lt;/th&gt;&lt;th&gt;Actions&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;orderReportRows&quot;&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;p class=&quot;muted&quot; style=&quot;font-size:.78rem&quot;&gt;Order profit is based on customer charges less expenses linked to that order. Unlinked business expenses are excluded. Missing charges or costs are flagged rather than treated as confirmed zero profit.&lt;/p&gt;&lt;/section&gt;
+  &lt;section class=&quot;card&quot;&gt;&lt;h2&gt;📅 Period Summary&lt;/h2&gt;&lt;div class=&quot;grid stats&quot; id=&quot;periodExtraStats&quot;&gt;&lt;/div&gt;&lt;p class=&quot;muted&quot; id=&quot;periodMethodNote&quot; style=&quot;font-size:.8rem&quot;&gt;&lt;/p&gt;&lt;/section&gt;
   &lt;section class=&quot;charts&quot;&gt;
     &lt;div class=&quot;card chart-card&quot;&gt;&lt;h2&gt;Monthly Payments Received&lt;/h2&gt;&lt;div class=&quot;chart-wrap&quot;&gt;&lt;canvas id=&quot;salesChart&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;&lt;/div&gt;
     &lt;div class=&quot;card chart-card&quot;&gt;&lt;h2&gt;Payments vs Expenses vs Profit/Loss&lt;/h2&gt;&lt;div class=&quot;chart-wrap&quot;&gt;&lt;canvas id=&quot;profitChart&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;&lt;/div&gt;
@@ -211,6 +213,15 @@ document.getElementById(&#x27;loginBtn&#x27;).onclick=async()=&gt;{
 document.getElementById(&#x27;logoutBtn&#x27;).onclick=async()=&gt;{await sb.auth.signOut();location.reload()};
 document.getElementById(&#x27;refreshBtn&#x27;).onclick=loadAll;
 document.getElementById(&#x27;yearSelect&#x27;).onchange=loadAll;
+let cachedData=null,activeStatus=&#x27;all&#x27;;
+const periodSelect=document.getElementById(&#x27;periodSelect&#x27;);
+function updatePeriodFields(){monthField.hidden=periodSelect.value!==&#x27;month&#x27;;fromField.hidden=toField.hidden=periodSelect.value!==&#x27;custom&#x27;;yearSelect.parentElement.hidden=![&#x27;month&#x27;,&#x27;year&#x27;].includes(periodSelect.value)}
+periodSelect.onchange=()=&gt;{updatePeriodFields();loadAll()};
+monthSelect.value=String(new Date().getMonth());
+monthSelect.onchange=loadAll;dateFrom.onchange=loadAll;dateTo.onchange=loadAll;
+orderSearch.oninput=()=&gt;cachedData&amp;&amp;renderOrderReport(cachedData);
+exactStatus.onchange=()=&gt;cachedData&amp;&amp;renderOrderReport(cachedData);
+updatePeriodFields();
 
 async function fetchData(){
   const [ordersRes,financeRes,paymentsRes,expensesRes]=await Promise.all([
@@ -243,7 +254,7 @@ async function loadAll(){
   try{
     const data=await fetchData();
     if(!yearSelect.options.length) populateYears(data.orders,data.expenses);
-    render(data.orders,data.finance,data.payments,data.expenses,Number(yearSelect.value));
+    cachedData=data;render(data.orders,data.finance,data.payments,data.expenses,Number(yearSelect.value));renderOrderReport(data);
     updatedAt.textContent=&#x27;Updated &#x27;+new Date().toLocaleString();
   }catch(e){document.getElementById(&#x27;updatedAt&#x27;).textContent=&#x27;Analytics load failed: &#x27;+e.message;console.error(e)}
 }
@@ -301,7 +312,7 @@ function render(orders,finance,payments,expenses,year){
   totalSales.textContent=money(sales.reduce((a,b)=&gt;a+b,0));
   totalOutstanding.textContent=money(outstandingTotal);
   totalExpenses.textContent=money(costs.reduce((a,b)=&gt;a+b,0));
-  const np=profit.reduce((a,b)=&gt;a+b,0);netProfit.textContent=money(np);netProfit.className=np&gt;=0?&#x27;good&#x27;:&#x27;bad&#x27;;
+  const np=profit.reduce((a,b)=&gt;a+b,0);netProfit.textContent=money(np);netProfit.className=np&gt;=0?&#x27;good&#x27;:&#x27;bad&#x27;;netProfitLabel.textContent=np&gt;0?&#x27;Cash Surplus&#x27;:np&lt;0?&#x27;Cash Deficit&#x27;:&#x27;Cash Break-even&#x27;;
   totalOrders.textContent=requests.reduce((a,b)=&gt;a+b,0);
   totalCustomers.textContent=new Set(orders.filter(r=&gt;yearOf(r.submitted_at)===year).map(customerKey).filter(Boolean)).size;
 
@@ -342,6 +353,50 @@ function render(orders,finance,payments,expenses,year){
   });
 }
 
+
+// Reporting is based on order creation date; cash totals are based on payment and expense dates.
+function inPeriod(value){if(!value)return false;const d=String(value).slice(0,10);if(!/^\d{4}-\d{2}-\d{2}$/.test(d))return false;
+ const p=periodSelect.value,y=Number(yearSelect.value),month=Number(monthSelect.value);
+ if(p===&#x27;all&#x27;)return true;if(p===&#x27;year&#x27;)return Number(d.slice(0,4))===y;
+ if(p===&#x27;month&#x27;)return Number(d.slice(0,4))===y&amp;&amp;Number(d.slice(5,7))===month+1;
+ return (!dateFrom.value||d&gt;=dateFrom.value)&amp;&amp;(!dateTo.value||d&lt;=dateTo.value);
+}
+function statusGroup(s){s=normalizeStatus(s);if(s===&#x27;cancelled&#x27;)return &#x27;cancelled&#x27;;if([&#x27;closed&#x27;,&#x27;completed&#x27;,&#x27;delivered&#x27;].includes(s))return &#x27;completed&#x27;;if(s===&#x27;out_for_delivery&#x27;)return &#x27;delivery&#x27;;if(s===&#x27;submitted&#x27;)return &#x27;pending&#x27;;return &#x27;progress&#x27;}
+function reportStatusName(s){return ({submitted:&#x27;Submitted&#x27;,confirmed:&#x27;Confirmed&#x27;,out_for_shopping:&#x27;Out for Shopping&#x27;,purchased:&#x27;Purchased&#x27;,out_for_delivery:&#x27;Out for Delivery&#x27;,delivered:&#x27;Delivered&#x27;,closed:&#x27;Completed&#x27;,completed:&#x27;Completed&#x27;,cancelled:&#x27;Cancelled&#x27;})[normalizeStatus(s)]||String(s||&#x27;Unknown&#x27;).replaceAll(&#x27;_&#x27;,&#x27; &#x27;)}
+function orderMaps(data){const finance=new Map(data.finance.map(x=&gt;[x.order_id,x]));const payments=new Map(),expenses=new Map(),expenseCount=new Map();
+ data.payments.forEach(p=&gt;payments.set(p.order_id,(payments.get(p.order_id)||0)+(normalizeStatus(p.payment_type)===&#x27;refund&#x27;?-1:1)*Number(p.amount||0)));
+ data.expenses.forEach(e=&gt;{if(!e.order_id)return;const id=String(e.order_id).trim().toUpperCase();expenses.set(id,(expenses.get(id)||0)+Number(e.amount||0));expenseCount.set(id,(expenseCount.get(id)||0)+1)});
+ return {finance,payments,expenses,expenseCount};}
+function renderOrderReport(data){const maps=orderMaps(data),orders=data.orders.filter(r=&gt;inPeriod(r.submitted_at));
+ const counts={all:orders.length,pending:0,progress:0,delivery:0,completed:0,cancelled:0};orders.forEach(r=&gt;counts[statusGroup(r.status)]++);
+ const labels=[[&#x27;all&#x27;,&#x27;📦 All&#x27;],[&#x27;pending&#x27;,&#x27;🟡 Pending&#x27;],[&#x27;progress&#x27;,&#x27;🔵 In Progress&#x27;],[&#x27;delivery&#x27;,&#x27;🚚 Out for Delivery&#x27;],[&#x27;completed&#x27;,&#x27;🟢 Delivered / Completed&#x27;],[&#x27;cancelled&#x27;,&#x27;🔴 Cancelled&#x27;]];
+ statusCards.innerHTML=labels.map(([key,label])=&gt;`&lt;button type=&quot;button&quot; class=&quot;status-tile ${activeStatus===key?&#x27;active&#x27;:&#x27;&#x27;}&quot; data-status=&quot;${key}&quot;&gt;${label}&lt;strong&gt;${counts[key]}&lt;/strong&gt;&lt;/button&gt;`).join(&#x27;&#x27;);
+ statusCards.querySelectorAll(&#x27;[data-status]&#x27;).forEach(b=&gt;b.onclick=()=&gt;{activeStatus=b.dataset.status;renderOrderReport(data)});
+ const query=orderSearch.value.trim().toLowerCase();const exact=exactStatus.value;
+ const shown=orders.filter(r=&gt;(activeStatus===&#x27;all&#x27;||statusGroup(r.status)===activeStatus)&amp;&amp;(!exact||normalizeStatus(r.status)===exact)&amp;&amp;(!query||String(r.request_id).toLowerCase().includes(query)||String(r.name||&#x27;&#x27;).toLowerCase().includes(query)));
+ const moneySafe=n=&gt;money(Number(n||0));let totalCharged=0,totalReceived=0,totalDirect=0,known=0;
+ orderReportRows.innerHTML=shown.map(r=&gt;{const id=r.request_id,f=maps.finance.get(id),charged=Number(f?.total_amount_charged||0),received=maps.payments.get(id)||0,spent=maps.expenses.get(id)||0,costRecorded=maps.expenseCount.has(id),chargeRecorded=!!f;totalCharged+=charged;totalReceived+=received;totalDirect+=spent;
+ const p=charged-spent;const ready=costRecorded&amp;&amp;chargeRecorded;if(ready)known++;
+ const pnl=ready?`&lt;span class=&quot;${p&gt;0?&#x27;profit&#x27;:p&lt;0?&#x27;loss&#x27;:&#x27;neutral&#x27;}&quot;&gt;${p&gt;0?&#x27;🟢 PROFIT&#x27;:p&lt;0?&#x27;🔴 LOSS&#x27;:&#x27;⚪ BREAK-EVEN&#x27;} ${moneySafe(Math.abs(p))}&lt;br&gt;&lt;small&gt;${charged&gt;0?(p/charged*100).toFixed(1)+&#x27;% margin&#x27;:&#x27;—&#x27;}&lt;/small&gt;&lt;/span&gt;`:`&lt;span class=&quot;neutral&quot;&gt;⚠️ ${!chargeRecorded?&#x27;No charges saved&#x27;:&#x27;Cost data missing&#x27;}&lt;/span&gt;`;
+ return `&lt;tr&gt;&lt;td&gt;&lt;b&gt;${escapeHtml(id)}&lt;/b&gt;&lt;br&gt;&lt;small&gt;${escapeHtml(String(r.submitted_at||&#x27;&#x27;).slice(0,10))}&lt;/small&gt;&lt;/td&gt;&lt;td&gt;${escapeHtml(r.name||&#x27;—&#x27;)}&lt;/td&gt;&lt;td&gt;&lt;span class=&quot;badge&quot;&gt;${escapeHtml(reportStatusName(r.status))}&lt;/span&gt;&lt;/td&gt;&lt;td&gt;${chargeRecorded?moneySafe(charged):&#x27;Not entered&#x27;}&lt;/td&gt;&lt;td&gt;${moneySafe(received)}&lt;/td&gt;&lt;td&gt;${costRecorded?moneySafe(spent):&#x27;Not entered&#x27;}&lt;/td&gt;&lt;td&gt;${pnl}&lt;/td&gt;&lt;td&gt;&lt;button class=&quot;secondary action-link&quot; data-open=&quot;${escapeHtml(id)}&quot;&gt;View / Edit&lt;/button&gt;&lt;button class=&quot;secondary action-link&quot; data-expense=&quot;${escapeHtml(id)}&quot;&gt;+ Expense&lt;/button&gt;&lt;/td&gt;&lt;/tr&gt;`}).join(&#x27;&#x27;)||&#x27;&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;muted&quot;&gt;No matching orders.&lt;/td&gt;&lt;/tr&gt;&#x27;;
+ orderReportRows.querySelectorAll(&#x27;[data-open]&#x27;).forEach(b=&gt;b.onclick=()=&gt;parent.postMessage({kind:&#x27;weshop4u-open-order&#x27;,orderId:b.dataset.open},location.origin));
+ orderReportRows.querySelectorAll(&#x27;[data-expense]&#x27;).forEach(b=&gt;b.onclick=()=&gt;parent.postMessage({kind:&#x27;weshop4u-add-expense&#x27;,orderId:b.dataset.expense},location.origin));
+ orderSummaryNote.textContent=`Showing ${shown.length} of ${orders.length} orders. ${known} shown orders have both charges and at least one recorded expense. Filters use order submission date.`;
+ const allCharged=orders.reduce((n,r)=&gt;n+Number(maps.finance.get(r.request_id)?.total_amount_charged||0),0);
+ const allReceived=data.payments.filter(p=&gt;inPeriod(p.payment_date)).reduce((n,p)=&gt;n+(normalizeStatus(p.payment_type)===&#x27;refund&#x27;?-1:1)*Number(p.amount||0),0);
+ const allExpenses=data.expenses.filter(e=&gt;inPeriod(e.expense_date)).reduce((n,e)=&gt;n+Number(e.amount||0),0);
+ const direct=data.expenses.filter(e=&gt;inPeriod(e.expense_date)&amp;&amp;e.order_id).reduce((n,e)=&gt;n+Number(e.amount||0),0);
+ const overhead=allExpenses-direct;
+ const periodCash=allReceived-allExpenses;
+ const cards=[[&#x27;Orders received&#x27;,orders.length],[&#x27;Order value (charges)&#x27;,moneySafe(allCharged)],[&#x27;Payments received&#x27;,moneySafe(allReceived)],[&#x27;Direct expenses (dated)&#x27;,moneySafe(direct)],[&#x27;Other business expenses&#x27;,moneySafe(overhead)],[&#x27;Total expenses&#x27;,moneySafe(allExpenses)],[&#x27;Cash &#x27;+(periodCash&gt;=0?&#x27;surplus&#x27;:&#x27;deficit&#x27;),moneySafe(Math.abs(periodCash))]];
+ periodExtraStats.innerHTML=cards.map(([label,value])=&gt;`&lt;div class=&quot;card stat&quot;&gt;&lt;span&gt;${label}&lt;/span&gt;&lt;strong&gt;${value}&lt;/strong&gt;&lt;/div&gt;`).join(&#x27;&#x27;);
+ periodMethodNote.textContent=&#x27;Orders and order value use submission date. Payments and expenses use transaction date. Cash surplus is not the same as accrual profit. Orders missing finance or cost entries cannot have a verified margin.&#x27;;
+ // Prevent annual-only charts and cards from being mistaken for all-time/monthly/custom reports.
+ const annual=periodSelect.value===&#x27;year&#x27;;document.querySelector(&#x27;.charts&#x27;).hidden=!annual;
+ document.querySelector(&#x27;.stats:not(#periodExtraStats)&#x27;).hidden=!annual;
+ document.getElementById(&#x27;orderInsights&#x27;).hidden=false;
+}
+
 function escapeHtml(v){return String(v??&#x27;&#x27;).replace(/[&amp;&lt;&gt;&quot;&#x27;]/g,c=&gt;({&#x27;&amp;&#x27;:&#x27;&amp;amp;&#x27;,&#x27;&lt;&#x27;:&#x27;&amp;lt;&#x27;,&#x27;&gt;&#x27;:&#x27;&amp;gt;&#x27;,&#x27;&quot;&#x27;:&#x27;&amp;quot;&#x27;,&quot;&#x27;&quot;:&#x27;&amp;#39;&#x27;}[c]))}
 
 document.getElementById(&#x27;saveExpenseBtn&#x27;).onclick=async()=&gt;{
@@ -363,7 +418,7 @@ window.deleteExpense=async id=&gt;{
   if(error){alert(error.message);return}await loadAll();
 };
 expenseDate.value=new Date().toISOString().slice(0,10);
-window.addEventListener(&#x27;message&#x27;,e=&gt;{if(e.source!==window.parent||!e.data)return;if(e.data.kind===&#x27;weshop4u-refresh&#x27;){if(!document.getElementById(&#x27;app&#x27;).hidden)loadAll();return;}if(e.data.kind!==&#x27;weshop4u-tab&#x27;)return;document.body.classList.toggle(&#x27;expenses-only&#x27;,e.data.tab===&#x27;expenses&#x27;);document.body.classList.toggle(&#x27;analytics-only&#x27;,e.data.tab===&#x27;analytics&#x27;);if(document.getElementById(&#x27;app&#x27;).hidden){ensureLoggedIn()}else{loadAll()};});
+window.addEventListener(&#x27;message&#x27;,e=&gt;{if(e.source!==window.parent||!e.data)return;if(e.data.kind===&#x27;weshop4u-prefill-expense&#x27;){expenseOrderId.value=e.data.orderId||&#x27;&#x27;;expenseOrderId.scrollIntoView({behavior:&#x27;smooth&#x27;,block:&#x27;center&#x27;});return;}if(e.data.kind===&#x27;weshop4u-refresh&#x27;){if(!document.getElementById(&#x27;app&#x27;).hidden)loadAll();return;}if(e.data.kind!==&#x27;weshop4u-tab&#x27;)return;document.body.classList.toggle(&#x27;expenses-only&#x27;,e.data.tab===&#x27;expenses&#x27;);document.body.classList.toggle(&#x27;analytics-only&#x27;,e.data.tab===&#x27;analytics&#x27;);if(document.getElementById(&#x27;app&#x27;).hidden){ensureLoggedIn()}else{loadAll()};});
 ensureLoggedIn().then(ok=&gt;{if(!ok){document.getElementById(&#x27;loginCard&#x27;).hidden=false;document.getElementById(&#x27;loginMsg&#x27;).textContent=&#x27;Please sign in to view analytics.&#x27;}});
 &lt;/script&gt;
 &lt;/body&gt;&lt;/html&gt;" loading="eager"></iframe></section></div></div>
@@ -789,4 +844,9 @@ function activate(tab){
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>activate(b.dataset.tab)));
 frame.addEventListener('load',()=>{const active=document.querySelector('[data-tab].active');if(active&&active.dataset.tab!=='orders')activate(active.dataset.tab)});
 })();
+</script><script>
+window.addEventListener('message',e=>{if(e.origin!==location.origin||e.source!==document.getElementById('analyticsFrame').contentWindow||!e.data)return;
+ if(e.data.kind==='weshop4u-open-order'){document.querySelector('[data-tab="orders"]').click();document.getElementById('orderId').value=e.data.orderId;document.getElementById('loadOrder').click();window.scrollTo({top:0,behavior:'smooth'});}
+ if(e.data.kind==='weshop4u-add-expense'){document.querySelector('[data-tab="expenses"]').click();document.getElementById('analyticsFrame').contentWindow.postMessage({kind:'weshop4u-prefill-expense',orderId:e.data.orderId},location.origin);window.scrollTo({top:0,behavior:'smooth'});}
+});
 </script></body></html>
