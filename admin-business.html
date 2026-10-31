@@ -312,7 +312,7 @@ function render(orders,finance,payments,expenses,year){
   totalSales.textContent=money(sales.reduce((a,b)=&gt;a+b,0));
   totalOutstanding.textContent=money(outstandingTotal);
   totalExpenses.textContent=money(costs.reduce((a,b)=&gt;a+b,0));
-  const np=profit.reduce((a,b)=&gt;a+b,0);netProfit.textContent=money(np);netProfit.className=np&gt;=0?&#x27;good&#x27;:&#x27;bad&#x27;;netProfitLabel.textContent=np&gt;0?&#x27;Cash Surplus&#x27;:np&lt;0?&#x27;Cash Deficit&#x27;:&#x27;Cash Break-even&#x27;;
+  const np=profit.reduce((a,b)=&gt;a+b,0);netProfit.textContent=money(np);netProfit.className=np&gt;=0?&#x27;good&#x27;:&#x27;bad&#x27;;netProfitLabel.textContent=np&gt;0?&#x27;Payments less expenses (positive)&#x27;:np&lt;0?&#x27;Payments less expenses (negative)&#x27;:&#x27;Payments equal expenses&#x27;;
   totalOrders.textContent=requests.reduce((a,b)=&gt;a+b,0);
   totalCustomers.textContent=new Set(orders.filter(r=&gt;yearOf(r.submitted_at)===year).map(customerKey).filter(Boolean)).size;
 
@@ -367,6 +367,10 @@ function orderMaps(data){const finance=new Map(data.finance.map(x=&gt;[x.order_i
  data.payments.forEach(p=&gt;payments.set(p.order_id,(payments.get(p.order_id)||0)+(normalizeStatus(p.payment_type)===&#x27;refund&#x27;?-1:1)*Number(p.amount||0)));
  data.expenses.forEach(e=&gt;{if(!e.order_id)return;const id=String(e.order_id).trim().toUpperCase();expenses.set(id,(expenses.get(id)||0)+Number(e.amount||0));expenseCount.set(id,(expenseCount.get(id)||0)+1)});
  return {finance,payments,expenses,expenseCount};}
+function navigateToOrder(action,id){
+ try{if(typeof parent.weshop4uNavigate===&#x27;function&#x27;){parent.weshop4uNavigate(action,id);return;}}catch(e){console.warn(&#x27;Direct navigation unavailable&#x27;,e)}
+ parent.postMessage({kind:action===&#x27;open&#x27;?&#x27;weshop4u-open-order&#x27;:&#x27;weshop4u-add-expense&#x27;,orderId:id},&#x27;*&#x27;);
+}
 function renderOrderReport(data){const maps=orderMaps(data),orders=data.orders.filter(r=&gt;inPeriod(r.submitted_at));
  const counts={all:orders.length,pending:0,progress:0,delivery:0,completed:0,cancelled:0};orders.forEach(r=&gt;counts[statusGroup(r.status)]++);
  const labels=[[&#x27;all&#x27;,&#x27;📦 All&#x27;],[&#x27;pending&#x27;,&#x27;🟡 Pending&#x27;],[&#x27;progress&#x27;,&#x27;🔵 In Progress&#x27;],[&#x27;delivery&#x27;,&#x27;🚚 Out for Delivery&#x27;],[&#x27;completed&#x27;,&#x27;🟢 Delivered / Completed&#x27;],[&#x27;cancelled&#x27;,&#x27;🔴 Cancelled&#x27;]];
@@ -379,18 +383,17 @@ function renderOrderReport(data){const maps=orderMaps(data),orders=data.orders.f
  const p=charged-spent;const ready=costRecorded&amp;&amp;chargeRecorded;if(ready)known++;
  const pnl=ready?`&lt;span class=&quot;${p&gt;0?&#x27;profit&#x27;:p&lt;0?&#x27;loss&#x27;:&#x27;neutral&#x27;}&quot;&gt;${p&gt;0?&#x27;🟢 PROFIT&#x27;:p&lt;0?&#x27;🔴 LOSS&#x27;:&#x27;⚪ BREAK-EVEN&#x27;} ${moneySafe(Math.abs(p))}&lt;br&gt;&lt;small&gt;${charged&gt;0?(p/charged*100).toFixed(1)+&#x27;% margin&#x27;:&#x27;—&#x27;}&lt;/small&gt;&lt;/span&gt;`:`&lt;span class=&quot;neutral&quot;&gt;⚠️ ${!chargeRecorded?&#x27;No charges saved&#x27;:&#x27;Cost data missing&#x27;}&lt;/span&gt;`;
  return `&lt;tr&gt;&lt;td&gt;&lt;b&gt;${escapeHtml(id)}&lt;/b&gt;&lt;br&gt;&lt;small&gt;${escapeHtml(String(r.submitted_at||&#x27;&#x27;).slice(0,10))}&lt;/small&gt;&lt;/td&gt;&lt;td&gt;${escapeHtml(r.name||&#x27;—&#x27;)}&lt;/td&gt;&lt;td&gt;&lt;span class=&quot;badge&quot;&gt;${escapeHtml(reportStatusName(r.status))}&lt;/span&gt;&lt;/td&gt;&lt;td&gt;${chargeRecorded?moneySafe(charged):&#x27;Not entered&#x27;}&lt;/td&gt;&lt;td&gt;${moneySafe(received)}&lt;/td&gt;&lt;td&gt;${costRecorded?moneySafe(spent):&#x27;Not entered&#x27;}&lt;/td&gt;&lt;td&gt;${pnl}&lt;/td&gt;&lt;td&gt;&lt;button class=&quot;secondary action-link&quot; data-open=&quot;${escapeHtml(id)}&quot;&gt;View / Edit&lt;/button&gt;&lt;button class=&quot;secondary action-link&quot; data-expense=&quot;${escapeHtml(id)}&quot;&gt;+ Expense&lt;/button&gt;&lt;/td&gt;&lt;/tr&gt;`}).join(&#x27;&#x27;)||&#x27;&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;muted&quot;&gt;No matching orders.&lt;/td&gt;&lt;/tr&gt;&#x27;;
- orderReportRows.querySelectorAll(&#x27;[data-open]&#x27;).forEach(b=&gt;b.onclick=()=&gt;parent.postMessage({kind:&#x27;weshop4u-open-order&#x27;,orderId:b.dataset.open},location.origin));
- orderReportRows.querySelectorAll(&#x27;[data-expense]&#x27;).forEach(b=&gt;b.onclick=()=&gt;parent.postMessage({kind:&#x27;weshop4u-add-expense&#x27;,orderId:b.dataset.expense},location.origin));
+ orderReportRows.querySelectorAll(&#x27;[data-open]&#x27;).forEach(b=&gt;b.onclick=()=&gt;navigateToOrder(&#x27;open&#x27;,b.dataset.open));
+ orderReportRows.querySelectorAll(&#x27;[data-expense]&#x27;).forEach(b=&gt;b.onclick=()=&gt;navigateToOrder(&#x27;expense&#x27;,b.dataset.expense));
  orderSummaryNote.textContent=`Showing ${shown.length} of ${orders.length} orders. ${known} shown orders have both charges and at least one recorded expense. Filters use order submission date.`;
  const allCharged=orders.reduce((n,r)=&gt;n+Number(maps.finance.get(r.request_id)?.total_amount_charged||0),0);
  const allReceived=data.payments.filter(p=&gt;inPeriod(p.payment_date)).reduce((n,p)=&gt;n+(normalizeStatus(p.payment_type)===&#x27;refund&#x27;?-1:1)*Number(p.amount||0),0);
  const allExpenses=data.expenses.filter(e=&gt;inPeriod(e.expense_date)).reduce((n,e)=&gt;n+Number(e.amount||0),0);
- const direct=data.expenses.filter(e=&gt;inPeriod(e.expense_date)&amp;&amp;e.order_id).reduce((n,e)=&gt;n+Number(e.amount||0),0);
- const overhead=allExpenses-direct;
- const periodCash=allReceived-allExpenses;
- const cards=[[&#x27;Orders received&#x27;,orders.length],[&#x27;Order value (charges)&#x27;,moneySafe(allCharged)],[&#x27;Payments received&#x27;,moneySafe(allReceived)],[&#x27;Direct expenses (dated)&#x27;,moneySafe(direct)],[&#x27;Other business expenses&#x27;,moneySafe(overhead)],[&#x27;Total expenses&#x27;,moneySafe(allExpenses)],[&#x27;Cash &#x27;+(periodCash&gt;=0?&#x27;surplus&#x27;:&#x27;deficit&#x27;),moneySafe(Math.abs(periodCash))]];
+ const pending=orders.reduce((sum,r)=&gt;{if(normalizeStatus(r.status)===&#x27;cancelled&#x27;)return sum;const charged=Number(maps.finance.get(r.request_id)?.total_amount_charged||0);return sum+Math.max(0,charged-(maps.payments.get(r.request_id)||0))},0);
+ const estimatedProfit=allCharged-allExpenses;
+ const cards=[[&#x27;Total orders&#x27;,orders.length],[&#x27;Total order amount&#x27;,moneySafe(allCharged)],[&#x27;Payments received&#x27;,moneySafe(allReceived)],[&#x27;Payments pending&#x27;,moneySafe(pending)],[&#x27;Total expenses&#x27;,moneySafe(allExpenses)],[estimatedProfit&gt;0?&#x27;🟢 Estimated profit&#x27;:estimatedProfit&lt;0?&#x27;🔴 Estimated loss&#x27;:&#x27;⚪ Break-even&#x27;,moneySafe(Math.abs(estimatedProfit))]];
  periodExtraStats.innerHTML=cards.map(([label,value])=&gt;`&lt;div class=&quot;card stat&quot;&gt;&lt;span&gt;${label}&lt;/span&gt;&lt;strong&gt;${value}&lt;/strong&gt;&lt;/div&gt;`).join(&#x27;&#x27;);
- periodMethodNote.textContent=&#x27;Orders and order value use submission date. Payments and expenses use transaction date. Cash surplus is not the same as accrual profit. Orders missing finance or cost entries cannot have a verified margin.&#x27;;
+ periodMethodNote.textContent=&#x27;Order totals use order submission dates. Payments and expenses use their transaction dates. Profit/loss is an estimate (order amount minus recorded expenses); missing order costs and orders not yet completed can affect the result. Pending payments are based on orders received in the selected period.&#x27;;
  // Prevent annual-only charts and cards from being mistaken for all-time/monthly/custom reports.
  const annual=periodSelect.value===&#x27;year&#x27;;document.querySelector(&#x27;.charts&#x27;).hidden=!annual;
  document.querySelector(&#x27;.stats:not(#periodExtraStats)&#x27;).hidden=!annual;
@@ -845,8 +848,25 @@ document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()
 frame.addEventListener('load',()=>{const active=document.querySelector('[data-tab].active');if(active&&active.dataset.tab!=='orders')activate(active.dataset.tab)});
 })();
 </script><script>
-window.addEventListener('message',e=>{if(e.origin!==location.origin||e.source!==document.getElementById('analyticsFrame').contentWindow||!e.data)return;
- if(e.data.kind==='weshop4u-open-order'){document.querySelector('[data-tab="orders"]').click();document.getElementById('orderId').value=e.data.orderId;document.getElementById('loadOrder').click();window.scrollTo({top:0,behavior:'smooth'});}
- if(e.data.kind==='weshop4u-add-expense'){document.querySelector('[data-tab="expenses"]').click();document.getElementById('analyticsFrame').contentWindow.postMessage({kind:'weshop4u-prefill-expense',orderId:e.data.orderId},location.origin);window.scrollTo({top:0,behavior:'smooth'});}
+window.weshop4uNavigate=function(action,rawId){
+ const id=String(rawId||'').trim().toUpperCase();if(!id)return;
+ const frame=document.getElementById('analyticsFrame');
+ if(action==='open'){
+  document.querySelector('[data-tab="orders"]').click();
+  document.getElementById('orderId').value=id;
+  document.getElementById('loadOrder').click();
+  document.getElementById('orderId').scrollIntoView({behavior:'smooth',block:'center'});
+  document.getElementById('orderId').focus({preventScroll:true});
+ }else{
+  document.querySelector('[data-tab="expenses"]').click();
+  frame.scrollIntoView({behavior:'smooth',block:'start'});
+  const prefill=()=>frame.contentWindow?.postMessage({kind:'weshop4u-prefill-expense',orderId:id},'*');
+  prefill();setTimeout(prefill,300);
+ }
+};
+window.addEventListener('message',e=>{
+ if(e.source!==document.getElementById('analyticsFrame').contentWindow||!e.data)return;
+ if(e.data.kind==='weshop4u-open-order')window.weshop4uNavigate('open',e.data.orderId);
+ if(e.data.kind==='weshop4u-add-expense')window.weshop4uNavigate('expense',e.data.orderId);
 });
 </script></body></html>
